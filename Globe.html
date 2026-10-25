@@ -156,6 +156,10 @@
     cursor: pointer; min-height: 38px;
   }
   .quiz-btn:active { background: rgba(255,255,255,0.22); }
+  .quiz-labels { display: flex; flex-direction: column; gap: 2px; background: rgba(0,0,0,0.28); border-radius: 10px; padding: 4px; }
+  .quiz-labels.hidden { display: none; }
+  .ql-row { display: flex; align-items: center; gap: 9px; padding: 7px 6px; font-size: 0.82rem; font-weight: 700; color: #fff; cursor: pointer; min-height: 36px; }
+  .ql-row input { width: 20px; height: 20px; accent-color: #f472b6; flex: none; margin: 0; }
 
   .top-actions {
     position: absolute;
@@ -451,6 +455,14 @@
     <button class="quiz-btn" id="quizPeekBtn">👀 Show question</button>
     <button class="quiz-btn" id="quizHintBtn">💡 Hint</button>
     <button class="quiz-btn" id="quizSkipBtn">⏭️ Show me</button>
+    <button class="quiz-btn" id="quizLabelsBtn">🏷️ Names on map ▾</button>
+    <div class="quiz-labels hidden" id="quizLabelsBox">
+      <label class="ql-row"><input type="checkbox" data-ql="continents"><span>Continents</span></label>
+      <label class="ql-row"><input type="checkbox" data-ql="oceans"><span>Oceans &amp; seas</span></label>
+      <label class="ql-row"><input type="checkbox" data-ql="countries"><span>Countries</span></label>
+      <label class="ql-row"><input type="checkbox" data-ql="states"><span>States</span></label>
+      <label class="ql-row"><input type="checkbox" data-ql="cities"><span>Cities</span></label>
+    </div>
   </div>
 </div>
 
@@ -1273,7 +1285,8 @@ const state = {
   quizDeck: [],
   quizTotal: 0,
   quizAsked: 0,
-  quizLocked: false
+  quizLocked: false,
+  quizLabels: { continents: true, oceans: true, countries: false, states: false, cities: false }
 };
 
 const overlayCanvas = document.getElementById('overlayCanvas');
@@ -1446,7 +1459,7 @@ function drawSurfaceText(text, lat, lon, o) {
   const eps = 0.05, epsR = eps * DEG2RAD;
   ctx.save();
   ctx.globalAlpha = fade;
-  ctx.textAlign = 'center';
+  ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
   lines.forEach((line, li) => {
@@ -1471,10 +1484,10 @@ function drawSurfaceText(text, lat, lon, o) {
       if (o.stroke) {
         ctx.strokeStyle = o.stroke;
         ctx.lineWidth = o.strokeW || 3;
-        ctx.strokeText(ch, 0, 0);
+        ctx.strokeText(ch, -w / 2, 0);
       }
       ctx.fillStyle = o.fill;
-      ctx.fillText(ch, 0, 0);
+      ctx.fillText(ch, -w / 2, 0);
     }
   });
   ctx.restore();
@@ -1647,11 +1660,14 @@ function renderFrame() {
     }
   }
 
+  const inQuiz = state.quizActive;
+  const QL = state.quizLabels;
   if (state.showLabels) {
     // 7. Continent and ocean names painted on the surface (level 1 only).
-    //    In the quiz they stay at every zoom level, so the child has something to steer by.
-    if (!showStates || state.quizActive) {
+    //    In the quiz they follow the quiz settings and stay at every zoom level.
+    if (!showStates || inQuiz) {
       for (const g of GEO_LABELS) {
+        if (inQuiz && !(g.kind === 'continent' ? QL.continents : QL.oceans)) continue;
         if (g.kind === 'continent') {
           drawSurfaceText(g.text, g.lat, g.lon, { px: 15, font: '800 15px ' + LABEL_FONT, spacing: 2.5,
             fill: 'rgba(255,255,255,0.95)', stroke: 'rgba(15,23,42,0.75)', strokeW: 3.2, minZ: 0.12, collide: false });
@@ -1666,12 +1682,12 @@ function renderFrame() {
     }
 
     // 8. Names of every other country (fade in as you zoom, biggest first). Hidden in the quiz.
-    if (!state.quizActive) for (const c of GEO.countryLabels) {
+    if (!inQuiz || QL.countries) for (const c of GEO.countryLabels) {
       const [name, lat, lon, rank, iso] = c;
-      if (FEATURED_COUNTRY_IDS.has(iso) && !showStates) continue;
-      const minZoom = countryNameMinZoom(rank);
+      if (FEATURED_COUNTRY_IDS.has(iso) && !showStates && !inQuiz) continue;   // these have pins
+      const minZoom = countryNameMinZoom(rank) - (inQuiz ? 0.35 : 0);
       if (state.zoom < minZoom) continue;
-      const featured = FEATURED_COUNTRY_IDS.has(iso);
+      const featured = FEATURED_COUNTRY_IDS.has(iso) && !inQuiz;
       const px = featured ? 14 : (rank <= 3 ? 12.5 : 11.5);
       const a = Math.min(1, (state.zoom - minZoom) / 0.25 + 0.15) * (showStates ? 0.85 : 1);
       drawSurfaceText(featured ? name.toUpperCase() : name, lat, lon, {
@@ -1681,11 +1697,11 @@ function renderFrame() {
     }
 
     // 9. Names of the other states in the featured countries (level 2+)
-    if (showStates && !state.quizActive) {
+    if (showStates && (!inQuiz || QL.states)) {
       const z2 = state.zoom * state.zoom;
       for (const s of GEO.stateLabels) {
         const [name, lat, lon, cc, area, code] = s;
-        if (FEATURED_STATE_IDS.has(code)) {
+        if (FEATURED_STATE_IDS.has(code) && !inQuiz) {
           if (showCities) {
             drawSurfaceText(name, lat, lon, { px: 12, font: '700 12px ' + LABEL_FONT, spacing: 0.6,
               fill: 'rgba(167, 243, 208, 0.92)', stroke: 'rgba(0,0,0,0.6)', strokeW: 2.6, minZ: 0.05, collide: true });
@@ -1713,6 +1729,19 @@ function renderFrame() {
       ctx.lineWidth = 2.5;
       ctx.strokeStyle = '#ea580c';
       ctx.stroke();
+      if (state.showLabels && QL.cities) {
+        ctx.save();
+        ctx.font = '700 12px ' + LABEL_FONT;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+        ctx.strokeText(c.name, p.x + 10, p.y);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(c.name, p.x + 10, p.y);
+        ctx.restore();
+      }
     }
   }
   drawMarkers(now);
@@ -1748,9 +1777,9 @@ function drawCountryPin(x, y, country, isSelected, below) {
   ctx.stroke();
 
   ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
+  ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(label, x, py + pillH / 2);
+  ctx.fillText(label, x - textW / 2, py + pillH / 2);
   ctx.restore();
 }
 
@@ -1779,9 +1808,9 @@ function drawStatePin(x, y, st, isSelected, below) {
   ctx.stroke();
 
   ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
+  ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(label, x, py + pillH / 2);
+  ctx.fillText(label, x - textW / 2, py + pillH / 2);
   ctx.restore();
 }
 
@@ -1811,9 +1840,9 @@ function drawCityPin(x, y, city, isSelected, below) {
   ctx.stroke();
 
   ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
+  ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(label, x, py + pillH / 2);
+  ctx.fillText(label, x - textW / 2, py + pillH / 2);
   ctx.restore();
 }
 
@@ -2460,6 +2489,29 @@ document.getElementById('quizHintBtn').addEventListener('click', () => {
   showBanner('💡 Look around here!', 'Find ' + t.name + '. It is in ' + t.hint + '.', 'info', 3500, false);
 });
 
+
+/* Which names the map shows during the quiz (parents choose, remembered on this device) */
+const QUIZ_LABEL_KEY = 'globeQuizLabels_v1';
+try {
+  const saved = JSON.parse(localStorage.getItem(QUIZ_LABEL_KEY) || 'null');
+  if (saved && typeof saved === 'object') Object.assign(state.quizLabels, saved);
+} catch (e) { /* storage blocked: use defaults */ }
+
+document.querySelectorAll('#quizLabelsBox input[data-ql]').forEach(box => {
+  box.checked = !!state.quizLabels[box.dataset.ql];
+  box.addEventListener('change', () => {
+    playTone('pop');
+    state.quizLabels[box.dataset.ql] = box.checked;
+    try { localStorage.setItem(QUIZ_LABEL_KEY, JSON.stringify(state.quizLabels)); } catch (e) {}
+  });
+});
+const quizLabelsBtn = document.getElementById('quizLabelsBtn');
+const quizLabelsBox = document.getElementById('quizLabelsBox');
+quizLabelsBtn.addEventListener('click', () => {
+  playTone('pop');
+  const open = quizLabelsBox.classList.toggle('hidden') === false;
+  quizLabelsBtn.textContent = open ? '🏷️ Names on map ▴' : '🏷️ Names on map ▾';
+});
 function spawnConfetti() {
   const colors = ['#fde047', '#38bdf8', '#f472b6', '#4ade80', '#fb923c'];
   for (let i = 0; i < 55; i++) {
