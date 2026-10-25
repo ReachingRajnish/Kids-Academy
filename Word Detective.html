@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Detective</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#DDEEFF; --dot:#C6E0FA; --surface:#FFFFFF; --ink:#26225C; --muted:#5F5B91;
+  --tile:#FFD23F; --tile-edge:#E2A400; --tile-ink:#26225C;
+  --slot:#BCD9F5; --slot-edge:#A3C6EA;
+  --accent:#FF4F8B; --accent-ink:#FFFFFF; --teal:#0B8379;
+  --good:#16A374; --bad:#E53E3E; --tape:rgba(255,210,63,.8);
+  --lift:0 3px 0 rgba(38,34,92,.14);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17143D; --dot:#221E52; --surface:#2A255F; --ink:#F3F1FF; --muted:#ABA6E3;
+    --tile:#FFD23F; --tile-edge:#B98600; --tile-ink:#26225C;
+    --slot:#383178; --slot-edge:#2C2662;
+    --accent:#FF6FA0; --accent-ink:#1B1640; --teal:#4FD1C5;
+    --good:#2BC48F; --bad:#FF6B6B; --tape:rgba(255,210,63,.6);
+    --lift:0 3px 0 rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17143D; --dot:#221E52; --surface:#2A255F; --ink:#F3F1FF; --muted:#ABA6E3;
+  --tile:#FFD23F; --tile-edge:#B98600; --tile-ink:#26225C;
+  --slot:#383178; --slot-edge:#2C2662;
+  --accent:#FF6FA0; --accent-ink:#1B1640; --teal:#4FD1C5;
+  --good:#2BC48F; --bad:#FF6B6B; --tape:rgba(255,210,63,.6);
+  --lift:0 3px 0 rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+body{
+  margin:0;min-height:100%;color:var(--ink);
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px);
+  background-size:22px 22px;
+  font-family:"Nunito",ui-rounded,"Arial Rounded MT Bold",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.45;font-weight:600;
+  -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+}
+[hidden]{display:none!important}
+button{font-family:inherit;color:inherit;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.emo{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;font-style:normal;line-height:1}
+.display{font-family:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;font-weight:400}
+
+.screen{max-width:480px;margin:0 auto;padding:10px 16px 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px}
+.brand{display:flex;align-items:center;gap:8px;font-size:23px}
+.stars{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:78px;background:var(--surface);border-radius:999px;padding:6px 14px 6px 10px;box-shadow:var(--lift);font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Home */
+.hero{padding:22px 4px 4px;text-align:center}
+.hero-board{display:inline-grid;grid-template-columns:repeat(2,54px);gap:9px;margin-bottom:16px}
+.hero-board span{height:54px;display:grid;place-items:center;font-size:30px;background:#fff;border-radius:8px;box-shadow:0 6px 14px rgba(38,34,92,.16);transform:rotate(var(--t))}
+.hero h1{font-size:clamp(36px,11vw,48px);line-height:1;margin:0 0 10px}
+.lede{margin:0 auto;max-width:27ch;color:var(--muted)}
+.count{margin:12px 0 0;font-weight:800;color:var(--teal)}
+.tracks{display:grid;gap:14px;margin-top:22px}
+.track{background:var(--surface);border-radius:22px;box-shadow:var(--lift);padding:4px 14px 10px}
+.track-main{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;background:none;border:0;padding:10px 0 8px;text-align:left;cursor:pointer}
+.badge{width:54px;height:54px;border-radius:16px;background:var(--bg);display:grid;place-items:center;font-size:32px}
+.track-name{display:block;font-size:25px;line-height:1.1}
+.track-sub{display:block;color:var(--muted);font-size:15px}
+.track-go{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:8px 18px;font-weight:800;font-size:16px;box-shadow:0 3px 0 rgba(0,0,0,.16)}
+.track-foot{display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:10px;border-radius:99px;background:var(--slot);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);border-radius:inherit}
+.track-count{font-size:14px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.link{background:none;border:0;padding:8px 2px;font-weight:800;color:var(--teal);font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.settings{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
+.pill{background:var(--surface);border:0;border-radius:999px;padding:9px 15px;font-weight:800;font-size:15px;box-shadow:var(--lift);cursor:pointer}
+.pill.warn{color:var(--bad)}
+.foot-note{text-align:center;color:var(--muted);font-size:14px;margin:14px auto 0;max-width:34ch}
+
+/* Play */
+.icon-btn{width:46px;height:46px;flex:none;border-radius:14px;border:0;background:var(--surface);box-shadow:var(--lift);font-size:22px;display:grid;place-items:center;cursor:pointer;padding:0}
+.level{flex:1;text-align:center;line-height:1.15}
+.lv-name{display:block;font-size:21px}
+.lv-num{display:block;font-size:13px;font-weight:800;color:var(--muted)}
+.board{
+  --w:min(calc(100vw - 44px),400px,max(180px,calc(100vh - 400px)));
+  width:var(--w);margin:16px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+@supports (height:100dvh){
+  .board{--w:min(calc(100vw - 44px),400px,max(180px,calc(100dvh - 400px)))}
+}
+.pic{
+  position:relative;aspect-ratio:1/1;min-height:84px;background:#fff;border-radius:8px;
+  box-shadow:0 2px 0 rgba(38,34,92,.10),0 10px 20px rgba(38,34,92,.14);
+  display:grid;place-items:center;transform:rotate(var(--tilt));
+  animation:deal .4s cubic-bezier(.2,.9,.3,1.25) both;
+}
+.pic .emo{font-size:calc(var(--w) * .2)}
+.pic::before{content:"";position:absolute;top:-8px;left:50%;width:42%;height:17px;transform:translateX(-50%) rotate(-3deg);background:var(--tape);border-radius:2px}
+.clue{min-height:24px;margin:14px 0 0;text-align:center;font-weight:800;color:var(--teal);font-size:16px}
+.slots{
+  --s:min(48px,calc((min(100vw,480px) - 32px - (var(--n) - 1) * 6px) / var(--n)));
+  display:flex;justify-content:center;gap:6px;margin:6px auto 0;
+}
+.slot{width:var(--s);height:calc(var(--s) * 1.12);border:0;border-radius:12px;padding:0;background:var(--slot);box-shadow:inset 0 -4px 0 var(--slot-edge);font-size:calc(var(--s) * .6);display:grid;place-items:center;cursor:pointer;color:var(--tile-ink)}
+.slot.filled{background:var(--tile);box-shadow:0 3px 0 var(--tile-edge)}
+.slot.locked{background:var(--teal);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.2);cursor:default}
+.slots.wrong{animation:shake .42s}
+.slots.wrong .slot.filled:not(.locked){background:var(--bad);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.slots.right .slot{background:var(--good);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.2);animation:hop .5s both;animation-delay:var(--d)}
+.bank{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:7px;width:min(100%,420px);margin:18px auto 0}
+.tile{aspect-ratio:1/1;min-height:38px;max-height:58px;border:0;border-radius:12px;padding:0;background:var(--tile);color:var(--tile-ink);box-shadow:0 4px 0 var(--tile-edge);font-size:clamp(20px,6vw,28px);cursor:pointer;transition:transform .07s,box-shadow .07s}
+.tile:active{transform:translateY(3px);box-shadow:0 1px 0 var(--tile-edge)}
+.tile.used,.tile.removed{visibility:hidden}
+.tools{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;width:min(100%,420px);margin:18px auto 0}
+.tool{border:0;background:var(--surface);border-radius:16px;box-shadow:var(--lift);padding:8px 2px 7px;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+.tool .emo{font-size:22px}
+.tool .t{font-size:13px;font-weight:800;line-height:1}
+.tool .c{font-size:11px;font-weight:800;color:var(--muted);line-height:1}
+.tool:disabled{opacity:.4;cursor:default}
+
+/* Sheets */
+.overlay{position:fixed;inset:0;z-index:30;background:rgba(18,15,50,.55);display:flex;align-items:flex-end;justify-content:center;padding:16px 12px calc(14px + env(safe-area-inset-bottom,0px))}
+@media (min-width:600px) and (min-height:640px){.overlay{align-items:center}}
+.sheet{width:min(100%,440px);max-height:calc(100% - env(safe-area-inset-top,0px) - 8px);overflow:auto;background:var(--surface);border-radius:26px;padding:22px 20px 18px;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:rise .32s cubic-bezier(.2,.9,.3,1.1) both}
+.sheet h2{margin:6px 0 0;font-size:27px;line-height:1.1;text-align:center}
+.big-emo{display:block;text-align:center;font-size:46px}
+.win-word{font-size:clamp(36px,12vw,56px);letter-spacing:.06em;text-align:center;color:var(--good);margin:8px 0 2px;overflow-wrap:anywhere}
+.win-q{text-align:center;color:var(--muted);margin:0 0 12px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;text-align:left;border:0;background:var(--bg);border-radius:14px;padding:8px 10px;min-height:50px;font-weight:700;font-size:14px;line-height:1.2;cursor:pointer}
+.chip .emo{font-size:26px;flex:none}
+.chip span:last-child::first-letter{text-transform:uppercase}
+.gain{text-align:center;font-weight:800;margin:14px 0 12px}
+.row{display:grid;grid-template-columns:auto 1fr;gap:10px}
+.btn{border:0;border-radius:16px;padding:14px 18px;font-weight:800;font-size:17px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.btn.ghost{background:var(--bg)}
+.btn.wide{width:100%;margin-top:16px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sheet-head h2{text-align:left;margin:0}
+.sheet-sub{color:var(--muted);margin:6px 0 0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:800;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:5px}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:7px;max-height:min(52vh,460px);overflow:auto;padding:4px 2px 2px;margin-top:12px}
+.lv{height:46px;border:0;border-radius:12px;background:var(--bg);font-weight:800;font-size:15px;cursor:pointer;font-variant-numeric:tabular-nums}
+.lv.solved{background:var(--good);color:#fff}
+.lv.skipped{background:var(--tile);color:var(--tile-ink)}
+.lv.current{background:var(--accent);color:var(--accent-ink)}
+.lv:disabled{opacity:.35;cursor:default}
+.center{text-align:center}
+.center p{color:var(--muted);margin:10px 0 0}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);width:max-content;max-width:min(92vw,420px);background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-weight:800;font-size:15px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:35}
+.bit{position:absolute;top:-40px;animation:fall 1.6s cubic-bezier(.3,.6,.5,1) forwards}
+
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--rot))}}
+@keyframes deal{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:rotate(var(--tilt))}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<section id="home" class="screen">
+  <header class="topbar">
+    <div class="brand display"><span class="emo">🔍</span>Word Detective</div>
+    <div class="stars" title="Stars"><span class="emo">⭐</span><b id="starsHome">100</b></div>
+  </header>
+  <div class="hero">
+    <div class="hero-board" aria-hidden="true">
+      <span class="emo" style="--t:-4deg">🍎</span><span class="emo" style="--t:3deg">🚒</span>
+      <span class="emo" style="--t:2deg">🍓</span><span class="emo" style="--t:-3deg">❤️</span>
+    </div>
+    <h1 class="display">Four pictures.<br>One word.</h1>
+    <p class="lede">Look closely, work out what all four share, then spell it.</p>
+    <p class="count" id="countLine"></p>
+  </div>
+  <div class="tracks" id="tracks"></div>
+  <div class="settings">
+    <button class="pill" id="soundBtn" type="button"></button>
+    <button class="pill" id="voiceBtn" type="button"></button>
+    <button class="pill warn" id="resetBtn" type="button">Reset progress</button>
+  </div>
+  <p class="foot-note">Progress saves on this device. Each solved puzzle earns stars to spend on hints.</p>
+</section>
+
+<section id="play" class="screen" hidden>
+  <header class="topbar">
+    <button class="icon-btn" id="backBtn" type="button" aria-label="Back to menu">⬅️</button>
+    <div class="level" id="levelLabel"></div>
+    <div class="stars" title="Stars"><span class="emo">⭐</span><b id="starsPlay">100</b></div>
+  </header>
+  <div class="board" id="board"></div>
+  <div class="clue" id="clue" aria-live="polite"></div>
+  <div class="slots display" id="slots"></div>
+  <div class="bank display" id="bank"></div>
+  <div class="tools">
+    <button class="tool" id="hintBtn" type="button"><span class="emo">💡</span><span class="t">Letter</span><span class="c" id="hintCost">10 ⭐</span></button>
+    <button class="tool" id="removeBtn" type="button"><span class="emo">🧹</span><span class="t">Remove</span><span class="c">15 ⭐</span></button>
+    <button class="tool" id="clueBtn" type="button"><span class="emo">🗂️</span><span class="t">Clue</span><span class="c">free</span></button>
+    <button class="tool" id="shuffleBtn" type="button"><span class="emo">🔀</span><span class="t">Shuffle</span><span class="c">free</span></button>
+    <button class="tool" id="skipBtn" type="button"><span class="emo">⏭️</span><span class="t">Skip</span><span class="c">free</span></button>
+  </div>
+</section>
+
+<div class="overlay" id="winOverlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <span class="big-emo emo">🎉</span>
+    <h2 class="display" id="winTitle">You got it!</h2>
+    <div class="win-word display" id="winWord"></div>
+    <p class="win-q" id="winQ"></p>
+    <div class="chips" id="winChips"></div>
+    <p class="gain" id="winGain"></p>
+    <div class="row">
+      <button class="btn ghost" id="hearBtn" type="button">🔊 Hear it</button>
+      <button class="btn primary" id="nextBtn" type="button">Next puzzle</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="gridOverlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gridTitle">
+    <div class="sheet-head">
+      <h2 class="display" id="gridTitle"></h2>
+      <button class="icon-btn" id="gridClose" type="button" aria-label="Close">✖️</button>
+    </div>
+    <p class="sheet-sub" id="gridSub"></p>
+    <div class="legend">
+      <span><i style="background:var(--good)"></i>Solved</span>
+      <span><i style="background:var(--tile)"></i>Skipped</span>
+      <span><i style="background:var(--accent)"></i>Up next</span>
+    </div>
+    <div class="levels" id="levels"></div>
+  </div>
+</div>
+
+<div class="overlay" id="doneOverlay" hidden>
+  <div class="sheet center" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+    <span class="big-emo emo">🏆</span>
+    <h2 class="display" id="doneTitle"></h2>
+    <p id="doneText"></p>
+    <button class="btn primary wide" id="doneBtn" type="button">Back to menu</button>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="confetti" aria-hidden="true"></div>
+
+<script>
+(function(){
+"use strict";
+var DATA = {"cats":["Colors","Weather","Nature","Animals","Food","Body","Feelings","Actions","Describing words","Home and toys","Clothes","School","Jobs and people","Places","Transport","Sports","Music and art","Space and science","Ocean","Time","Holidays","Shapes and numbers","Tools","Fantasy","Sounds and words","Mixed"],"p":[["RED",["🍎","🚒","🍓","❤️"],0],["BLUE",["🐳","💙","🫐","🧊"],0],["GREEN",["🥦","🐸","🍀","💚"],0],["YELLOW",["🍌","🌻","🐥","💛"],0],["ORANGE",["🥕","🎃","🍊","🧡"],0],["PURPLE",["🍇","🍆","💜","🟣"],0],["PINK",["🌸","🐷","🦩","💗"],0],["BROWN",["🐻","🍫","🤎","🌰"],0],["BLACK",["🎩","🎱","🖤","🕶️"],0],["WHITE",["⛄","🥛","🤍","☁️"],0],["GOLD",["🥇","🏆","👑","💰"],0],["SILVER",["🥈","🥄","🍴","🪙"],0],["GRAY",["🐘","🐭","🌫️","🦏"],0],["RAINBOW",["🌈","🌦️","🦄","💧"],0],["COLORFUL",["🦜","🎨","🎈","🖍️"],0],["SUN",["☀️","🌞","😎","🏖️"],1],["RAIN",["🌧️","☔","🌂","💧"],1],["SNOW",["❄️","⛄","🌨️","⛷️"],1],["WIND",["🌬️","🪁","🍃","🎐"],1],["STORM",["⛈️","🌪️","🌊","☔"],1],["CLOUD",["☁️","⛅","🌥️","✈️"],1],["THUNDER",["🌩️","⚡","🔊","😱"],1],["LIGHTNING",["⚡","⛈️","🌩️","🏃"],1],["HOT",["🔥","☀️","🌶️","🥵"],1],["COLD",["🥶","❄️","🧊","🧣"],1],["WARM",["🧥","☕","🔥","🧤"],1],["SUMMER",["🏖️","🍉","🩳","🍦"],1],["WINTER",["⛄","🧣","❄️","🎿"],1],["SPRING",["🌷","🐣","🌱","🦋"],1],["AUTUMN",["🍂","🍁","🎃","🌰"],1],["SEASON",["🌷","🏖️","🍂","⛄"],1],["WEATHER",["☀️","🌧️","❄️","🌬️"],1],["TORNADO",["🌪️","🏚️","🌀","💨"],1],["FLOOD",["🌊","🏠","🌧️","🚣"],1],["ICE",["🧊","⛸️","🏒","🥶"],1],["WET",["💦","☔","🚿","💧"],1],["SKY",["☁️","🌈","🦅","✈️"],1],["SUNSET",["🌇","🌆","🏖️","🌅"],1],["UMBRELLA",["☂️","☔","🌂","🏖️"],1],["FOG",["🌫️","🌁","🚢","🔦"],1],["PUDDLE",["🌧️","💧","🥾","🦆"],1],["RAINDROP",["💧","🌧️","☔","🌂"],1],["SNOWFLAKE",["❄️","🔍","🌨️","⛄"],1],["SUNSHINE",["☀️","🌻","😎","✨"],1],["RAINCOAT",["🌧️","🧥","☔","💛"],1],["TREE",["🌳","🌲","🌴","🎄"],2],["FLOWER",["🌸","🌻","🌷","🌹"],2],["PLANT",["🌱","🪴","🌿","🌵"],2],["LEAF",["🍃","🍂","🍁","🌿"],2],["FOREST",["🌲","🌳","🦌","🍄"],2],["JUNGLE",["🐒","🌴","🐅","🦜"],2],["DESERT",["🏜️","🐪","🌵","🦂"],2],["MOUNTAIN",["⛰️","🏔️","🗻","🧗"],2],["VOLCANO",["🌋","🔥","🪨","💥"],2],["RIVER",["🏞️","🛶","🐟","💧"],2],["LAKE",["🦆","🎣","🦢","⛵"],2],["ISLAND",["🏝️","🌴","🌊","⛵"],2],["BEACH",["🏖️","🐚","🦀","🩱"],2],["CAVE",["🦇","🔦","🐻","⛏️"],2],["ROCK",["🪨","🗿","🎸","⛰️"],2],["SAND",["🏖️","⏳","🏜️","🏰"],2],["MUD",["🐷","🥾","🚜","🌧️"],2],["SEED",["🌱","🌻","🍉","🥜"],2],["GRASS",["🌿","🐄","⚽","⛳"],2],["MUSHROOM",["🍄","🍕","🌲","🐸"],2],["CACTUS",["🌵","🏜️","🤠","🌞"],2],["GARDEN",["🌻","🥕","🐝","🌷"],2],["NATURE",["🌳","🦋","🏞️","🌸"],2],["WATER",["💧","🚰","🌊","🚿"],2],["FIRE",["🔥","🚒","🧯","🕯️"],2],["EARTH",["🌍","🌏","🌋","🌊"],2],["WAVE",["🌊","👋","🏄","🌀"],2],["SHELL",["🐚","🐢","🐌","🥚"],2],["NEST",["🐦","🥚","🐣","🌳"],2],["WOOD",["🪵","🪓","🌲","🪑"],2],["POND",["🦆","🐸","🐟","🌿"],2],["ROSE",["🌹","💐","❤️","🥀"],2],["STAR",["🌟","⭐","✨","🌠"],2],["MOON",["🌙","🌕","🌝","🌛"],2],["PLANET",["🪐","🌍","🔭","👽"],2],["SUNFLOWER",["🌻","☀️","🐝","🌱"],2],["DAISY",["🌼","💐","🐝","🌷"],2],["TULIP",["🌷","🌱","💐","🧡"],2],["BLOSSOM",["🌸","🌳","🐝","💮"],2],["SOIL",["🌱","🪱","🪴","🥕"],2],["ROOT",["🥕","🌳","🌱","🥔"],2],["VINE",["🍇","🌿","🐒","🌳"],2],["THORN",["🌹","🌵","📌","🩹"],2],["WATERFALL",["💧","🏞️","⛰️","🌊"],2],["GLACIER",["🏔️","🧊","❄️","🐧"],2],["ICEBERG",["🧊","🚢","🌊","🐻‍❄️"],2],["SWAMP",["🐊","🐸","🦟","🌿"],2],["DOG",["🐶","🐕","🦴","🐩"],3],["CAT",["🐱","🐈","🧶","🐭"],3],["PET",["🐶","🐱","🐹","🐠"],3],["FARM",["🐓","🐖","🌾","🐑"],3],["ZOO",["🦁","🦒","🐘","🦓"],3],["BIRD",["🐦","🦜","🦅","🐧"],3],["FISH",["🐟","🐠","🎣","🐡"],3],["BUG",["🐛","🐞","🐜","🦗"],3],["BEE",["🐝","🍯","🌼","🐻"],3],["HONEY",["🍯","🐝","🐻","🥞"],3],["SPIDER",["🕷️","🕸️","🦟","🌙"],3],["SNAKE",["🐍","🪜","🎲","🌿"],3],["FROG",["🐸","🐛","💧","👑"],3],["MONKEY",["🐒","🐵","🍌","🙈"],3],["LION",["🦁","👑","🦓","🌾"],3],["TIGER",["🐯","🐅","🧡","🌴"],3],["BEAR",["🐻","🧸","🍯","🐼"],3],["PANDA",["🐼","🎋","🖤","🤍"],3],["RABBIT",["🐰","🐇","🥕","🎩"],3],["MOUSE",["🐭","🐁","🧀","🖱️"],3],["HORSE",["🐴","🐎","🏇","🤠"],3],["COW",["🐄","🐮","🥛","🌾"],3],["PIG",["🐷","🐖","🐽","🥓"],3],["SHEEP",["🐑","🧶","🐏","💤"],3],["CHICKEN",["🐔","🐓","🥚","🍗"],3],["DUCK",["🦆","🐤","🛁","🍞"],3],["OWL",["🦉","🌙","📚","🌳"],3],["PENGUIN",["🐧","🧊","❄️","🐟"],3],["WHALE",["🐳","🐋","🌊","💦"],3],["SHARK",["🦈","🌊","🦷","🏄"],3],["DOLPHIN",["🐬","🌊","🐠","🏊"],3],["OCTOPUS",["🐙","🦑","🌊","8️⃣"],3],["CRAB",["🦀","🏖️","🐚","🌊"],3],["TURTLE",["🐢","🌊","🥚","🏖️"],3],["SNAIL",["🐌","🐚","🍃","🐢"],3],["BUTTERFLY",["🦋","🐛","🌸","🌈"],3],["ELEPHANT",["🐘","🥜","🎪","🌍"],3],["GIRAFFE",["🦒","🌳","🦓","📏"],3],["ZEBRA",["🦓","🐴","🖤","🤍"],3],["KANGAROO",["🦘","🐨","🌏","👜"],3],["KOALA",["🐨","🌳","🦘","🍃"],3],["FOX",["🦊","🍂","🐰","🌲"],3],["WOLF",["🐺","🌕","🐑","🐷"],3],["DEER",["🦌","🌲","🎄","🍃"],3],["CAMEL",["🐪","🐫","🏜️","🌵"],3],["CROCODILE",["🐊","🦷","🌿","🌊"],3],["DINOSAUR",["🦖","🦕","🦴","🌋"],3],["DRAGON",["🐉","🐲","🔥","🏰"],3],["UNICORN",["🦄","🌈","✨","🌟"],3],["BAT",["🦇","🏏","🌙","⚾"],3],["ANT",["🐜","🍃","🍰","🧺"],3],["WORM",["🪱","🍎","🐦","🎣"],3],["PARROT",["🦜","🗣️","🌴","🌈"],3],["EAGLE",["🦅","🏔️","🐟","🪶"],3],["SWAN",["🦢","🩰","🏞️","🤍"],3],["PEACOCK",["🦚","💙","💚","🪶"],3],["FLAMINGO",["🦩","💗","🦵","🌴"],3],["GOAT",["🐐","🧀","🏔️","🥛"],3],["LLAMA",["🦙","🏔️","🧶","🌄"],3],["HEDGEHOG",["🦔","🍂","🍎","🌵"],3],["SQUIRREL",["🐿️","🌰","🌳","🍂"],3],["SLOTH",["🦥","😴","🌳","🐌"],3],["OTTER",["🦦","🌊","🐚","🦀"],3],["SKUNK",["🦨","💨","🤢","🖤"],3],["BEAVER",["🦫","🪵","🌊","🦷"],3],["SEAL",["🦭","🧊","🐟","🎪"],3],["BEETLE",["🪲","🐞","🌿","🔍"],3],["LADYBUG",["🐞","🔴","⚫","🍀"],3],["MOSQUITO",["🦟","🩸","🌙","🤚"],3],["CRICKET",["🦗","🏏","🌙","🎻"],3],["LIZARD",["🦎","🌵","🪨","☀️"],3],["PUPPY",["🐶","🦴","🐾","🍼"],3],["KITTEN",["🐱","🧶","🥛","🍼"],3],["CHICK",["🐣","🐥","🐤","🥚"],3],["PAW",["🐾","🐶","🐱","🐻"],3],["TAIL",["🐕","🦊","🐒","🪁"],3],["FEATHER",["🪶","🦜","🦚","🖋️"],3],["WING",["🦋","🦅","✈️","🦇"],3],["HORN",["🦏","🦄","📯","🐐"],3],["EGG",["🥚","🐣","🍳","🐔"],3],["BONE",["🦴","🐶","💀","🦖"],3],["CLAW",["🦀","🦞","🐯","🦅"],3],["WILD",["🐺","🐗","🌲","🦁"],3],["SAFARI",["🦒","🦓","🦁","🚙"],3],["AQUARIUM",["🐠","🐡","🦈","🐙"],3],["REPTILE",["🦎","🐍","🐢","🐊"],3],["MAMMAL",["🐘","🐬","🐕","🦇"],3],["HATCH",["🐣","🥚","🐢","🐉"],3],["NOCTURNAL",["🦉","🦇","🌙","🦝"],3],["HERD",["🐄","🐘","🦬","🐑"],3],["FLOCK",["🐦","🐑","🕊️","🦢"],3],["HIVE",["🐝","🍯","👑","🌼"],3],["WEB",["🕸️","🕷️","🌐","💻"],3],["BARK",["🐕","🌳","🔊","🪵"],3],["FUR",["🐻","🦊","🐈","🧥"],3],["SCALE",["🐟","⚖️","🐍","🎹"],3],["PACK",["🐺","🎒","📦","🃏"],3],["HAMSTER",["🐹","🌻","🎡","🧀"],3],["GORILLA",["🦍","🍌","🌴","💪"],3],["HIPPO",["🦛","🌊","🦷","🐊"],3],["RACCOON",["🦝","🗑️","🌙","🎭"],3],["TURKEY",["🦃","🍗","🥧","🍁"],3],["DOVE",["🕊️","☮️","🤍","🌿"],3],["CHEETAH",["🐆","💨","🏃","⚡"],3],["BOAR",["🐗","🌲","🐷","🦷"],3],["POODLE",["🐩","✂️","🎀","🐕"],3],["BISON",["🦬","🌾","🐃","🏔️"],3],["ROOSTER",["🐓","🌅","⏰","🗣️"],3],["LAMB",["🐑","🍼","🌸","🤍"],3],["PONY",["🐴","🎀","🌈","🥕"],3],["PIGLET",["🐷","🐽","🍼","🎀"],3],["TADPOLE",["🐸","💧","🐟","🥚"],3],["COCOON",["🐛","🦋","🌿","🛌"],3],["TUSK",["🐘","🦣","🐗","🦷"],3],["TRUNK",["🐘","🌳","🧳","🚗"],3],["WHISKERS",["🐱","🐭","🦭","🧔"],3],["STRIPES",["🦓","🐯","🍭","🐝"],3],["SPOTS",["🐆","🐞","🐄","🦒"],3],["HUMP",["🐪","🐫","🐋","🏜️"],3],["POUCH",["🦘","🐨","👛","🎒"],3],["BEAK",["🐦","🦜","🦆","🐧"],3],["FIN",["🦈","🐟","🐬","🤿"],3],["DEN",["🦊","🐻","🦁","🛋️"],3],["BURROW",["🐇","🐜","🕳️","🦫"],3],["FIREFLY",["🔥","🪰","🌙","✨"],3],["DRAGONFLY",["🐉","🪰","🌿","💧"],3],["FOOD",["🍔","🍕","🍎","🍝"],4],["FRUIT",["🍎","🍌","🍇","🍓"],4],["VEGETABLE",["🥕","🥦","🌽","🥒"],4],["APPLE",["🍎","🍏","🥧","🌳"],4],["BANANA",["🍌","🐒","🍨","🥤"],4],["GRAPE",["🍇","🧃","💜","🦊"],4],["LEMON",["🍋","😖","🥤","🟡"],4],["CHERRY",["🍒","🍰","🌸","🍦"],4],["PEACH",["🍑","🧡","🥧","🌳"],4],["PEAR",["🍐","🌳","💚","🥧"],4],["MELON",["🍈","🍉","🥗","🟢"],4],["WATERMELON",["🍉","💧","🍈","🌞"],4],["STRAWBERRY",["🍓","🍰","🥛","🍨"],4],["PINEAPPLE",["🍍","🍕","🌴","🍹"],4],["COCONUT",["🥥","🌴","🏝️","🥛"],4],["MANGO",["🥭","🌴","🧡","🥤"],4],["KIWI",["🥝","🐦","💚","🌏"],4],["AVOCADO",["🥑","🥪","🌮","🥗"],4],["TOMATO",["🍅","🍝","🍕","🥗"],4],["CARROT",["🥕","🐰","⛄","🥗"],4],["CORN",["🌽","🍿","🌾","🐔"],4],["POTATO",["🥔","🍟","🌱","🥘"],4],["ONION",["🧅","😢","🍔","🥘"],4],["GARLIC",["🧄","🧛","🍝","🍞"],4],["PEPPER",["🌶️","🫑","🍕","🤧"],4],["BROCCOLI",["🥦","🌳","💚","🥗"],4],["LETTUCE",["🥬","🥗","🐰","🍔"],4],["CUCUMBER",["🥒","🥗","🧖","💚"],4],["OLIVE",["🫒","🍕","🌿","🕊️"],4],["CHESTNUT",["🌰","🔥","🐿️","🍂"],4],["BREAD",["🍞","🥖","🥪","🧈"],4],["CHEESE",["🧀","🐭","🍕","📸"],4],["MILK",["🥛","🐄","🍼","🍪"],4],["BUTTER",["🧈","🍞","🥞","🐄"],4],["PIZZA",["🍕","🧀","🍅","🍄"],4],["BURGER",["🍔","🍟","🥤","🍅"],4],["SANDWICH",["🥪","🍞","🧀","🥬"],4],["NOODLE",["🍜","🍝","🥢","🥡"],4],["PASTA",["🍝","🧀","🍅","🧄"],4],["RICE",["🍚","🍙","🍛","🌾"],4],["SOUP",["🍲","🥣","🥄","🍜"],4],["SALAD",["🥗","🥬","🍅","🥒"],4],["TACO",["🌮","🥑","🌶️","🧀"],4],["BURRITO",["🌯","🥑","🍚","🌶️"],4],["HOTDOG",["🌭","🐕","🔥","⚾"],4],["FRIES",["🍟","🍔","🥔","🧂"],4],["POPCORN",["🍿","🌽","🧈","🧂"],4],["CAKE",["🎂","🍰","🧁","🕯️"],4],["COOKIE",["🍪","🥛","🍫","🎅"],4],["CANDY",["🍬","🍭","🎃","🍫"],4],["CHOCOLATE",["🍫","🍩","🍪","🤎"],4],["DONUT",["🍩","☕","🕳️","🍫"],4],["PIE",["🥧","🍎","🍒","🍰"],4],["CONE",["🍦","🚧","🥳","🍨"],4],["PANCAKE",["🥞","🍯","🧈","🍓"],4],["WAFFLE",["🧇","🍯","🍓","🧈"],4],["JUICE",["🧃","🍊","🍎","🥤"],4],["TEA",["🍵","🫖","🍋","🍪"],4],["COFFEE",["☕","🥐","🌅","🍩"],4],["SALT",["🧂","🌊","🍟","🥨"],4],["SUGAR",["🍭","🍬","🧁","☕"],4],["SPICY",["🌶️","🥵","🔥","🍛"],4],["SWEET",["🍬","🍭","🍰","🍯"],4],["SOUR",["🍋","😖","🍏","🥒"],4],["YUMMY",["😋","🍕","🍰","🍔"],4],["HUNGRY",["🤤","🍽️","🍔","⏰"],4],["THIRSTY",["🥤","💧","🥵","🏜️"],4],["BREAKFAST",["🥞","🍳","🥓","🌅"],4],["LUNCH",["🥪","🍱","🕛","🍎"],4],["DINNER",["🍝","🍽️","🌙","🕯️"],4],["SNACK",["🍿","🥨","🍪","🍌"],4],["PICNIC",["🧺","🥪","🍉","🐜"],4],["BOWL",["🥣","🍜","🎳","🥗"],4],["SPOON",["🥄","🍲","🥣","🍦"],4],["FORK",["🍴","🍝","🥗","🥧"],4],["CUP",["☕","🥤","🏆","🍵"],4],["STRAW",["🥤","🧃","🌾","👒"],4],["NUT",["🥜","🌰","🐿️","🔩"],4],["PEANUT",["🥜","🐘","🥪","🧈"],4],["CEREAL",["🥣","🥛","🌾","🌅"],4],["TOAST",["🍞","🧈","🍳","🌅"],4],["JAM",["🍓","🍞","🚗","🎸"],4],["SUSHI",["🍣","🍙","🥢","🐟"],4],["BAKE",["🥧","🧁","🍞","⏲️"],4],["LEMONADE",["🍋","🥤","🧊","☀️"],4],["SMOOTHIE",["🥤","🍓","🍌","🥛"],4],["CUPCAKE",["🧁","🎂","🍰","🍓"],4],["MUFFIN",["🧁","☕","🫐","🌅"],4],["PRETZEL",["🥨","🧂","🎡","🍿"],4],["BAGEL",["🥯","🧈","☕","🥚"],4],["CROISSANT",["🥐","☕","🧈","🗼"],4],["PICKLE",["🥒","🍔","🧂","😖"],4],["STEW",["🍲","🥕","🥔","🥩"],4],["STEAK",["🥩","🍽️","🔥","🐄"],4],["BACON",["🥓","🍳","🐷","🍔"],4],["SAUSAGE",["🌭","🍳","🐷","🥓"],4],["LOLLIPOP",["🍭","👅","🌈","🍬"],4],["FEAST",["🍗","🍖","🎉","🍽️"],4],["DUMPLING",["🥟","🥢","🍲","🐉"],4],["CURRY",["🍛","🍚","🌶️","🥄"],4],["SALSA",["🍅","🌶️","💃","🧅"],4],["YOGURT",["🥛","🍓","🥄","🫐"],4],["OMELET",["🍳","🥚","🧀","🍄"],4],["SYRUP",["🥞","🍯","🍁","🧇"],4],["FLOUR",["🌾","🍞","🧁","🌸"],4],["DOUGH",["🍕","🥖","🍪","💰"],4],["RECIPE",["📝","🥣","🍰","👩‍🍳"],4],["MENU",["📋","🍽️","🍔","🍝"],4],["DESSERT",["🍰","🍨","🍮","🍩"],4],["PUDDING",["🍮","🥄","🍫","🥣"],4],["JELLY",["🍇","🍞","🥜","🍮"],4],["TREAT",["🍬","🍪","🎃","🦴"],4],["GROCERY",["🛒","🍎","🥖","🧾"],4],["SPINACH",["🥬","💪","🥗","💚"],4],["BERRY",["🍓","🫐","🍇","🌳"],4],["COCOA",["☕","🍫","❄️","🧣"],4],["BROWNIE",["🍫","🍰","🤎","🧁"],4],["BLUEBERRY",["🫐","💙","🧁","🥞"],4],["EYE",["👁️","👀","🕶️","🙈"],5],["EAR",["👂","🎧","🐰","🔊"],5],["NOSE",["👃","🤧","🐽","🌸"],5],["MOUTH",["👄","🦷","😮","🗣️"],5],["TOOTH",["🦷","🪥","🧚","🍬"],5],["HAND",["✋","🤚","👋","🧤"],5],["FOOT",["🦶","👣","🥾","⚽"],5],["LEG",["🦵","👖","🦩","🏃"],5],["ARM",["💪","🦾","🩹","🤗"],5],["HAIR",["💇","💈","👱","🧔"],5],["BRAIN",["🧠","📚","🧩","💭"],5],["HEART",["❤️","💓","🫀","💘"],5],["FACE",["😀","😢","😡","🎭"],5],["SMILE",["😀","😊","😁","📸"],5],["TONGUE",["👅","😛","🍭","🍦"],5],["LIPS",["👄","💄","💋","😘"],5],["FINGER",["👆","☝️","💅","💍"],5],["THUMB",["👍","👎","📱","🎮"],5],["NAIL",["💅","🔨","🪵","🖌️"],5],["KNEE",["🧎","🦵","🩹","🛹"],5],["SICK",["🤒","🤧","🤢","🏥"],5],["COUGH",["😷","🤧","🍯","🌡️"],5],["SNEEZE",["🤧","🌸","🤒","🧻"],5],["FEVER",["🤒","🌡️","🥵","🛌"],5],["MUSCLE",["💪","🦵","🥩","🏃"],5],["BLOOD",["🩸","💉","❤️","🧛"],5],["HEALTHY",["🥦","🍎","🏃","💪"],5],["GROW",["🌱","📏","🌳","👶"],5],["BABY",["👶","🍼","🧸","🐣"],5],["BODY",["🧍","💪","🧠","🦵"],5],["SKELETON",["💀","🦴","🏴‍☠️","🎃"],5],["NECK",["🦒","🧣","👔","📿"],5],["TOE",["🦶","👣","🩰","💅"],5],["WRIST",["⌚","✋","🩹","🏏"],5],["LUNGS",["🫁","💨","🌬️","🏃"],5],["BANDAGE",["🩹","🤕","🩺","🦵"],5],["MEDICINE",["💊","🩺","🧪","🤒"],5],["SWEAT",["💦","🥵","🏃","😓"],5],["TEARS",["💧","😂","🥲","😭"],5],["HAPPY",["😀","😄","🥳","😊"],6],["SAD",["😞","💔","🌧️","😿"],6],["ANGRY",["😠","😡","💢","👿"],6],["SCARED",["😱","😨","👻","🕷️"],6],["SURPRISE",["😮","🎁","🎉","😲"],6],["TIRED",["🥱","😩","🛋️","🏃"],6],["SILLY",["🤪","😜","🤡","🙃"],6],["LOVE",["❤️","😍","💕","🥰"],6],["KISS",["💋","😘","😚","🐸"],6],["HUG",["🤗","🫂","🧸","💞"],6],["LAUGH",["🤣","😆","🤡","😹"],6],["CRY",["😢","👶","🧅","💧"],6],["BORED",["🥱","😐","🙄","⏳"],6],["PROUD",["🏆","🥇","😌","🦚"],6],["SHY",["🙈","😳","☺️","🐢"],6],["BRAVE",["🦁","🦸","🛡️","💪"],6],["CALM",["🧘","🕊️","😌","🍃"],6],["WORRY",["😟","💭","🤞","😣"],6],["LONELY",["🏝️","🧍","🌙","🥺"],6],["EXCITED",["🤩","🎉","🥳","🎢"],6],["NERVOUS",["😬","😰","💦","🎤"],6],["CONFUSED",["😕","🤔","❓","🌀"],6],["CURIOUS",["🧐","🔍","🐱","🐒"],6],["GRUMPY",["😾","😒","☁️","🐻"],6],["KIND",["🤝","💝","🙏","😇"],6],["FRIEND",["👫","🤝","💛","🐶"],6],["SMART",["🎓","💡","🤓","🦉"],6],["GENTLE",["🐑","🕊️","🤲","🌸"],6],["FUNNY",["😂","🙃","🎈","🐒"],6],["GRATEFUL",["🙏","💝","😊","🍁"],6],["SORRY",["🙇","💐","💌","😔"],6],["HOPE",["🌈","🤞","🙏","🌱"],6],["PEACE",["☮️","🕊️","✌️","🌍"],6],["DREAM",["💭","😴","🌈","✨"],6],["WISH",["🌠","🎂","⛲","🍀"],6],["LUCK",["🍀","🤞","🎲","🐞"],6],["JOY",["😃","🎉","🌞","💃"],6],["GLOOMY",["☁️","🌧️","😞","🌫️"],6],["RELAXED",["🏖️","🛋️","😌","🧘"],6],["RUN",["🏃","👟","🏁","🐆"],7],["WALK",["🚶","👣","🦮","🌳"],7],["JUMP",["🦘","🐸","🐬","🏀"],7],["SWIM",["🏊","🐠","🩱","🌊"],7],["FLY",["✈️","🦅","🪰","🧚"],7],["CLIMB",["🧗","🏔️","🪜","🐒"],7],["RIDE",["🚴","🏇","🎢","🛴"],7],["DRIVE",["🔑","🛣️","🚦","⛽"],7],["READ",["📖","📚","👓","🤓"],7],["WRITE",["✏️","📝","🔤","🖊️"],7],["DRAW",["🖍️","📐","⭕","🃏"],7],["SING",["🎤","🗣️","🐦","🎶"],7],["DANCE",["💃","🕺","🩰","🎶"],7],["PLAY",["🎮","🧸","⚽","🎭"],7],["SLEEP",["🛌","😴","🌙","💤"],7],["EAT",["🍽️","😋","🍔","🥢"],7],["DRINK",["🥤","🧃","💧","🍼"],7],["COOK",["🍳","🔥","🍲","🥄"],7],["WASH",["🧼","🚿","🧺","🚙"],7],["CLEAN",["🧹","🧽","✨","🗑️"],7],["BUILD",["🔨","🧩","🏰","🛠️"],7],["DIG",["⛏️","🕳️","🐶","🏖️"],7],["THROW",["🤾","⚾","🏈","🥏"],7],["CATCH",["🧤","⚾","🎣","🥅"],7],["KICK",["⚽","🦵","🥋","🏈"],7],["OPEN",["🔓","🎁","🚪","📖"],7],["LOOK",["👀","🔍","🔭","👓"],7],["LISTEN",["👂","🎧","🎵","📻"],7],["SMELL",["👃","🌸","🧀","🦨"],7],["TASTE",["👅","😋","🍦","🍋"],7],["TOUCH",["👆","✋","📱","🐾"],7],["THINK",["🤔","💭","💡","❓"],7],["TALK",["🗣️","💬","📞","👄"],7],["CALL",["📞","☎️","📢","🦆"],7],["CLAP",["👏","🎭","🦭","🎤"],7],["POINT",["👉","☝️","📍","✏️"],7],["SHARE",["🍕","🍪","🤝","💞"],7],["HELP",["🆘","🤝","🚑","🙋"],7],["GIVE",["🎁","🤲","💝","🤝"],7],["BUY",["💳","💵","🏷️","🧾"],7],["SELL",["🏪","🏷️","🍋","💰"],7],["SHOP",["🛍️","🏬","👗","🛒"],7],["WIN",["🏆","🥇","🎉","🏁"],7],["SEARCH",["🔎","🗺️","🧭","👀"],7],["HIDE",["🙈","📦","🛏️","🦎"],7],["SHOUT",["🗣️","📢","😱","🔊"],7],["WHISPER",["🤫","👂","💭","🐭"],7],["LEARN",["📚","🎓","🧠","✏️"],7],["STUDY",["📚","📝","🤓","🕯️"],7],["COUNT",["🔢","🧮","1️⃣","🧛"],7],["SPELL",["🔤","🪄","🧙","📝"],7],["MEASURE",["📏","📐","⚖️","🌡️"],7],["WEIGH",["⚖️","🏋️","🍎","🐘"],7],["MIX",["🥣","🎨","🎚️","🌀"],7],["CUT",["✂️","💇","🩹","🎂"],7],["FOLD",["👕","📄","🗺️","🦢"],7],["TIE",["👔","🎀","👟","🤝"],7],["SEW",["🧵","🪡","👗","🧷"],7],["KNIT",["🧶","🧣","🧤","👵"],7],["FEED",["🍼","🐓","🦆","🍞"],7],["CAMP",["⛺","🏕️","🔥","🌲"],7],["HIKE",["🥾","⛰️","🎒","🌲"],7],["SKATE",["⛸️","🛹","🛼","🧊"],7],["SKI",["🎿","⛷️","🏔️","❄️"],7],["SURF",["🏄","🌊","🏝️","🦈"],7],["DIVE",["🤿","🐠","🏊","🌊"],7],["SAIL",["⛵","🌬️","🧭","🌊"],7],["ROW",["🚣","🛶","🌾","🌊"],7],["SPIN",["🌀","🪀","🎡","💫"],7],["ROLL",["🎲","🧻","🎳","🍣"],7],["BOUNCE",["🏀","🦘","🎾","⚽"],7],["SLIDE",["🛷","🏂","🐧","🎢"],7],["SWING",["⚾","🏌️","🎷","🐒"],7],["HOP",["🐇","🐸","🦘","🦗"],7],["CRAWL",["🐛","👶","🐢","🐜"],7],["FALL",["🍂","🍁","🍎","🤕"],7],["FLOAT",["🎈","☁️","🦆","🛶"],7],["SINK",["🚰","⚓","🪨","🧽"],7],["MELT",["🍦","⛄","🧊","🔥"],7],["FREEZE",["🥶","🧊","❄️","🛑"],7],["BURN",["🔥","🕯️","🪵","🧯"],7],["BREAK",["💔","🥚","🔨","☕"],7],["FIX",["🔧","🛠️","🔩","🩹"],7],["WAIT",["🚏","⏳","🧍","🙄"],7],["HURRY",["⏰","🏃","💨","🐇"],7],["STOP",["🛑","✋","🚦","⛔"],7],["START",["▶️","🚦","🔑","🏃"],7],["FINISH",["🏁","🏆","✅","🔚"],7],["SAVE",["💾","💰","🥅","🚑"],7],["CHOOSE",["🤔","👈","👉","☑️"],7],["GUESS",["🤔","❓","🎲","💭"],7],["JUGGLE",["🤹","🎳","🍊","⚽"],7],["MARCH",["🥁","🎺","💂","📅"],7],["KNOCK",["🚪","✊","🥊","🎳"],7],["RING",["💍","🔔","📞","🥊"],7],["BLOW",["🌬️","🎈","🎂","🎺"],7],["PICK",["🍎","⛏️","🧺","🎸"],7],["WINK",["😉","😜","😘","👁️"],7],["YAWN",["🥱","😴","🌙","🦁"],7],["SNORE",["😴","💤","🐻","🛌"],7],["BRUSH",["🪥","🖌️","🧹","💇"],7],["SHAVE",["🪒","🧔","🧴","💈"],7],["BATH",["🛁","🧼","🦆","🧽"],7],["SHOWER",["🚿","🌦️","🧴","🧼"],7],["SPLASH",["💦","🌊","🐳","🏊"],7],["SPILL",["🥛","🧃","💦","😮"],7],["SQUEEZE",["🍋","🤗","🧴","🧃"],7],["STRETCH",["🧘","🤸","🐈","🦒"],7],["EXPLORE",["🧭","🗺️","🔭","🏔️"],7],["DISCOVER",["🔍","💡","🦖","🌍"],7],["INVENT",["💡","🔧","⚙️","🤖"],7],["CREATE",["🎨","🛠️","✨","💡"],7],["IMAGINE",["💭","🦄","🌈","🚀"],7],["WONDER",["🤔","✨","🌌","❓"],7],["SHINE",["✨","☀️","💎","🌟"],7],["GLOW",["🌙","🕯️","🔦","🎃"],7],["SPARKLE",["✨","💎","🎇","💫"],7],["TWINKLE",["⭐","✨","🌃","💫"],7],["VOTE",["🗳️","✋","☑️","📊"],7],["CELEBRATE",["🎉","🥳","🎂","🎊"],7],["PAINT",["🖌️","🪣","🎨","🌈"],7],["FISHING",["🎣","🐟","🛶","🪱"],7],["PRACTICE",["🎹","⚽","🔁","📝"],7],["REMEMBER",["🧠","📝","🐘","🔁"],7],["FORGET",["🤦","🧠","🔑","❓"],7],["PRETEND",["🎭","👑","🦸","🧸"],7],["CARRY",["🎒","🐜","🧺","🤲"],7],["LIFT",["🏋️","🛗","🏗️","🤲"],7],["POUR",["🥛","🌧️","☕","🍯"],7],["SHAKE",["🤝","🥤","🧂","🐕"],7],["WIGGLE",["🐛","🪱","🐍","💃"],7],["TICKLE",["🪶","😂","🦶","🤣"],7],["CHEW",["🦷","🍬","🐄","😋"],7],["BITE",["🦷","🍎","🦈","🦟"],7],["LICK",["👅","🍦","🍭","🐶"],7],["SWALLOW",["🐦","💊","🥛","😮"],7],["SNEAK",["🐈","🥷","🤫","👣"],7],["TIPTOE",["🩰","👣","🤫","🌙"],7],["WAKE",["⏰","🌅","🛌","🐓"],7],["RESCUE",["🚁","🚒","🆘","🦸"],7],["PROTECT",["🛡️","🦸","🔒","⛑️"],7],["JOIN",["🤝","🧩","➕","👥"],7],["FOLLOW",["👣","🦆","🐤","➡️"],7],["DELIVER",["📦","🚚","🍕","📬"],7],["HARVEST",["🌾","🚜","🎃","🧺"],7],["RECYCLE",["♻️","🥫","📰","🌍"],7],["BIG",["🐘","🐳","🏔️","🦕"],8],["SMALL",["🐭","🐜","🌰","🐞"],8],["TINY",["🔬","🦠","🤏","💧"],8],["TALL",["🦒","🏙️","🌴","🗼"],8],["SHORT",["🩳","🐁","📏","⏱️"],8],["LONG",["🐍","🚂","📜","🦒"],8],["FAST",["🚀","🏎️","🐇","⚡"],8],["SLOW",["🐢","🐌","🦥","⏳"],8],["LOUD",["📢","🔊","🥁","🎺"],8],["QUIET",["🤫","🔇","📚","🐭"],8],["SOFT",["🧸","☁️","🪶","🛏️"],8],["HARD",["🪨","💎","🧱","🔨"],8],["HEAVY",["🏋️","🐘","🪨","⚓"],8],["LIGHT",["💡","🪶","🔦","🕯️"],8],["DARK",["🌑","🌃","🔦","🦇"],8],["BRIGHT",["☀️","💡","🌟","😎"],8],["DIRTY",["🐷","🥾","🧽","🗑️"],8],["FULL",["🌕","🔋","😋","🥛"],8],["OLD",["👴","👵","🏛️","🦖"],8],["NEW",["🆕","✨","🛍️","🌱"],8],["YOUNG",["👶","🐣","🌱","🧒"],8],["SCARY",["👻","🎃","🕷️","🦇"],8],["CUTE",["🐶","🐱","🐰","🥰"],8],["PRETTY",["🌸","🦋","💐","🌅"],8],["BEAUTIFUL",["🌅","🌸","🦚","🌈"],8],["SHARP",["✂️","📌","🌵","🦔"],8],["ROUND",["⚽","🌕","🍩","🔵"],8],["FLAT",["🥞","📄","🗺️","🛹"],8],["SPIKY",["🦔","🌵","🐡","🍍"],8],["SMOOTH",["🥚","🧈","🧊","🎱"],8],["STICKY",["🍯","🍭","🩹","🕸️"],8],["SLIPPERY",["🍌","🧊","🐟","🧼"],8],["COOL",["😎","🧊","🆒","🍦"],8],["RICH",["💰","🤑","💎","👑"],8],["DEEP",["🌊","🤿","🕳️","🐋"],8],["HIGH",["🏔️","✈️","🪁","🙌"],8],["FAR",["🔭","🌌","🗺️","🚀"],8],["DOWN",["⬇️","👇","🍂","🪂"],8],["BUSY",["🐝","🐜","🏙️","📅"],8],["LAZY",["🦥","🛋️","🐨","😴"],8],["MESSY",["🍝","🎨","🐷","🧸"],8],["FAMOUS",["⭐","📸","🎤","🏆"],8],["SECRET",["🤫","🔐","🗝️","📔"],8],["SAFE",["🔒","🦺","🛡️","⛑️"],8],["DANGER",["⚠️","🔥","⚡","🦈"],8],["FRESH",["🥬","🌿","🍞","🌬️"],8],["JUICY",["🍉","🍑","🍊","💦"],8],["CRUNCHY",["🥕","🍎","🥜","🍂"],8],["FLUFFY",["☁️","🐑","🧸","🐩"],8],["FUZZY",["🍑","🐝","🐛","🧸"],8],["GIANT",["🦕","🐳","🏔️","🗿"],8],["MAGIC",["✨","🧞","🔮","🦄"],8],["STINKY",["🦨","🧦","🧀","🗑️"],8],["EARLY",["🐓","⏰","🐛","🐦"],8],["LATE",["⏰","🌙","🏃","🦉"],8],["TOGETHER",["🤝","👨‍👩‍👧‍👦","🧩","👫"],8],["FAMILY",["👨‍👩‍👧‍👦","🏠","🐶","❤️"],8],["GOOD",["👍","😇","✅","🌟"],8],["BAD",["👎","😈","❌","🤢"],8],["RIGHT",["✅","👉","➡️","✔️"],8],["WRONG",["❌","🙅","🚫","👎"],8],["BEST",["🥇","🏆","👑","💯"],8],["FIRST",["🥇","1️⃣","🏆","🚩"],8],["NEXT",["⏭️","➡️","🔜","👉"],8],["PERFECT",["💯","👌","⭐","🎯"],8],["COZY",["🛋️","🧦","☕","🔥"],8],["EMPTY",["📭","🍽️","🕳️","🛒"],8],["FROZEN",["🧊","❄️","🥶","⛄"],8],["CLEAR",["💧","🔍","☀️","🪟"],8],["WOODEN",["🪵","🪑","🚪","🪆"],8],["WISE",["🦉","👴","📚","🧙"],8],["STRONG",["🏋️","🦍","🦾","🐂"],8],["FANCY",["🎩","👑","💎","🦚"],8],["HOUSE",["🏠","🏘️","🚪","🧱"],9],["HOME",["🏡","❤️","🐶","🛋️"],9],["DOOR",["🚪","🔑","🔐","👋"],9],["WINDOW",["🪟","🌇","🏠","🖼️"],9],["WALL",["🧱","🖼️","🏯","🕰️"],9],["BED",["🛏️","🛌","🌸","🌊"],9],["CHAIR",["🪑","💺","🛋️","🦽"],9],["TABLE",["🍽️","🪑","📊","🏓"],9],["SOFA",["🛋️","📺","🍿","🐈"],9],["LAMP",["💡","🛋️","🪔","🏮"],9],["CLOCK",["🕰️","🕒","⏰","🕛"],9],["MIRROR",["🪞","💄","👸","🪥"],9],["KEY",["🔑","🗝️","🚪","🎹"],9],["LOCK",["🔒","🔐","🚲","🗝️"],9],["BOX",["📦","🥊","🎁","🗳️"],9],["BAG",["👜","🎒","🛍️","💼"],9],["BASKET",["🧺","🏀","🥚","🍎"],9],["BUCKET",["🪣","🏖️","🧹","💧"],9],["BROOM",["🧹","🧙","🦇","🏠"],9],["SOAP",["🧼","🚿","🛁","👐"],9],["TOWEL",["🧖","🛁","🏖️","🚿"],9],["PILLOW",["🛏️","😴","☁️","🪶"],9],["BLANKET",["🛌","🥶","🛋️","🧶"],9],["TOY",["🧸","🪀","🚂","🪁"],9],["TEDDY",["🧸","🐻","🛌","💤"],9],["DOLL",["🪆","🎎","👗","🏠"],9],["BALL",["⚽","🏀","🎾","🎱"],9],["BALLOON",["🎈","🎉","🎂","🌬️"],9],["KITE",["🪁","🌬️","🏖️","🦅"],9],["PUZZLE",["🧩","🤔","🔍","🧠"],9],["GAME",["🎮","🎲","♟️","🃏"],9],["CARD",["🃏","🎴","💳","💌"],9],["CHESS",["♟️","👑","🐴","🏰"],9],["ROBOT",["🤖","⚙️","🦾","🔋"],9],["PHONE",["📱","☎️","📲","🔋"],9],["SCREEN",["📺","💻","📱","🎬"],9],["COMPUTER",["💻","🖥️","🖱️","⌨️"],9],["CAMERA",["📷","🎥","📹","🔍"],9],["RADIO",["📻","🎵","🎙️","📡"],9],["BOOK",["📖","📚","📕","🔖"],9],["PEN",["🖊️","✍️","🐷","🖋️"],9],["PENCIL",["✏️","📝","✂️","📏"],9],["PAPER",["📄","📃","✈️","📰"],9],["LETTER",["✉️","📮","🔤","💌"],9],["GIFT",["🎁","💝","🎄","🎂"],9],["PRESENT",["🎁","🙋","⏰","🎀"],9],["CANDLE",["🕯️","🎂","🔥","🪔"],9],["LADDER",["🪜","🚒","🐍","🍎"],9],["GARAGE",["🚗","🔧","🏠","🚲"],9],["KITCHEN",["🍳","🧂","🍽️","👩‍🍳"],9],["BATHROOM",["🛁","🚽","🚿","🪥"],9],["BEDROOM",["🛏️","🧸","🪟","🌙"],9],["TOILET",["🚽","🧻","🚻","🧼"],9],["FRIDGE",["🧊","🥛","🧀","🥶"],9],["TRASH",["🗑️","🚮","♻️","🦝"],9],["GLASS",["🥛","🪟","🔍","💎"],9],["BOTTLE",["🍼","🧴","🥤","🚰"],9],["SPONGE",["🧽","🧼","🍰","🌊"],9],["NEEDLE",["🪡","🧵","💉","🌲"],9],["BUTTON",["🔘","🧥","🎮","🔴"],9],["MAGNET",["🧲","🔩","📎","❤️"],9],["BATTERY",["🔋","📱","🔦","⚡"],9],["PLUG",["🔌","⚡","🛁","🔋"],9],["ROPE",["🪢","🧗","🤠","⛵"],9],["CHAIN",["⛓️","🔗","🚲","🔒"],9],["TAPE",["📼","📏","🎁","🩹"],9],["SCISSORS",["✂️","📄","💇","🪨"],9],["WALLET",["👛","💳","💵","🧾"],9],["MONEY",["💰","💵","💳","🪙"],9],["COIN",["🪙","⛲","💰","🎮"],9],["BANK",["🏦","💰","🏞️","🐷"],9],["DOORBELL",["🚪","🔔","🛎️","🏠"],9],["FIREPLACE",["🔥","🏠","🧦","🪵"],9],["BEDTIME",["🌙","📖","🧸","🥛"],9],["TOOTHBRUSH",["🦷","🪥","🧴","😁"],9],["VASE",["🏺","💐","🌹","🌷"],9],["SHELF",["📚","🪴","🏺","📦"],9],["NEWSPAPER",["📰","🗞️","☕","🐕"],9],["SHIRT",["👕","👔","👚","🎽"],10],["PANTS",["👖","🩳","🦵","👔"],10],["DRESS",["👗","👚","👠","🎀"],10],["SHOE",["👟","👞","👠","🥾"],10],["SOCK",["🧦","🦶","🎄","🧺"],10],["HAT",["🎩","👒","🧢","🎓"],10],["CAP",["🧢","🎓","💊","🖊️"],10],["CROWN",["👑","🤴","👸","💎"],10],["GLOVE",["🧤","🥊","⚾","❄️"],10],["SCARF",["🧣","❄️","⛄","🧶"],10],["COAT",["🧥","🥼","🧣","🌧️"],10],["BOOT",["🥾","👢","🤠","⛄"],10],["WATCH",["⌚","👀","📺","🕰️"],10],["GLASSES",["👓","🕶️","🥽","🤓"],10],["PAJAMAS",["🛌","🌙","🧸","👕"],10],["UNIFORM",["👮","👩‍⚕️","👨‍🚒","💂"],10],["COSTUME",["🎭","🦸","🎃","🧛"],10],["MASK",["🎭","😷","🤿","🦝"],10],["HELMET",["⛑️","🚴","🏈","🏍️"],10],["NECKLACE",["📿","💎","👸","🧡"],10],["BACKPACK",["🎒","🏫","📚","⛰️"],10],["POCKET",["👖","🦘","🧥","🪙"],10],["FASHION",["👗","👠","👜","💄"],10],["SUNGLASSES",["🕶️","😎","☀️","🏖️"],10],["EARRING",["👂","💍","💎","✨"],10],["HANDBAG",["👜","✋","💄","👛"],10],["SLIPPER",["🥿","👠","🕛","🎃"],10],["BELT",["🥋","👖","🚗","💺"],10],["SNEAKER",["👟","🏃","🏀","🤫"],10],["APRON",["👩‍🍳","🍳","🎨","🧁"],10],["CLOSET",["👗","👕","🚪","👠"],10],["LAUNDRY",["🧺","👕","🧦","🧼"],10],["VEST",["🦺","👔","🧥","🃏"],10],["KIMONO",["👘","🎎","🗾","🌸"],10],["TUXEDO",["🤵","🎩","🐧","💍"],10],["GOGGLES",["🥽","🏊","🧪","🤿"],10],["SCHOOL",["🏫","🎒","📚","🚌"],11],["TEACHER",["👩‍🏫","🍎","📚","🏫"],11],["STUDENT",["👩‍🎓","📚","✏️","🎒"],11],["HOMEWORK",["📝","🏠","📚","✏️"],11],["TEST",["📝","💯","✅","🧪"],11],["QUIZ",["❓","📝","🧠","💯"],11],["MATH",["➕","➖","✖️","➗"],11],["SCIENCE",["🔬","🧪","🧬","🧲"],11],["HISTORY",["📜","🏰","🗿","⏳"],11],["ART",["🖼️","🗿","🎭","🩰"],11],["MUSIC",["🎵","🎶","🎸","🎹"],11],["LIBRARY",["📚","📖","🤫","🏛️"],11],["RULER",["📏","👑","📐","🤴"],11],["CRAYON",["🖍️","🌈","📝","🎨"],11],["GLOBE",["🌍","🌐","🗺️","⛄"],11],["MAP",["🗺️","🧭","📍","🌍"],11],["ALPHABET",["🔤","🅰️","🅱️","📚"],11],["WORD",["🔤","💬","📖","📝"],11],["STORY",["📖","🧚","🏰","🐉"],11],["NUMBER",["🔢","#️⃣","1️⃣","🧮"],11],["ADD",["➕","🧮","🔢","🛒"],11],["BUS",["🚌","🚏","🏫","🎫"],11],["DESK",["🖥️","🪑","📝","💼"],11],["GRADUATE",["🎓","👩‍🎓","📜","🎉"],11],["PRIZE",["🏆","🎁","🥇","🎟️"],11],["NOTEBOOK",["📓","📒","✏️","📝"],11],["ABACUS",["🧮","🔢","➕","🟤"],11],["MICROSCOPE",["🔬","🦠","🧫","🧪"],11],["TELESCOPE",["🔭","🌌","🌙","🪐"],11],["EXPERIMENT",["🧪","🔬","⚗️","🥽"],11],["GENIUS",["🧠","💡","🤓","🏆"],11],["IDEA",["💡","🧠","💭","✨"],11],["QUESTION",["❓","🤔","❔","🙋"],11],["ANSWER",["✅","🙋","💡","📝"],11],["BOOKWORM",["📖","🪱","🤓","📚"],11],["LESSON",["📚","👩‍🏫","✏️","💡"],11],["DIVIDE",["➗","🍕","🍰","✂️"],11],["MULTIPLY",["✖️","🐇","🔢","🧮"],11],["LANGUAGE",["🗣️","🔤","💬","🌍"],11],["GEOGRAPHY",["🗺️","🌍","🏔️","🌋"],11],["BIOLOGY",["🧬","🦠","🌱","🐸"],11],["CHEMISTRY",["🧪","⚗️","⚛️","🥼"],11],["PHYSICS",["🍎","🧲","⚛️","🚀"],11],["DOCTOR",["👨‍⚕️","🩺","💊","🦠"],12],["NURSE",["👩‍⚕️","🩹","🌡️","💉"],12],["DENTIST",["🦷","🪥","😁","🪞"],12],["VET",["🐕","🩺","🐈","💉"],12],["CHEF",["👨‍🍳","🍝","🍰","🥘"],12],["FARMER",["👨‍🌾","🚜","🌽","🥕"],12],["PILOT",["👨‍✈️","✈️","🛫","🧭"],12],["ASTRONAUT",["👩‍🚀","🚀","🌕","🛰️"],12],["POLICE",["👮","🚓","🚨","🚔"],12],["ARTIST",["👩‍🎨","🖌️","🖼️","🎨"],12],["SINGER",["👩‍🎤","🎤","🎶","🎙️"],12],["BAKER",["🥖","🥐","🍞","🧁"],12],["BUILDER",["👷","🦺","🏗️","🧱"],12],["MECHANIC",["👨‍🔧","🔧","🚗","🛠️"],12],["SCIENTIST",["👩‍🔬","🧪","🔬","🥼"],12],["DRIVER",["🚕","🚌","🚚","🏎️"],12],["PIRATE",["🏴‍☠️","🦜","⚓","💰"],12],["KING",["🤴","👑","🏰","🦁"],12],["QUEEN",["👸","👑","🐝","🏰"],12],["PRINCESS",["👸","👗","🐸","🦄"],12],["KNIGHT",["🛡️","⚔️","🐴","🏰"],12],["WIZARD",["🧙‍♂️","🏰","🦉","📜"],12],["MAGICIAN",["🎩","🐇","🃏","🪄"],12],["CLOWN",["🤡","🎪","🎈","👃"],12],["DETECTIVE",["🕵️","🔍","👣","🧩"],12],["JUDGE",["👩‍⚖️","⚖️","🏛️","🔨"],12],["GUARD",["💂","🛡️","🏰","🔐"],12],["COWBOY",["🤠","🐴","🌵","🐄"],12],["PLUMBER",["🪠","🚰","🔧","🚽"],12],["WRITER",["✍️","📚","🖋️","💭"],12],["ACTOR",["🎭","🎬","🎥","🌟"],12],["WORK",["💼","🏢","💻","👷"],12],["OFFICE",["🏢","💼","🖨️","📎"],12],["ENGINEER",["⚙️","🌉","🔧","📐"],12],["CAPTAIN",["⚓","🚢","🧭","🎖️"],12],["NINJA",["🥷","🥋","🌙","🤫"],12],["SUPERHERO",["🦸","🦹","💥","🌆"],12],["HERO",["🦸","🏅","👩‍🚒","🦮"],12],["MAIL",["📬","✉️","📦","📮"],12],["TAILOR",["🧵","✂️","👔","📏"],12],["BARBER",["💈","💇","✂️","🪒"],12],["COACH",["📣","🚌","🏈","📋"],12],["FLORIST",["💐","🌹","🌷","🏪"],12],["MUSICIAN",["🎻","🎸","🎹","🎺"],12],["LIFEGUARD",["🏊","🏖️","🆘","🦺"],12],["ZOOKEEPER",["🦁","🐘","🔑","🦓"],12],["CARPENTER",["🪚","🪵","🔨","🪑"],12],["GOALIE",["🥅","🧤","⚽","🏒"],12],["TWINS",["👯","👬","👭","2️⃣"],12],["PEOPLE",["👥","🧑","👫","👨‍👩‍👧"],12],["CROWD",["👥","🏟️","🎤","🙌"],12],["CITY",["🏙️","🌆","🚕","🏢"],13],["VILLAGE",["🏘️","🛖","🌾","🐓"],13],["PARK",["🏞️","🌳","🦆","🅿️"],13],["CASTLE",["🏰","🏯","👑","🐉"],13],["HOSPITAL",["🏥","🚑","🛏️","🩺"],13],["MARKET",["🍎","🥕","🧀","🛒"],13],["RESTAURANT",["🍽️","🍝","🧾","👨‍🍳"],13],["CAFE",["☕","🥐","🍰","🍵"],13],["MUSEUM",["🏛️","🦖","🖼️","🗿"],13],["THEATER",["🎭","🎟️","🩰","🎤"],13],["MOVIE",["🎬","🍿","🎥","🎞️"],13],["STADIUM",["🏟️","⚽","🏈","📣"],13],["AIRPORT",["🛬","🧳","🛂","🗺️"],13],["STATION",["🚉","🎫","🕐","🧳"],13],["HARBOR",["⚓","🚢","⛵","🌊"],13],["BRIDGE",["🌉","🌁","🛶","🚗"],13],["ROAD",["🛣️","🚧","🚦","🗺️"],13],["TUNNEL",["🚇","⛰️","🚂","🕳️"],13],["TOWER",["🗼","🏯","📡","🧱"],13],["POOL",["🏊","🩱","🎱","💦"],13],["GYM",["🏋️","🤸","💪","👟"],13],["HOTEL",["🏨","🛏️","🛎️","🧳"],13],["WORLD",["🌐","🌎","🗺️","🌏"],13],["FACTORY",["🏭","⚙️","🤖","📦"],13],["CIRCUS",["🎪","🤡","🐘","🤹"],13],["FAIR",["🎡","🎠","🎢","🍭"],13],["ARCTIC",["🐻‍❄️","🧊","❄️","🦭"],13],["ANTARCTICA",["🐧","🧊","❄️","🌎"],13],["NORTH",["🧭","❄️","🎅","⬆️"],13],["SOUTH",["🧭","⬇️","🐧","🌴"],13],["EAST",["🧭","➡️","🌅","🐉"],13],["WEST",["🧭","⬅️","🌇","🤠"],13],["LEFT",["⬅️","👈","↩️","🤚"],13],["OUTSIDE",["🌳","☀️","🚪","🏞️"],13],["TENT",["⛺","🎪","🏕️","🔦"],13],["CABIN",["🛖","🌲","🪵","🏔️"],13],["IGLOO",["🧊","❄️","🏠","🐧"],13],["SKYSCRAPER",["🏙️","🏢","🗼","☁️"],13],["ELEVATOR",["🛗","⬆️","⬇️","🏢"],13],["TREEHOUSE",["🌳","🏠","🪜","🐿️"],13],["PARIS",["🗼","🥐","🎨","🧀"],13],["JAPAN",["🗾","🗻","🍣","🎎"],13],["CHINA",["🐼","🏮","🥢","🐉"],13],["INDIA",["🐘","🍛","🪔","🏏"],13],["ITALY",["🍕","🍝","🛵","🏛️"],13],["LONDON",["💂","🕰️","☔","🫖"],13],["AFRICA",["🌍","🦁","🦒","🥁"],13],["MEXICO",["🌮","🌵","🪅","🌶️"],13],["HAWAII",["🌺","🏄","🌋","🍍"],13],["AUSTRALIA",["🦘","🐨","🏄","🌏"],13],["CAR",["🚗","🚙","🚕","🏎️"],14],["TRAIN",["🚂","🚆","🛤️","🚃"],14],["BOAT",["⛵","🚤","🛥️","🚣"],14],["SHIP",["🚢","⚓","🌊","🏴‍☠️"],14],["PLANE",["✈️","🛫","🛩️","☁️"],14],["BIKE",["🚲","🚴","🚵","🔔"],14],["TRUCK",["🚚","🚛","🛻","📦"],14],["TAXI",["🚕","🚖","🙋","🏙️"],14],["ROCKET",["🚀","🌕","🔥","🛰️"],14],["HELICOPTER",["🚁","🏔️","🛩️","🌀"],14],["TRACTOR",["🚜","🌾","👨‍🌾","🐄"],14],["SCOOTER",["🛴","🛵","🛹","🏃"],14],["MOTORBIKE",["🏍️","🛵","💨","🛣️"],14],["AMBULANCE",["🚑","🚨","🏥","👩‍⚕️"],14],["SLED",["🛷","❄️","🦌","🐕"],14],["CANOE",["🛶","🏞️","🚣","🌲"],14],["WHEEL",["🎡","🚲","🧀","🛼"],14],["ENGINE",["🚂","⚙️","🚒","🔧"],14],["FUEL",["⛽","🔥","🔋","🛢️"],14],["TICKET",["🎫","🎟️","🚌","🎬"],14],["TRAVEL",["🧳","✈️","🛳️","🏝️"],14],["TRIP",["🧳","🗺️","🤕","🚙"],14],["RACE",["🏎️","🏁","🏃","🐎"],14],["TRAFFIC",["🚦","🚗","🚙","🚌"],14],["CRUISE",["🛳️","🌊","🏝️","🍹"],14],["ANCHOR",["⚓","🚢","⛵","📺"],14],["SUBWAY",["🚇","🚉","🎫","🏙️"],14],["JET",["✈️","💨","🚀","🛩️"],14],["PARACHUTE",["🪂","✈️","☁️","⬇️"],14],["VEHICLE",["🚗","🚌","🚚","🚲"],14],["SIREN",["🚨","🚑","🚓","🧜‍♀️"],14],["LUGGAGE",["🧳","✈️","🏨","🛄"],14],["WHEELCHAIR",["🦽","🦼","♿","🏥"],14],["SPORT",["⚽","🏀","🎾","🏈"],15],["SOCCER",["⚽","🥅","👟","🏟️"],15],["FOOTBALL",["🏈","🏟️","🦶","📣"],15],["BASEBALL",["⚾","🧢","🧤","🏟️"],15],["BASKETBALL",["🏀","⛹️","🧺","🏟️"],15],["TENNIS",["🎾","🏓","🥎","🏆"],15],["GOLF",["⛳","🏌️","🕳️","🚩"],15],["HOCKEY",["🏒","🥅","🧊","⛸️"],15],["BOXING",["🥊","🔔","🏆","🦘"],15],["KARATE",["🥋","🦵","✋","🥷"],15],["GOAL",["🥅","⚽","🎯","🏆"],15],["TEAM",["👥","⚽","🤝","🏆"],15],["RACKET",["🎾","🏸","🏓","🔊"],15],["NET",["🥅","🏐","🎾","🕸️"],15],["SCORE",["💯","🏆","🔢","🎼"],15],["MEDAL",["🏅","🥇","🎖️","🏆"],15],["TROPHY",["🏆","🎉","🥳","🏁"],15],["CHAMPION",["🏆","👑","🥇","💪"],15],["YOGA",["🧘","🤸","🌿","😌"],15],["SKATEBOARD",["🛹","🧢","🛣️","🤸"],15],["BOWLING",["🎳","👟","🏆","🍕"],15],["TARGET",["🎯","🏹","🔴","⭕"],15],["ARROW",["🏹","➡️","⬆️","💘"],15],["BOW",["🏹","🎀","🙇","🎻"],15],["REFEREE",["🟨","🟥","⚽","🗣️"],15],["WHISTLE",["🐦","🚂","⚽","🎶"],15],["CHEER",["📣","🎉","🥳","🙌"],15],["BADMINTON",["🏸","🪶","🏓","🏆"],15],["VOLLEYBALL",["🏐","🏖️","🥅","🤾"],15],["PLAYER",["🎮","⚽","🎸","🃏"],15],["STRIKE",["🎳","⚾","⚡","🔥"],15],["RUGBY",["🏉","🏟️","🦘","🥅"],15],["JOCKEY",["🏇","🐎","🏁","🏆"],15],["MARATHON",["🏃","🏁","👟","💦"],15],["WORKOUT",["🏋️","💪","👟","🧘"],15],["SPRINT",["🏃","⚡","🏁","💨"],15],["MATCH",["🔥","🎾","🧦","⚽"],15],["SONG",["🎵","📻","🎧","💿"],16],["DRUM",["🥁","🪘","🛢️","👂"],16],["GUITAR",["🎸","🎤","🎶","🤘"],16],["PIANO",["🎹","🎼","🎶","🎵"],16],["VIOLIN",["🎻","🎼","🎶","🎭"],16],["TRUMPET",["🎺","🐘","📯","🎶"],16],["BAND",["🎸","🥁","🎺","🎤"],16],["CONCERT",["🎤","🎸","🎟️","🎶"],16],["RHYTHM",["🥁","👏","🎶","💃"],16],["NOTE",["🎵","📝","🗒️","💵"],16],["MICROPHONE",["🎤","🎙️","🔊","🗣️"],16],["SPEAKER",["🔊","🗣️","📢","🎤"],16],["COLOR",["🎨","🖍️","🟥","🟦"],16],["PICTURE",["🖼️","📷","🏞️","✏️"],16],["PHOTO",["📸","🤳","🖼️","🌅"],16],["STATUE",["🗿","🗽","🏛️","🧍"],16],["SHOW",["🎭","📺","🎪","🎤"],16],["ORCHESTRA",["🎻","🎺","🎹","🥁"],16],["LULLABY",["🎶","👶","😴","🌙"],16],["BALLET",["🩰","🦢","💃","🎶"],16],["SAXOPHONE",["🎷","🎶","🎺","🌃"],16],["BANJO",["🪕","🤠","🎶","🎸"],16],["MELODY",["🎶","🎵","🎹","🐦"],16],["DISCO",["💃","🕺","🎶","🌟"],16],["CRAFT",["✂️","🧶","🎨","📎"],16],["ORIGAMI",["📄","🦢","🗾","🐸"],16],["SPACE",["🚀","🪐","🌌","👩‍🚀"],17],["GALAXY",["🌌","✨","🌀","🔭"],17],["COMET",["☄️","🌠","✨","🔭"],17],["ALIEN",["👽","🛸","👾","🪐"],17],["SATELLITE",["🛰️","📡","🌍","📺"],17],["ASTEROID",["☄️","🦖","🪨","💥"],17],["ECLIPSE",["🌑","🌘","🕶️","🌞"],17],["GRAVITY",["🍎","🌍","🪂","⬇️"],17],["ORBIT",["🛰️","🌍","🌕","🔄"],17],["CRATER",["🌕","☄️","🕳️","🌋"],17],["ATOM",["⚛️","🔬","🧪","⚡"],17],["GERM",["🦠","🧼","🤧","🔬"],17],["ELECTRIC",["⚡","🔌","🎸","💡"],17],["ENERGY",["⚡","🔋","☀️","💪"],17],["POWER",["🔌","🏭","🌬️","💪"],17],["SOUND",["🔊","🎵","👂","📢"],17],["ECHO",["🗣️","🏔️","🦇","🔁"],17],["LENS",["🔍","👓","📷","🔭"],17],["SHADOW",["👤","☀️","🌳","🐿️"],17],["CRYSTAL",["💎","🔮","❄️","🧊"],17],["FOSSIL",["🦴","🦕","🐚","🪨"],17],["LAVA",["🌋","🔥","🧡","💥"],17],["OXYGEN",["🫁","🌳","🤿","💨"],17],["BUBBLE",["💭","🧼","🐟","🛁"],17],["LIQUID",["💧","🥛","🧃","🌊"],17],["SOLID",["🧊","🪨","🧱","💎"],17],["GAS",["⛽","💨","🎈","☁️"],17],["STEAM",["♨️","🚂","☕","🌫️"],17],["SMOKE",["🔥","💨","🏭","🚂"],17],["CODE",["💻","🔐","🤖","🔢"],17],["PATTERN",["🦓","🐆","🔁","🧩"],17],["MACHINE",["⚙️","🤖","🏭","🔧"],17],["GEAR",["⚙️","🚲","🎒","🔧"],17],["EXTINCT",["🦤","🦣","🦖","☄️"],17],["MAMMOTH",["🦣","❄️","🐘","🦴"],17],["CELL",["🦠","📱","🔋","🔬"],17],["VACCINE",["💉","🦠","🛡️","🩺"],17],["UNIVERSE",["🌌","🪐","✨","🌠"],17],["RADAR",["📡","✈️","🦇","🌧️"],17],["SIGNAL",["📶","🚦","📡","👋"],17],["PIXEL",["👾","🖥️","🟦","🎮"],17],["OCEAN",["🌊","🐋","🐠","🚢"],18],["SEA",["🦀","🐚","⛵","🧜"],18],["MERMAID",["🧜‍♀️","🐚","🌊","🔱"],18],["SEAWEED",["🌿","🌊","🍣","🐢"],18],["TIDE",["🌊","🌕","🏖️","⏰"],18],["PEARL",["🦪","🤍","📿","💍"],18],["TREASURE",["💰","💎","🗺️","🏴‍☠️"],18],["LOBSTER",["🦞","🦀","🌊","🍽️"],18],["SQUID",["🦑","🐙","🌊","🖤"],18],["STARFISH",["⭐","🐟","🌊","🏖️"],18],["SEAHORSE",["🐴","🌊","🐠","🦑"],18],["LIGHTHOUSE",["🗼","💡","🌊","🚢"],18],["SCUBA",["🤿","🐠","🌊","🐢"],18],["SANDCASTLE",["🏰","🏖️","🪣","🐚"],18],["SEAGULL",["🐦","🌊","🍟","🏖️"],18],["SUNSCREEN",["🧴","☀️","🏖️","😎"],18],["TIME",["⌛","⏳","📅","⌚"],19],["DAY",["☀️","🌞","🏙️","📅"],19],["NIGHT",["🌙","🌃","🦉","⭐"],19],["MORNING",["🌅","☕","🥣","🌄"],19],["EVENING",["🌆","🌇","🍽️","🌙"],19],["WEEK",["📅","7️⃣","🗓️","📆"],19],["MONTH",["🗓️","🌙","📆","3️⃣"],19],["YEAR",["📅","🎆","🎂","🌍"],19],["BIRTHDAY",["🎂","🎁","🎈","🥳"],19],["PARTY",["🎉","🥳","🎈","🎶"],19],["CALENDAR",["📅","🗓️","✏️","📌"],19],["WEEKEND",["🛋️","🎮","🏖️","📅"],19],["HOLIDAY",["🏖️","🎄","✈️","🎉"],19],["SECOND",["⏱️","🥈","2️⃣","⌚"],19],["ALARM",["⏰","🚨","🔔","🛏️"],19],["TIMER",["⏲️","⏱️","🍳","⌛"],19],["FUTURE",["🔮","🚀","🤖","🛸"],19],["ANCIENT",["🏛️","🗿","🏺","📜"],19],["MIDNIGHT",["🕛","🌙","🦉","🌃"],19],["SUNRISE",["🌅","🐓","🌄","☀️"],19],["CHRISTMAS",["🎄","🎅","🎁","⛄"],20],["SANTA",["🎅","🦌","🛷","🎁"],20],["HALLOWEEN",["🎃","👻","🍬","🦇"],20],["EASTER",["🐰","🥚","🐣","🌷"],20],["WEDDING",["💍","👰","🤵","💒"],20],["FIREWORKS",["🎆","🎇","🧨","🎉"],20],["PARADE",["🎺","🥁","🎈","🚩"],20],["FESTIVAL",["🎡","🎶","🎆","🎪"],20],["VALENTINE",["💘","🌹","💌","🍫"],20],["PUMPKIN",["🎃","🥧","🍂","🧡"],20],["REINDEER",["🦌","🎅","🛷","❄️"],20],["ELF",["🧝","🎄","🎅","🏹"],20],["ANGEL",["👼","😇","✨","☁️"],20],["GHOST",["👻","🏚️","🌙","😱"],20],["WITCH",["🧙‍♀️","🧹","🐈‍⬛","🎃"],20],["VAMPIRE",["🧛","🦇","🧄","🩸"],20],["MONSTER",["👾","👹","🦑","🛏️"],20],["LANTERN",["🏮","🎃","🔦","🏕️"],20],["PINATA",["🪅","🍬","🎉","🏏"],20],["SNOWMAN",["⛄","❄️","🥕","🧣"],20],["DIWALI",["🪔","🎆","🍬","✨"],20],["HANUKKAH",["🕎","🕯️","🍩","🎁"],20],["EID",["🌙","🕌","🍬","🎁"],20],["DECORATE",["🎄","🎈","🎀","✨"],20],["CONFETTI",["🎊","🎉","🥳","🌈"],20],["INVITE",["💌","🎉","✉️","🎂"],20],["SHAPE",["🔺","🔵","🟥","⭐"],21],["CIRCLE",["⭕","🔵","🟠","💿"],21],["SQUARE",["🟥","🟦","⬛","🔲"],21],["TRIANGLE",["🔺","🔻","⚠️","🍕"],21],["DIAMOND",["💎","♦️","🔷","💍"],21],["CUBE",["🧊","🎲","📦","🧱"],21],["LINE",["📏","➖","〰️","🚶"],21],["DOT",["⚫","🔴","🐞","🎲"],21],["SPIRAL",["🌀","🐚","🍥","🌪️"],21],["ZERO",["0️⃣","⭕","🍩","🥚"],21],["ONE",["1️⃣","☝️","🥇","🦄"],21],["TWO",["2️⃣","✌️","👯","🥈"],21],["THREE",["3️⃣","🥉","🔺","☘️"],21],["FOUR",["4️⃣","🍀","🐕","🚗"],21],["FIVE",["5️⃣","🖐️","⭐","🙌"],21],["SIX",["6️⃣","🐜","🎲","🐝"],21],["SEVEN",["7️⃣","🌈","📅","🎶"],21],["EIGHT",["8️⃣","🐙","🕷️","🎱"],21],["NINE",["9️⃣","🐈","⚾","🔢"],21],["TEN",["🔟","🙌","🎳","🦶"],21],["HUNDRED",["💯","🔢","💵","🎂"],21],["DOZEN",["🥚","🍩","🌹","🧁"],21],["PAIR",["🧦","👟","🍐","👯"],21],["SIZE",["📏","🐘","🐜","👕"],21],["SYMMETRY",["🦋","🪞","❄️","🕸️"],21],["GRAPH",["📈","📊","📉","🔢"],21],["OCTAGON",["🛑","8️⃣","🐙","⬛"],21],["HEXAGON",["🐝","🍯","⚽","6️⃣"],21],["RECTANGLE",["🚪","📱","📺","🟦"],21],["TOOL",["🔧","🔨","🛠️","🪛"],22],["HAMMER",["🔨","📌","👷","🧱"],22],["SAW",["🪚","🪵","👀","🌲"],22],["SCREW",["🔩","🪛","⚙️","🌀"],22],["WRENCH",["🔧","🔩","🚰","🛠️"],22],["AXE",["🪓","🪵","🌲","🔥"],22],["BRICK",["🧱","🏠","🐷","🏰"],22],["METAL",["🔩","⚙️","🪙","🤘"],22],["PLASTIC",["🥤","🧴","♻️","🧸"],22],["WOOL",["🐑","🧶","🧦","🦙"],22],["COTTON",["🧵","👕","☁️","🍭"],22],["SILK",["🐛","👘","🕸️","🎀"],22],["RUBBER",["🦆","🎈","🎾","🧤"],22],["STRING",["🧵","🪁","🎻","🪀"],22],["PIN",["📌","📍","🎳","🧷"],22],["CLIP",["📎","🎬","🎀","💇"],22],["TORCH",["🔥","🔦","🏟️","🏰"],22],["FLASHLIGHT",["🔦","🌑","🏕️","🔋"],22],["SHIELD",["🛡️","🏰","🐢","🦔"],22],["SWORD",["⚔️","🗡️","🛡️","🏰"],22],["COMPASS",["🧭","🗺️","⬆️","🏔️"],22],["HOOK",["🪝","🎣","🏴‍☠️","🧥"],22],["BOLT",["⚡","🔩","🚪","🏃"],22],["TOOLBOX",["🧰","🔧","🔨","🪛"],22],["FAIRY",["🧚","✨","🦷","🍄"],23],["GENIE",["🧞","🪔","💨","✨"],23],["POTION",["🧪","⚗️","🧙","💜"],23],["WAND",["🪄","🧚","⭐","🎩"],23],["THRONE",["👑","🪑","🏰","🤴"],23],["KINGDOM",["👑","🏰","🗺️","🐉"],23],["QUEST",["🗺️","⚔️","🐉","🏆"],23],["FABLE",["🐢","🐇","📖","🦊"],23],["BEANSTALK",["🌱","☁️","🐄","🏰"],23],["CHEST",["💰","🏴‍☠️","🗝️","💪"],23],["ADVENTURE",["🗺️","🧭","🏔️","🏴‍☠️"],23],["MYSTERY",["🕵️","🔍","❓","🗝️"],23],["RIDDLE",["❓","🤔","🧩","🗣️"],23],["MAZE",["🌀","🧩","🐭","🌽"],23],["PHOENIX",["🔥","🐦","✨","🔁"],23],["MOO",["🐄","🐮","🥛","🔊"],24],["OINK",["🐷","🐽","🐖","🔊"],24],["QUACK",["🦆","🐤","🔊","🛁"],24],["MEOW",["🐱","🐈","🔊","😺"],24],["WOOF",["🐶","🐕","🔊","🦴"],24],["HISS",["🐍","😾","🦢","🔊"],24],["TWEET",["🐦","🐤","🎶","🔊"],24],["NEIGH",["🐴","🐎","🔊","🏇"],24],["ROAR",["🦁","🐯","🦖","🗣️"],24],["HOWL",["🐺","🌕","🗣️","🐕"],24],["PURR",["🐱","😻","💤","🎶"],24],["CHIRP",["🦗","🐦","🎶","🔊"],24],["BUZZ",["🐝","📱","⚡","💇"],24],["GROWL",["🐻","🐕","😠","🍔"],24],["ZOOM",["🔍","🏎️","💨","🚀"],24],["BOOM",["💥","🧨","🎆","🔊"],24],["POP",["🎈","🍿","🥤","🎤"],24],["CRASH",["💥","🚗","🌊","🥁"],24],["WOW",["😮","🤩","🎆","‼️"],24],["OUCH",["🤕","🩹","🐝","🌵"],24],["HONK",["🚗","🦢","📯","🔊"],24],["HELLO",["👋","📞","😀","🗣️"],24],["GOODBYE",["👋","🚪","✈️","😢"],24],["THANKS",["🙏","💐","😊","💌"],24],["YES",["👍","✅","✔️","🙋"],24],["MAYBE",["🤷","🤔","❓","🎲"],24],["FUN",["🎉","🎢","🎈","😄"],25],["NAME",["📛","🏷️","🗣️","✍️"],25],["FLAG",["🚩","🏁","🏳️","🏴"],25],["SIGN",["🪧","🛑","✍️","⚠️"],25],["MESSAGE",["💬","✉️","📱","📨"],25],["INTERNET",["🌐","💻","📶","📱"],25],["VIDEO",["📹","🎥","📺","▶️"],25],["NEWS",["📰","🗞️","📺","📻"],25],["PRICE",["🏷️","💲","💰","🧾"],25],["POLLUTION",["🏭","💨","🗑️","🛢️"],25],["HORSESHOE",["🐴","🧲","🍀","👟"],25],["FOOTPRINT",["🦶","👣","🐾","🔍"],25],["SNOWBALL",["❄️","⛄","🧤","💥"],25],["CAMPFIRE",["🔥","🏕️","🌭","🎸"],25],["HANDSHAKE",["🤝","👋","💼","😀"],25],["HAIRCUT",["💇","✂️","💈","🪞"],25],["POSTCARD",["📮","✉️","🏝️","🖼️"],25],["MAILBOX",["📬","📫","✉️","🏠"],25]],"names":{"🍎":"red apple","🚒":"fire engine","🍓":"strawberry","❤️":"red heart","🐳":"spouting whale","💙":"blue heart","🫐":"blueberries","🧊":"ice","🥦":"broccoli","🐸":"frog","🍀":"four leaf clover","💚":"green heart","🍌":"banana","🌻":"sunflower","🐥":"front-facing baby chick","💛":"yellow heart","🥕":"carrot","🎃":"jack-o-lantern","🍊":"tangerine","🧡":"orange heart","🍇":"grapes","🍆":"eggplant","💜":"purple heart","🟣":"purple circle","🌸":"cherry blossom","🐷":"pig face","🦩":"flamingo","💗":"growing heart","🐻":"bear","🍫":"chocolate bar","🤎":"brown heart","🌰":"chestnut","🎩":"top hat","🎱":"pool 8 ball","🖤":"black heart","🕶️":"sunglasses","⛄":"snowman without snow","🥛":"glass of milk","🤍":"white heart","☁️":"cloud","🥇":"1st place medal","🏆":"trophy","👑":"crown","💰":"money bag","🥈":"2nd place medal","🥄":"spoon","🍴":"fork and knife","🪙":"coin","🐘":"elephant","🐭":"mouse face","🌫️":"fog","🦏":"rhinoceros","🌈":"rainbow","🌦️":"sun behind rain cloud","🦄":"unicorn","💧":"droplet","🦜":"parrot","🎨":"artist palette","🎈":"balloon","🖍️":"crayon","☀️":"sun","🌞":"sun with face","😎":"smiling face with sunglasses","🏖️":"beach with umbrella","🌧️":"cloud with rain","☔":"umbrella with rain drops","🌂":"closed umbrella","❄️":"snowflake","🌨️":"cloud with snow","⛷️":"skier","🌬️":"wind face","🪁":"kite","🍃":"leaf fluttering in wind","🎐":"wind chime","⛈️":"cloud with lightning and rain","🌪️":"tornado","🌊":"water wave","⛅":"sun behind cloud","🌥️":"sun behind large cloud","✈️":"airplane","🌩️":"cloud with lightning","⚡":"high voltage","🔊":"speaker high volume","😱":"face screaming in fear","🏃":"person running","🔥":"fire","🌶️":"hot pepper","🥵":"hot face","🥶":"cold face","🧣":"scarf","🧥":"coat","☕":"hot beverage","🧤":"gloves","🍉":"watermelon","🩳":"shorts","🍦":"soft ice cream","🎿":"skis","🌷":"tulip","🐣":"hatching chick","🌱":"seedling","🦋":"butterfly","🍂":"fallen leaf","🍁":"maple leaf","🏚️":"derelict house","🌀":"cyclone","💨":"dashing away","🏠":"house","🚣":"person rowing boat","⛸️":"ice skate","🏒":"ice hockey","💦":"sweat droplets","🚿":"shower","🦅":"eagle","🌇":"sunset","🌆":"cityscape at dusk","🌅":"sunrise","☂️":"umbrella","🌁":"foggy","🚢":"ship","🔦":"flashlight","🥾":"hiking boot","🦆":"duck","🔍":"magnifying glass tilted left","✨":"sparkles","🌳":"deciduous tree","🌲":"evergreen tree","🌴":"palm tree","🎄":"Christmas tree","🌹":"rose","🪴":"potted plant","🌿":"herb","🌵":"cactus","🦌":"deer","🍄":"mushroom","🐒":"monkey","🐅":"tiger","🏜️":"desert","🐪":"camel","🦂":"scorpion","⛰️":"mountain","🏔️":"snow-capped mountain","🗻":"mount fuji","🧗":"person climbing","🌋":"volcano","🪨":"rock","💥":"collision","🏞️":"national park","🛶":"canoe","🐟":"fish","🎣":"fishing pole","🦢":"swan","⛵":"sailboat","🏝️":"desert island","🐚":"spiral shell","🦀":"crab","🩱":"one-piece swimsuit","🦇":"bat","⛏️":"pick","🗿":"moai","🎸":"guitar","⏳":"hourglass not done","🏰":"castle","🚜":"tractor","🥜":"peanuts","🐄":"cow","⚽":"soccer ball","⛳":"flag in hole","🍕":"pizza","🤠":"cowboy hat face","🐝":"honeybee","🚰":"potable water","🧯":"fire extinguisher","🕯️":"candle","🌍":"globe showing Europe-Africa","🌏":"globe showing Asia-Australia","👋":"waving hand","🏄":"person surfing","🐢":"turtle","🐌":"snail","🥚":"egg","🐦":"bird","🪵":"wood","🪓":"axe","🪑":"chair","💐":"bouquet","🥀":"wilted flower","🌟":"glowing star","⭐":"star","🌠":"shooting star","🌙":"crescent moon","🌕":"full moon","🌝":"full moon face","🌛":"first quarter moon face","🪐":"ringed planet","🔭":"telescope","👽":"alien","🌼":"blossom","💮":"white flower","🪱":"worm","🥔":"potato","📌":"pushpin","🩹":"adhesive bandage","🐧":"penguin","🐻‍❄️":"polar bear","🐊":"crocodile","🦟":"mosquito","🐶":"dog face","🐕":"dog","🦴":"bone","🐩":"poodle","🐱":"cat face","🐈":"cat","🧶":"yarn","🐹":"hamster","🐠":"tropical fish","🐓":"rooster","🐖":"pig","🌾":"sheaf of rice","🐑":"ewe","🦁":"lion","🦒":"giraffe","🦓":"zebra","🐡":"blowfish","🐛":"bug","🐞":"lady beetle","🐜":"ant","🦗":"cricket","🍯":"honey pot","🥞":"pancakes","🕷️":"spider","🕸️":"spider web","🐍":"snake","🪜":"ladder","🎲":"game die","🐵":"monkey face","🙈":"see-no-evil monkey","🐯":"tiger face","🧸":"teddy bear","🐼":"panda","🎋":"tanabata tree","🐰":"rabbit face","🐇":"rabbit","🐁":"mouse","🧀":"cheese wedge","🖱️":"computer mouse","🐴":"horse face","🐎":"horse","🏇":"horse racing","🐮":"cow face","🐽":"pig nose","🥓":"bacon","🐏":"ram","💤":"ZZZ","🐔":"chicken","🍗":"poultry leg","🐤":"baby chick","🛁":"bathtub","🍞":"bread","🦉":"owl","📚":"books","🐋":"whale","🦈":"shark","🦷":"tooth","🐬":"dolphin","🏊":"person swimming","🐙":"octopus","🦑":"squid","8️⃣":"keycap 8","🎪":"circus tent","📏":"straight ruler","🦘":"kangaroo","🐨":"koala","👜":"handbag","🦊":"fox","🐺":"wolf","🐫":"two-hump camel","🦖":"T-Rex","🦕":"sauropod","🐉":"dragon","🐲":"dragon face","🏏":"cricket game","⚾":"baseball","🍰":"shortcake","🧺":"basket","🗣️":"speaking head","🪶":"feather","🩰":"ballet shoes","🦚":"peacock","🦵":"leg","🐐":"goat","🦙":"llama","🌄":"sunrise over mountains","🦔":"hedgehog","🐿️":"chipmunk","🦥":"sloth","😴":"sleeping face","🦦":"otter","🦨":"skunk","🤢":"nauseated face","🦫":"beaver","🦭":"seal","🪲":"beetle","🔴":"red circle","⚫":"black circle","🩸":"drop of blood","🤚":"raised back of hand","🎻":"violin","🦎":"lizard","🐾":"paw prints","🍼":"baby bottle","🖋️":"fountain pen","📯":"postal horn","🍳":"cooking","💀":"skull","🦞":"lobster","🐗":"boar","🚙":"sport utility vehicle","🦝":"raccoon","🦬":"bison","🕊️":"dove","🌐":"globe with meridians","💻":"laptop","⚖️":"balance scale","🎹":"musical keyboard","🎒":"backpack","📦":"package","🃏":"joker","🎡":"ferris wheel","🦍":"gorilla","💪":"flexed biceps","🦛":"hippopotamus","🗑️":"wastebasket","🎭":"performing arts","🦃":"turkey","🥧":"pie","☮️":"peace symbol","🐆":"leopard","✂️":"scissors","🎀":"ribbon","🐃":"water buffalo","⏰":"alarm clock","🛌":"person in bed","🦣":"mammoth","🧳":"luggage","🚗":"automobile","🧔":"person beard","🍭":"lollipop","👛":"purse","🤿":"diving mask","🛋️":"couch and lamp","🕳️":"hole","🪰":"fly","🍔":"hamburger","🍝":"spaghetti","🌽":"ear of corn","🥒":"cucumber","🍏":"green apple","🍨":"ice cream","🥤":"cup with straw","🧃":"beverage box","🍋":"lemon","😖":"confounded face","🟡":"yellow circle","🍒":"cherries","🍑":"peach","🍐":"pear","🍈":"melon","🥗":"green salad","🟢":"green circle","🍍":"pineapple","🍹":"tropical drink","🥥":"coconut","🥭":"mango","🥝":"kiwi fruit","🥑":"avocado","🥪":"sandwich","🌮":"taco","🍅":"tomato","🍿":"popcorn","🍟":"french fries","🥘":"shallow pan of food","🧅":"onion","😢":"crying face","🧄":"garlic","🧛":"vampire","🫑":"bell pepper","🤧":"sneezing face","🥬":"leafy green","🧖":"person in steamy room","🫒":"olive","🥖":"baguette bread","🧈":"butter","📸":"camera with flash","🍪":"cookie","🍜":"steaming bowl","🥢":"chopsticks","🥡":"takeout box","🍚":"cooked rice","🍙":"rice ball","🍛":"curry rice","🍲":"pot of food","🥣":"bowl with spoon","🌯":"burrito","🌭":"hot dog","🧂":"salt","🎂":"birthday cake","🧁":"cupcake","🎅":"Santa Claus","🍬":"candy","🍩":"doughnut","🚧":"construction","🥳":"partying face","🧇":"waffle","🍵":"teacup without handle","🫖":"teapot","🥐":"croissant","🥨":"pretzel","😋":"face savoring food","🤤":"drooling face","🍽️":"fork and knife with plate","🍱":"bento box","🕛":"twelve o’clock","🎳":"bowling","👒":"woman’s hat","🔩":"nut and bolt","🍣":"sushi","⏲️":"timer clock","🥯":"bagel","🗼":"Tokyo tower","🥩":"cut of meat","👅":"tongue","🍖":"meat on bone","🎉":"party popper","🥟":"dumpling","💃":"woman dancing","📝":"memo","👩‍🍳":"woman cook","📋":"clipboard","🍮":"custard","🛒":"shopping cart","🧾":"receipt","👁️":"eye","👀":"eyes","👂":"ear","🎧":"headphone","👃":"nose","👄":"mouth","😮":"face with open mouth","🪥":"toothbrush","🧚":"fairy","✋":"raised hand","🦶":"foot","👣":"footprints","👖":"jeans","🦾":"mechanical arm","🤗":"smiling face with open hands","💇":"person getting haircut","💈":"barber pole","👱":"person blond hair","🧠":"brain","🧩":"puzzle piece","💭":"thought balloon","💓":"beating heart","🫀":"anatomical heart","💘":"heart with arrow","😀":"grinning face","😡":"enraged face","😊":"smiling face with smiling eyes","😁":"beaming face with smiling eyes","😛":"face with tongue","💄":"lipstick","💋":"kiss mark","😘":"face blowing a kiss","👆":"backhand index pointing up","☝️":"index pointing up","💅":"nail polish","💍":"ring","👍":"thumbs up","👎":"thumbs down","📱":"mobile phone","🎮":"video game","🔨":"hammer","🖌️":"paintbrush","🧎":"person kneeling","🛹":"skateboard","🤒":"face with thermometer","🏥":"hospital","😷":"face with medical mask","🌡️":"thermometer","🧻":"roll of paper","💉":"syringe","👶":"baby","🧍":"person standing","🏴‍☠️":"pirate flag","👔":"necktie","📿":"prayer beads","⌚":"watch","🫁":"lungs","🤕":"face with head-bandage","🩺":"stethoscope","💊":"pill","🧪":"test tube","😓":"downcast face with sweat","😂":"face with tears of joy","🥲":"smiling face with tear","😭":"loudly crying face","😄":"grinning face with smiling eyes","😞":"disappointed face","💔":"broken heart","😿":"crying cat","😠":"angry face","💢":"anger symbol","👿":"angry face with horns","😨":"fearful face","👻":"ghost","🎁":"wrapped gift","😲":"astonished face","🥱":"yawning face","😩":"weary face","🤪":"zany face","😜":"winking face with tongue","🤡":"clown face","🙃":"upside-down face","😍":"smiling face with heart-eyes","💕":"two hearts","🥰":"smiling face with hearts","😚":"kissing face with closed eyes","🫂":"people hugging","💞":"revolving hearts","🤣":"rolling on the floor laughing","😆":"grinning squinting face","😹":"cat with tears of joy","😐":"neutral face","🙄":"face with rolling eyes","😌":"relieved face","😳":"flushed face","☺️":"smiling face","🦸":"superhero","🛡️":"shield","🧘":"person in lotus position","😟":"worried face","🤞":"crossed fingers","😣":"persevering face","🥺":"pleading face","🤩":"star-struck","🎢":"roller coaster","😬":"grimacing face","😰":"anxious face with sweat","🎤":"microphone","😕":"confused face","🤔":"thinking face","❓":"red question mark","🧐":"face with monocle","😾":"pouting cat","😒":"unamused face","🤝":"handshake","💝":"heart with ribbon","🙏":"folded hands","😇":"smiling face with halo","👫":"woman and man holding hands","🎓":"graduation cap","💡":"light bulb","🤓":"nerd face","🤲":"palms up together","🙇":"person bowing","💌":"love letter","😔":"pensive face","✌️":"victory hand","⛲":"fountain","😃":"grinning face with big eyes","👟":"running shoe","🏁":"chequered flag","🚶":"person walking","🦮":"guide dog","🏀":"basketball","🚴":"person biking","🛴":"kick scooter","🔑":"key","🛣️":"motorway","🚦":"vertical traffic light","⛽":"fuel pump","📖":"open book","👓":"glasses","✏️":"pencil","🔤":"input latin letters","🖊️":"pen","📐":"triangular ruler","⭕":"hollow red circle","🎶":"musical notes","🕺":"man dancing","🧼":"soap","🧹":"broom","🧽":"sponge","🛠️":"hammer and wrench","🤾":"person playing handball","🏈":"american football","🥏":"flying disc","🥅":"goal net","🥋":"martial arts uniform","🔓":"unlocked","🚪":"door","🎵":"musical note","📻":"radio","💬":"speech balloon","📞":"telephone receiver","☎️":"telephone","📢":"loudspeaker","👏":"clapping hands","👉":"backhand index pointing right","📍":"round pushpin","🆘":"SOS button","🚑":"ambulance","🙋":"person raising hand","💳":"credit card","💵":"dollar banknote","🏷️":"label","🏪":"convenience store","🛍️":"shopping bags","🏬":"department store","👗":"dress","🔎":"magnifying glass tilted right","🗺️":"world map","🧭":"compass","🛏️":"bed","🤫":"shushing face","🔢":"input numbers","🧮":"abacus","1️⃣":"keycap 1","🪄":"magic wand","🧙":"mage","🏋️":"person lifting weights","🎚️":"level slider","👕":"t-shirt","📄":"page facing up","🧵":"thread","🪡":"sewing needle","🧷":"safety pin","👵":"old woman","⛺":"tent","🏕️":"camping","🛼":"roller skate","🪀":"yo-yo","💫":"dizzy","🎾":"tennis","🛷":"sled","🏂":"snowboarder","🏌️":"person golfing","🎷":"saxophone","⚓":"anchor","🛑":"stop sign","🔧":"wrench","🚏":"bus stop","⛔":"no entry","▶️":"play button","✅":"check mark button","🔚":"END arrow","💾":"floppy disk","👈":"backhand index pointing left","☑️":"check box with check","🤹":"person juggling","🥁":"drum","🎺":"trumpet","💂":"guard","📅":"calendar","✊":"raised fist","🥊":"boxing glove","🔔":"bell","😉":"winking face","🪒":"razor","🧴":"lotion bottle","🤸":"person cartwheeling","⚙️":"gear","🤖":"robot","🚀":"rocket","🌌":"milky way","💎":"gem stone","🎇":"sparkler","🌃":"night with stars","🗳️":"ballot box with ballot","📊":"bar chart","🎊":"confetti ball","🪣":"bucket","🔁":"repeat button","🤦":"person facepalming","🛗":"elevator","🏗️":"building construction","🥷":"ninja","🚁":"helicopter","🔒":"locked","⛑️":"rescue worker’s helmet","➕":"plus","👥":"busts in silhouette","➡️":"right arrow","🚚":"delivery truck","📬":"open mailbox with raised flag","♻️":"recycling symbol","🥫":"canned food","📰":"newspaper","🔬":"microscope","🦠":"microbe","🤏":"pinching hand","🏙️":"cityscape","⏱️":"stopwatch","🚂":"locomotive","📜":"scroll","🏎️":"racing car","🔇":"muted speaker","🧱":"brick","🌑":"new moon","🔋":"battery","👴":"old man","🏛️":"classical building","🆕":"NEW button","🧒":"child","🔵":"blue circle","🆒":"COOL button","🤑":"money-mouth face","🙌":"raising hands","⬇️":"down arrow","👇":"backhand index pointing down","🪂":"parachute","🔐":"locked with key","🗝️":"old key","📔":"notebook with decorative cover","🦺":"safety vest","⚠️":"warning","🧞":"genie","🔮":"crystal ball","🧦":"socks","👨‍👩‍👧‍👦":"family man, woman, girl, boy","😈":"smiling face with horns","❌":"cross mark","✔️":"check mark","🙅":"person gesturing NO","🚫":"prohibited","💯":"hundred points","🚩":"triangular flag","⏭️":"next track button","🔜":"SOON arrow","👌":"OK hand","🎯":"bullseye","📭":"open mailbox with lowered flag","🪟":"window","🪆":"nesting dolls","🐂":"ox","🏘️":"houses","🏡":"house with garden","🖼️":"framed picture","🏯":"Japanese castle","🕰️":"mantelpiece clock","💺":"seat","🦽":"manual wheelchair","🏓":"ping pong","📺":"television","🪔":"diya lamp","🏮":"red paper lantern","🕒":"three o’clock","🪞":"mirror","👸":"princess","🚲":"bicycle","💼":"briefcase","👐":"open hands","🎎":"Japanese dolls","♟️":"chess pawn","🎴":"flower playing cards","📲":"mobile phone with arrow","🎬":"clapper board","🖥️":"desktop computer","⌨️":"keyboard","📷":"camera","🎥":"movie camera","📹":"video camera","🎙️":"studio microphone","📡":"satellite antenna","📕":"closed book","🔖":"bookmark","✍️":"writing hand","📃":"page with curl","✉️":"envelope","📮":"postbox","🚽":"toilet","🚻":"restroom","🚮":"litter in bin sign","🔘":"radio button","🧲":"magnet","📎":"paperclip","🔌":"electric plug","🪢":"knot","⛓️":"chains","🔗":"link","📼":"videocassette","🏦":"bank","🛎️":"bellhop bell","🏺":"amphora","🗞️":"rolled-up newspaper","👚":"woman’s clothes","🎽":"running shirt","👠":"high-heeled shoe","👞":"man’s shoe","🧢":"billed cap","🤴":"prince","🥼":"lab coat","👢":"woman’s boot","🥽":"goggles","👮":"police officer","👩‍⚕️":"woman health worker","👨‍🚒":"man firefighter","🏍️":"motorcycle","🏫":"school","🥿":"flat shoe","👘":"kimono","🗾":"map of Japan","🤵":"person in tuxedo","🚌":"bus","👩‍🏫":"woman teacher","👩‍🎓":"woman student","➖":"minus","✖️":"multiply","➗":"divide","🧬":"dna","🅰️":"A button (blood type)","🅱️":"B button (blood type)","#️⃣":"keycap #","🎫":"ticket","🎟️":"admission tickets","📓":"notebook","📒":"ledger","🟤":"brown circle","🧫":"petri dish","⚗️":"alembic","❔":"white question mark","⚛️":"atom symbol","👨‍⚕️":"man health worker","👨‍🍳":"man cook","👨‍🌾":"man farmer","👨‍✈️":"man pilot","🛫":"airplane departure","👩‍🚀":"woman astronaut","🛰️":"satellite","🚓":"police car","🚨":"police car light","🚔":"oncoming police car","👩‍🎨":"woman artist","👩‍🎤":"woman singer","👷":"construction worker","👨‍🔧":"man mechanic","👩‍🔬":"woman scientist","🚕":"taxi","⚔️":"crossed swords","🧙‍♂️":"man mage","🕵️":"detective","👩‍⚖️":"woman judge","🪠":"plunger","🏢":"office building","🖨️":"printer","🌉":"bridge at night","🎖️":"military medal","🦹":"supervillain","🏅":"sports medal","👩‍🚒":"woman firefighter","📣":"megaphone","🪚":"carpentry saw","👯":"people with bunny ears","👬":"men holding hands","👭":"women holding hands","2️⃣":"keycap 2","🧑":"person","👨‍👩‍👧":"family man, woman, girl","🏟️":"stadium","🛖":"hut","🅿️":"P button","🎞️":"film frames","🛬":"airplane arrival","🛂":"passport control","🚉":"station","🕐":"one o’clock","🚇":"metro","🏨":"hotel","🌎":"globe showing Americas","🏭":"factory","🎠":"carousel horse","⬆️":"up arrow","⬅️":"left arrow","↩️":"right arrow curving left","🛵":"motor scooter","🪅":"piñata","🌺":"hibiscus","🚆":"train","🛤️":"railway track","🚃":"railway car","🚤":"speedboat","🛥️":"motor boat","🛩️":"small airplane","🚵":"person mountain biking","🚛":"articulated lorry","🛻":"pickup truck","🚖":"oncoming taxi","🛢️":"oil drum","🛳️":"passenger ship","🧜‍♀️":"mermaid","🛄":"baggage claim","🦼":"motorized wheelchair","♿":"wheelchair symbol","⛹️":"person bouncing ball","🥎":"softball","🏸":"badminton","🏐":"volleyball","🎼":"musical score","🏹":"bow and arrow","🟨":"yellow square","🟥":"red square","🏉":"rugby football","💿":"optical disk","🪘":"long drum","🤘":"sign of the horns","🗒️":"spiral notepad","🟦":"blue square","🤳":"selfie","🗽":"Statue of Liberty","🪕":"banjo","☄️":"comet","🛸":"flying saucer","👾":"alien monster","🌘":"waning crescent moon","🔄":"counterclockwise arrows button","👤":"bust in silhouette","♨️":"hot springs","🦤":"dodo","📶":"antenna bars","🧜":"merperson","🔱":"trident emblem","🦪":"oyster","⌛":"hourglass done","7️⃣":"keycap 7","🗓️":"spiral calendar","📆":"tear-off calendar","3️⃣":"keycap 3","🎆":"fireworks","👰":"person with veil","💒":"wedding","🧨":"firecracker","🧝":"elf","👼":"baby angel","🧙‍♀️":"woman mage","🐈‍⬛":"black cat","👹":"ogre","🕎":"menorah","🕌":"mosque","🔺":"red triangle pointed up","🟠":"orange circle","⬛":"black large square","🔲":"black square button","🔻":"red triangle pointed down","♦️":"diamond suit","🔷":"large blue diamond","〰️":"wavy dash","🍥":"fish cake with swirl","0️⃣":"keycap 0","🥉":"3rd place medal","☘️":"shamrock","4️⃣":"keycap 4","5️⃣":"keycap 5","🖐️":"hand with fingers splayed","6️⃣":"keycap 6","9️⃣":"keycap 9","🔟":"keycap 10","📈":"chart increasing","📉":"chart decreasing","🪛":"screwdriver","🗡️":"dagger","🪝":"hook","🧰":"toolbox","😺":"grinning cat","😻":"smiling cat with heart-eyes","‼️":"double exclamation mark","🤷":"person shrugging","📛":"name badge","🏳️":"white flag","🏴":"black flag","🪧":"placard","📨":"incoming envelope","💲":"heavy dollar sign","📫":"closed mailbox with raised flag"}};
+var CATS = DATA.cats, NAMES = DATA.names;
+var ALL = DATA.p.map(function(r){ return { w:r[0], e:r[1], c:r[2] }; });
+var $ = function(id){ return document.getElementById(id); };
+var fmt = function(n){ return n.toLocaleString("en-US"); };
+var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+
+function hashStr(s){ var h = 2166136261 >>> 0; for (var i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h,16777619) >>> 0; } return h; }
+function mulberry(seed){ var a = seed >>> 0; return function(){ a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ (t>>>15), t|1); t ^= t + Math.imul(t ^ (t>>>7), t|61); return ((t ^ (t>>>14)) >>> 0) / 4294967296; }; }
+function shuffled(arr, rand){ var a = arr.slice(); for (var i=a.length-1;i>0;i--){ var j = Math.floor(rand()*(i+1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+var TRACKS = [
+  { id:"easy",   name:"Easy",   badge:"🐣", desc:"3 or 4 letters",  min:3, max:4 },
+  { id:"medium", name:"Medium", badge:"🦊", desc:"5 or 6 letters",  min:5, max:6 },
+  { id:"hard",   name:"Hard",   badge:"🦉", desc:"7 to 10 letters", min:7, max:10 }
+];
+var LISTS = {};
+TRACKS.forEach(function(t){
+  var list = ALL.filter(function(p){ return p.w.length >= t.min && p.w.length <= t.max; })
+                .sort(function(a,b){ return a.w < b.w ? -1 : a.w > b.w ? 1 : 0; });
+  LISTS[t.id] = shuffled(list, mulberry(hashStr("word-detective-" + t.id)));
+});
+function trackById(id){ return TRACKS.filter(function(t){ return t.id === id; })[0]; }
+
+/* Saved progress */
+var KEY = "word-detective-v1";
+function fresh(){ return { stars:100, solved:{}, skipped:{}, hints:{}, sound:true, voice:true }; }
+var S = fresh();
+try {
+  var raw = localStorage.getItem(KEY);
+  if (raw){ var o = JSON.parse(raw); if (o && typeof o === "object") S = Object.assign(fresh(), o); }
+} catch(e){}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+/* Sound and voice */
+var actx = null;
+function tone(freq, dur, type, vol, delay){
+  if (!S.sound) return;
+  try {
+    if (!actx){ var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; actx = new AC(); }
+    if (actx.state === "suspended") actx.resume();
+    var t = actx.currentTime + (delay || 0);
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || "sine"; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + dur + 0.03);
+  } catch(e){}
+}
+var sfx = {
+  tap:   function(){ tone(620, 0.06, "triangle", 0.08); },
+  back:  function(){ tone(400, 0.06, "triangle", 0.07); },
+  coin:  function(){ tone(988, 0.07, "square", 0.04); tone(1319, 0.12, "square", 0.04, 0.07); },
+  wrong: function(){ tone(240, 0.16, "square", 0.04); tone(190, 0.22, "square", 0.04, 0.13); },
+  win:   function(){ [523,659,784,1047].forEach(function(f,i){ tone(f, 0.18, "triangle", 0.1, i*0.09); }); }
+};
+function say(text){
+  if (!S.voice || !text) return;
+  try {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.85; u.pitch = 1.05; u.lang = "en-US";
+    window.speechSynthesis.speak(u);
+  } catch(e){}
+}
+
+/* Screens */
+function show(id){ ["home","play"].forEach(function(s){ $(s).hidden = (s !== id); }); window.scrollTo(0,0); }
+function solvedIn(id){ return LISTS[id].reduce(function(n,p){ return n + (S.solved[p.w] ? 1 : 0); }, 0); }
+function nextIndex(id){
+  var L = LISTS[id], i;
+  for (i=0;i<L.length;i++){ if (!S.solved[L[i].w] && !S.skipped[L[i].w]) return i; }
+  for (i=0;i<L.length;i++){ if (!S.solved[L[i].w]) return i; }
+  return -1;
+}
+function frontier(id){
+  var L = LISTS[id];
+  for (var i=0;i<L.length;i++){ if (!S.solved[L[i].w] && !S.skipped[L[i].w]) return i; }
+  return L.length - 1;
+}
+
+var resetArmed = false, resetTimer = null;
+function renderHome(){
+  $("starsHome").textContent = fmt(S.stars);
+  var done = ALL.reduce(function(n,p){ return n + (S.solved[p.w] ? 1 : 0); }, 0);
+  $("countLine").textContent = done === 0 ? fmt(ALL.length) + " puzzles to crack" : fmt(done) + " of " + fmt(ALL.length) + " cracked so far";
+  var wrap = $("tracks"); wrap.innerHTML = "";
+  TRACKS.forEach(function(t){
+    var L = LISTS[t.id], n = solvedIn(t.id), pct = Math.round(n / L.length * 100), nx = nextIndex(t.id);
+    var card = document.createElement("div");
+    card.className = "track";
+    card.innerHTML =
+      '<button class="track-main" type="button">' +
+        '<span class="badge emo">' + t.badge + '</span>' +
+        '<span><span class="track-name display">' + t.name + '</span>' +
+        '<span class="track-sub">' + t.desc + ', ' + fmt(L.length) + ' puzzles</span></span>' +
+        '<span class="track-go">' + (nx < 0 ? "Done" : n === 0 ? "Start" : "Play") + '</span>' +
+      '</button>' +
+      '<div class="track-foot"><div class="bar"><i style="width:' + pct + '%"></i></div>' +
+      '<span class="track-count">' + n + ' / ' + L.length + '</span>' +
+      '<button class="link" type="button">Pick a puzzle</button></div>';
+    card.querySelector(".track-main").onclick = function(){ sfx.tap(); var i = nextIndex(t.id); if (i < 0) openGrid(t.id); else openPuzzle(t.id, i); };
+    card.querySelector(".link").onclick = function(){ sfx.tap(); openGrid(t.id); };
+    wrap.appendChild(card);
+  });
+  $("soundBtn").textContent = S.sound ? "🔊 Sounds on" : "🔇 Sounds off";
+  $("soundBtn").setAttribute("aria-pressed", S.sound);
+  $("voiceBtn").textContent = S.voice ? "🗣️ Read aloud on" : "🗣️ Read aloud off";
+  $("voiceBtn").setAttribute("aria-pressed", S.voice);
+  if (!resetArmed) $("resetBtn").textContent = "Reset progress";
+}
+
+/* Puzzle */
+var FILL = "EEEEEAAAAIIIOOOUUTTTNNNSSSRRRLLLDDHHCCMMPPBBGGFFWYKV";
+var TILTS = ["-2deg","1.6deg","1.2deg","-1.8deg"];
+var HINT_COST = 10, REMOVE_COST = 15, FREE_WAIT = 30;
+var cur = null;
+
+function makeBank(w){
+  var size = w.length <= 5 ? 12 : (w.length <= 8 ? 14 : 16);
+  var r = mulberry(hashStr("bank-" + w));
+  var t = w.split("");
+  while (t.length < size) t.push(FILL[Math.floor(r() * FILL.length)]);
+  return shuffled(t, r);
+}
+
+function openPuzzle(id, i){
+  var p = LISTS[id][i];
+  var tiles = makeBank(p.w), needed = [], claimed = {};
+  p.w.split("").forEach(function(ch){
+    for (var k=0;k<tiles.length;k++){ if (!claimed[k] && tiles[k] === ch){ claimed[k] = true; needed.push(k); return; } }
+  });
+  cur = {
+    id:id, i:i, p:p, tiles:tiles, needed:needed, claimed:claimed,
+    order: tiles.map(function(_,k){ return k; }),
+    used: tiles.map(function(){ return false; }),
+    removed: tiles.map(function(){ return false; }),
+    slots: p.w.split("").map(function(){ return null; }),
+    locked: p.w.split("").map(function(){ return false; }),
+    clue:false, done:false, helped:false, since:Date.now()
+  };
+  var h = S.hints[p.w];
+  if (h){
+    (h.r || []).forEach(function(pos){ lockPos(pos); });
+    if (h.x) applyRemove();
+    if (h.c) cur.clue = true;
+    if ((h.r && h.r.length) || h.x) cur.helped = true;
+  }
+  $("slots").className = "slots display";
+  show("play");
+  renderPlay(true);
+}
+
+function renderPlay(dealPics){
+  var t = trackById(cur.id), L = LISTS[cur.id];
+  $("levelLabel").innerHTML = '<span class="lv-name display">' + t.name + '</span><span class="lv-num">Puzzle ' + (cur.i+1) + ' of ' + fmt(L.length) + (S.solved[cur.p.w] && !cur.done ? ", solved before" : "") + '</span>';
+  $("starsPlay").textContent = fmt(S.stars);
+  if (dealPics){
+    var board = $("board"); board.innerHTML = "";
+    cur.p.e.forEach(function(e,k){
+      var d = document.createElement("div");
+      d.className = "pic";
+      d.style.setProperty("--tilt", TILTS[k]);
+      d.style.animationDelay = (k * 70) + "ms";
+      d.innerHTML = '<span class="emo">' + e + '</span>';
+      board.appendChild(d);
+    });
+  }
+  $("clue").textContent = cur.clue ? "Group: " + CATS[cur.p.c] : "";
+  renderSlots(); renderBank(); renderTools();
+}
+
+function renderSlots(){
+  var el = $("slots");
+  el.style.setProperty("--n", cur.p.w.length);
+  el.innerHTML = "";
+  cur.slots.forEach(function(k,pos){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "slot" + (k !== null ? " filled" : "") + (cur.locked[pos] ? " locked" : "");
+    b.textContent = k !== null ? cur.tiles[k] : "";
+    b.style.setProperty("--d", (pos * 45) + "ms");
+    b.setAttribute("aria-label", k !== null ? "Letter " + cur.tiles[k] + ", tap to remove" : "Empty box " + (pos+1));
+    b.onclick = function(){ unplace(pos); };
+    el.appendChild(b);
+  });
+}
+
+function renderBank(){
+  var el = $("bank");
+  el.style.setProperty("--cols", cur.tiles.length / 2);
+  el.innerHTML = "";
+  cur.order.forEach(function(k){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "tile" + (cur.used[k] ? " used" : "") + (cur.removed[k] ? " removed" : "");
+    b.textContent = cur.tiles[k];
+    b.disabled = cur.used[k] || cur.removed[k];
+    b.onclick = function(){ place(k); };
+    el.appendChild(b);
+  });
+}
+
+function hintState(){
+  if (cur.done || cur.locked.indexOf(false) < 0) return { ok:false };
+  if (S.stars >= HINT_COST) return { ok:true, free:false };
+  var wait = Math.max(0, FREE_WAIT - Math.floor((Date.now() - cur.since) / 1000));
+  return wait === 0 ? { ok:true, free:true } : { ok:false, wait:wait };
+}
+
+function renderTools(){
+  var st = hintState(), c = $("hintCost");
+  if (S.stars >= HINT_COST) c.textContent = HINT_COST + " ⭐";
+  else if (st.ok) c.textContent = "free now";
+  else if (st.wait) c.textContent = "free in " + st.wait + "s";
+  else c.textContent = "";
+  var h = S.hints[cur.p.w];
+  $("hintBtn").disabled = cur.done || cur.locked.indexOf(false) < 0;
+  $("removeBtn").disabled = cur.done || !!(h && h.x);
+  $("clueBtn").disabled = cur.done || cur.clue;
+  $("shuffleBtn").disabled = cur.done;
+  $("skipBtn").disabled = cur.done;
+}
+
+function place(k){
+  if (cur.done || cur.used[k] || cur.removed[k]) return;
+  var pos = cur.slots.indexOf(null);
+  if (pos < 0) return;
+  $("slots").classList.remove("wrong");
+  cur.slots[pos] = k; cur.used[k] = true;
+  sfx.tap(); renderSlots(); renderBank();
+  if (cur.slots.indexOf(null) < 0) check();
+}
+
+function unplace(pos){
+  if (cur.done || cur.locked[pos]) return;
+  var k = cur.slots[pos];
+  if (k === null) return;
+  $("slots").classList.remove("wrong");
+  cur.slots[pos] = null; cur.used[k] = false;
+  sfx.back(); renderSlots(); renderBank();
+}
+
+function check(){
+  var guess = cur.slots.map(function(k){ return cur.tiles[k]; }).join("");
+  if (guess === cur.p.w){ win(); return; }
+  var el = $("slots");
+  el.classList.remove("wrong"); void el.offsetWidth; el.classList.add("wrong");
+  sfx.wrong();
+  try { if (navigator.vibrate) navigator.vibrate(120); } catch(e){}
+}
+
+function returnUnlocked(){
+  cur.slots.forEach(function(k,pos){ if (k !== null && !cur.locked[pos]){ cur.used[k] = false; cur.slots[pos] = null; } });
+}
+function lockPos(pos){
+  returnUnlocked();
+  var k = cur.needed[pos];
+  cur.slots[pos] = k; cur.used[k] = true; cur.locked[pos] = true; cur.removed[k] = false;
+}
+function applyRemove(){
+  returnUnlocked();
+  cur.tiles.forEach(function(_,k){ if (!cur.claimed[k]) cur.removed[k] = true; });
+}
+function hintRec(){ return S.hints[cur.p.w] || (S.hints[cur.p.w] = {}); }
+
+function doHint(){
+  var st = hintState();
+  if (!st.ok){
+    if (st.wait) toast("A letter costs " + HINT_COST + " stars. You get one free in " + st.wait + " seconds.");
+    return;
+  }
+  var pos = cur.locked.indexOf(false);
+  if (st.free) cur.since = Date.now(); else S.stars -= HINT_COST;
+  var h = hintRec(); h.r = (h.r || []).concat(pos);
+  cur.helped = true;
+  lockPos(pos); save(); sfx.coin(); renderPlay(false);
+  if (cur.slots.indexOf(null) < 0) check();
+}
+function doRemove(){
+  if (cur.done) return;
+  if (S.stars < REMOVE_COST){ toast("Removing letters costs " + REMOVE_COST + " stars. Solve a puzzle to earn more."); return; }
+  S.stars -= REMOVE_COST; hintRec().x = 1; cur.helped = true;
+  applyRemove(); save(); sfx.coin(); renderPlay(false);
+}
+function doClue(){
+  if (cur.done || cur.clue) return;
+  cur.clue = true; hintRec().c = 1; save(); sfx.tap(); renderPlay(false);
+}
+function doShuffle(){
+  if (cur.done) return;
+  cur.order = shuffled(cur.order, Math.random); sfx.tap(); renderBank();
+}
+function doSkip(){
+  if (cur.done) return;
+  S.skipped[cur.p.w] = 1; save();
+  var i = nextIndex(cur.id);
+  if (i === cur.i){ toast("This is the last one left in " + trackById(cur.id).name + ". You can crack it!"); return; }
+  sfx.back(); goNext();
+}
+function goNext(){
+  var i = nextIndex(cur.id);
+  if (i < 0){ trackDone(); return; }
+  openPuzzle(cur.id, i);
+}
+
+var CHEERS = ["You got it!","Case cracked!","Brilliant work!","Super sleuth!","Nailed it!","Sharp eyes!"];
+function win(){
+  cur.done = true;
+  var w = cur.p.w, first = !S.solved[w], gain = 0;
+  if (first){ gain = 5 + (cur.helped ? 0 : 2); S.stars += gain; S.solved[w] = 1; }
+  delete S.skipped[w]; delete S.hints[w];
+  save();
+  $("slots").classList.add("right");
+  $("starsPlay").textContent = fmt(S.stars);
+  renderTools();
+  sfx.win(); confetti(); say(w.toLowerCase());
+  setTimeout(function(){ showWin(gain, first); }, 700);
+}
+function showWin(gain, first){
+  var w = cur.p.w;
+  $("winTitle").textContent = CHEERS[Math.floor(Math.random() * CHEERS.length)];
+  $("winWord").textContent = w;
+  $("winQ").textContent = "How does each picture connect to \u201C" + w.toLowerCase() + "\u201D?";
+  var chips = $("winChips"); chips.innerHTML = "";
+  cur.p.e.forEach(function(e){
+    var name = NAMES[e] || "";
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip";
+    b.innerHTML = '<span class="emo">' + e + '</span><span>' + esc(name) + '</span>';
+    b.onclick = function(){ say(name); };
+    chips.appendChild(b);
+  });
+  $("winGain").textContent = first ? "+" + gain + " stars" + (gain > 5 ? ", including 2 for solving with no help" : "") : "You solved this one before, so no new stars.";
+  $("winOverlay").hidden = false;
+  $("nextBtn").focus();
+}
+function trackDone(){
+  var t = trackById(cur.id);
+  $("doneTitle").textContent = "Every " + t.name + " puzzle solved!";
+  $("doneText").textContent = "That is " + fmt(LISTS[cur.id].length) + " words. Pick another level from the menu.";
+  $("doneOverlay").hidden = false;
+  $("doneBtn").focus();
+}
+
+/* Puzzle picker */
+function openGrid(id){
+  var t = trackById(id), L = LISTS[id], f = frontier(id);
+  $("gridTitle").textContent = t.name + " puzzles";
+  $("gridSub").textContent = solvedIn(id) + " of " + L.length + " solved. Tap a number to play it.";
+  var g = $("levels"); g.innerHTML = "";
+  var frag = document.createDocumentFragment();
+  L.forEach(function(p,i){
+    var b = document.createElement("button");
+    var solved = !!S.solved[p.w], skipped = !!S.skipped[p.w];
+    b.type = "button";
+    b.className = "lv" + (solved ? " solved" : skipped ? " skipped" : i === f ? " current" : "");
+    b.textContent = i + 1;
+    b.disabled = !(solved || skipped || i <= f);
+    b.setAttribute("aria-label", "Puzzle " + (i+1) + (solved ? ", solved" : skipped ? ", skipped" : ""));
+    b.onclick = function(){ closeGrid(); openPuzzle(id, i); };
+    frag.appendChild(b);
+  });
+  g.appendChild(frag);
+  $("gridOverlay").hidden = false;
+  setTimeout(function(){ var c = g.querySelector(".current"); if (c) g.scrollTop = c.offsetTop - g.clientHeight / 2; }, 0);
+}
+function closeGrid(){ $("gridOverlay").hidden = true; }
+
+/* Little extras */
+var toastTimer = null;
+function toast(msg){
+  var el = $("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2800);
+}
+var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function confetti(){
+  if (reduceMotion) return;
+  var box = $("confetti"), bits = ["⭐","✨","🎉","🎈","💛","🔍"];
+  for (var i=0;i<22;i++){
+    var s = document.createElement("span");
+    s.className = "bit emo";
+    s.textContent = bits[i % bits.length];
+    s.style.left = (Math.random() * 100) + "%";
+    s.style.fontSize = (18 + Math.random() * 16) + "px";
+    s.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+    s.style.setProperty("--rot", (Math.random() * 540 - 270) + "deg");
+    s.style.animationDelay = (Math.random() * 0.25) + "s";
+    box.appendChild(s);
+    (function(node){ setTimeout(function(){ node.remove(); }, 2100); })(s);
+  }
+}
+
+/* Wiring */
+$("backBtn").onclick = function(){ sfx.back(); try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e){} renderHome(); show("home"); };
+$("hintBtn").onclick = doHint;
+$("removeBtn").onclick = doRemove;
+$("clueBtn").onclick = doClue;
+$("shuffleBtn").onclick = doShuffle;
+$("skipBtn").onclick = doSkip;
+$("nextBtn").onclick = function(){ $("winOverlay").hidden = true; goNext(); };
+$("hearBtn").onclick = function(){ say(cur.p.w.toLowerCase()); };
+$("gridClose").onclick = closeGrid;
+$("gridOverlay").addEventListener("click", function(e){ if (e.target === this) closeGrid(); });
+$("doneBtn").onclick = function(){ $("doneOverlay").hidden = true; renderHome(); show("home"); };
+$("soundBtn").onclick = function(){ S.sound = !S.sound; save(); renderHome(); sfx.tap(); };
+$("voiceBtn").onclick = function(){ S.voice = !S.voice; save(); renderHome(); say("Read aloud is on"); };
+$("resetBtn").onclick = function(){
+  if (!resetArmed){
+    resetArmed = true;
+    $("resetBtn").textContent = "Tap again to erase everything";
+    resetTimer = setTimeout(function(){ resetArmed = false; renderHome(); }, 3500);
+    return;
+  }
+  clearTimeout(resetTimer); resetArmed = false;
+  var keep = { sound:S.sound, voice:S.voice };
+  S = Object.assign(fresh(), keep); save(); renderHome();
+  toast("Progress erased. Fresh start with 100 stars.");
+};
+
+var tick = setInterval(function(){
+  if (cur && !cur.done && !$("play").hidden && S.stars < HINT_COST) renderTools();
+}, 1000);
+
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && !$("gridOverlay").hidden){ closeGrid(); return; }
+  if ($("play").hidden || !cur || cur.done) return;
+  if (!$("gridOverlay").hidden || !$("winOverlay").hidden || !$("doneOverlay").hidden) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^[a-zA-Z]$/.test(e.key)){
+    var ch = e.key.toUpperCase();
+    var k = cur.order.filter(function(k){ return cur.tiles[k] === ch && !cur.used[k] && !cur.removed[k]; })[0];
+    if (k !== undefined) place(k);
+    e.preventDefault();
+  } else if (e.key === "Backspace"){
+    for (var pos = cur.slots.length - 1; pos >= 0; pos--){
+      if (cur.slots[pos] !== null && !cur.locked[pos]){ unplace(pos); break; }
+    }
+    e.preventDefault();
+  }
+});
+
+renderHome();
+})();
+</script>
+</body>
+</html>

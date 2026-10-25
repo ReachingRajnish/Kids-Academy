@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Draw with me</title>
+<style>
+:root {
+  --mat: #1E4D47;
+  --mat-line: rgba(255, 255, 255, 0.07);
+  --mat-text: #F3F1E8;
+  --mat-soft: #B9CFC9;
+  --paper: #FFFFFF;
+  --ink: #2A2A2A;
+  --new: #F26B1D;
+  --old: #A3A8AE;
+  --ghost: #D3D6DA;
+  --start: #1E9E62;
+  --pencil: #FFC93C;
+  --pencil-ink: #3B2A00;
+  --chip: rgba(255, 255, 255, 0.10);
+  --radius: 14px;
+  --font: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --mat: #14332F; --paper: #F4F3EE; --chip: rgba(255, 255, 255, 0.08); color-scheme: dark; }
+}
+*, *::before, *::after { box-sizing: inherit; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font);
+  color: var(--mat-text);
+  background-color: var(--mat);
+  background-image:
+    linear-gradient(var(--mat-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mat-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; }
+button:focus-visible, .card:focus-visible { outline: 3px solid var(--pencil); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+/* ---------- Home ---------- */
+#home { max-width: 1180px; margin: 0 auto; padding: 28px 24px 48px; }
+.home-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 24px; margin-bottom: 22px; }
+.home-head h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1; margin: 0; font-weight: 800; letter-spacing: -0.01em; }
+.home-head p { margin: 10px 0 0; font-size: 18px; color: var(--mat-soft); }
+.surprise {
+  border: 0; border-radius: 999px; background: var(--pencil); color: var(--pencil-ink);
+  font-weight: 700; font-size: 18px; padding: 14px 24px; min-height: 54px;
+}
+.surprise:active { transform: scale(0.97); }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 18px; scrollbar-width: none; }
+.chip {
+  flex: none; border: 0; border-radius: 999px; background: var(--chip); color: var(--mat-text);
+  font-size: 17px; padding: 10px 18px; min-height: 46px;
+}
+.chip span { color: var(--mat-soft); margin-left: 4px; }
+.chip[aria-pressed="true"] { background: var(--mat-text); color: var(--mat); }
+.chip[aria-pressed="true"] span { color: var(--mat); opacity: 0.6; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 22px; }
+.card {
+  position: relative; background: var(--paper); color: var(--ink); border: 0; border-radius: 6px;
+  padding: 10px 10px 12px; text-align: left; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+  transform: rotate(var(--tilt, 0deg)); transition: transform 0.15s ease;
+}
+.card:active { transform: rotate(0deg) scale(0.97); }
+.card svg { display: block; width: 100%; aspect-ratio: 1; }
+.card .name { display: block; font-size: 18px; font-weight: 700; margin-top: 4px; }
+.card .meta { display: block; font-size: 14px; color: #6B7075; margin-top: 2px; }
+.card .done {
+  position: absolute; top: 8px; right: 8px; background: var(--start); color: #fff; font-size: 13px; font-weight: 700;
+  border-radius: 999px; padding: 3px 9px;
+}
+
+/* ---------- Lesson ---------- */
+#lesson { height: 100%; display: flex; flex-direction: column; padding: 14px 20px 18px; gap: 14px; }
+.bar { display: flex; align-items: center; gap: 14px; min-height: 52px; }
+.back {
+  border: 0; background: var(--chip); border-radius: 999px; padding: 10px 18px 10px 14px; font-size: 17px; min-height: 48px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.bar h2 { margin: 0; font-size: 26px; font-weight: 800; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.counter { font-size: 17px; color: var(--mat-soft); white-space: nowrap; }
+.work { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: 24px; align-items: center; }
+.stage-wrap { height: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.stage {
+  height: 100%; max-height: 100%; max-width: 100%; aspect-ratio: 1; background: var(--paper); border-radius: 6px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.22); border: 0; padding: 0; display: block;
+}
+.stage svg { display: block; width: 100%; height: 100%; }
+.panel { display: flex; flex-direction: column; gap: 18px; }
+.pips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pip { width: 22px; height: 8px; border-radius: 4px; background: var(--chip); }
+.pip.past { background: var(--mat-soft); }
+.pip.now { background: var(--new); width: 34px; }
+.say { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.3; font-weight: 700; margin: 0; min-height: 3.9em; }
+.sub { font-size: 17px; line-height: 1.45; color: var(--mat-soft); margin: -6px 0 0; }
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn {
+  border: 0; border-radius: var(--radius); background: var(--chip); color: var(--mat-text); font-size: 19px; font-weight: 700;
+  min-height: 62px; padding: 10px 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:disabled { opacity: 0.35; cursor: default; }
+.btn:not(:disabled):active { transform: scale(0.97); }
+.btn.primary { grid-column: 1 / -1; background: var(--pencil); color: var(--pencil-ink); font-size: 22px; min-height: 72px; }
+.btn svg { width: 22px; height: 22px; flex: none; }
+.speed { display: flex; align-items: center; gap: 8px; font-size: 16px; color: var(--mat-soft); }
+.speed button { border: 0; background: var(--chip); border-radius: 999px; padding: 8px 14px; min-height: 40px; font-size: 16px; }
+.speed button[aria-pressed="true"] { background: var(--mat-text); color: var(--mat); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 15px; color: var(--mat-soft); }
+.legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.legend i.dash { background: repeating-linear-gradient(90deg, var(--mat-soft) 0 5px, transparent 5px 9px); }
+.legend b { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 6px; background: var(--start); }
+
+@media (max-aspect-ratio: 1/1), (max-width: 760px) {
+  #lesson { height: auto; min-height: 100%; }
+  .work { grid-template-columns: 1fr; align-items: start; }
+  .stage-wrap { height: auto; }
+  .stage { width: min(100%, 58vh); height: auto; }
+  .say { min-height: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cheer { animation: cheer 0.6s ease-out; }
+  @keyframes cheer { 0% { transform: scale(0.92) rotate(-2deg); } 60% { transform: scale(1.03) rotate(1deg); } 100% { transform: none; } }
+}
+</style>
+</head>
+<body>
+
+<main id="home">
+  <div class="home-head">
+    <div>
+      <h1>Draw with me</h1>
+      <p>Pick a drawing. Grab a pencil and paper, and copy one step at a time.</p>
+    </div>
+    <button class="surprise" id="surprise">Surprise me</button>
+  </div>
+  <div class="chips" id="chips" role="toolbar" aria-label="Kinds of drawings"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<section id="lesson" hidden>
+  <div class="bar">
+    <button class="back" id="backHome" aria-label="Back to all drawings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      All drawings
+    </button>
+    <h2 id="title"></h2>
+    <span class="counter" id="counter"></span>
+  </div>
+  <div class="work">
+    <div class="stage-wrap">
+      <button class="stage" id="stage" aria-label="Watch this step again">
+        <svg id="svg" viewBox="0 0 400 400" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <g id="layer"></g>
+          <circle id="dot" r="9" style="fill: var(--start)" stroke="#fff" stroke-width="3" opacity="0"></circle>
+        </svg>
+      </button>
+    </div>
+    <div class="panel">
+      <div class="pips" id="pips" aria-hidden="true"></div>
+      <p class="say" id="say" aria-live="polite"></p>
+      <p class="sub" id="sub"></p>
+      <div class="controls">
+        <button class="btn" id="prev">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          Back
+        </button>
+        <button class="btn" id="again">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg>
+          <span id="againLabel">Watch again</span>
+        </button>
+        <button class="btn primary" id="next"></button>
+      </div>
+      <div class="speed" id="speedRow">
+        Speed
+        <button data-speed="1.8" aria-pressed="false">Slow</button>
+        <button data-speed="1" aria-pressed="true">Normal</button>
+        <button data-speed="0.55" aria-pressed="false">Fast</button>
+      </div>
+      <div class="legend" id="legend">
+        <span><b></b>Start here</span>
+        <span><i style="background: var(--new)"></i>Draw this now</span>
+        <span><i style="background: var(--old)"></i>Already drawn</span>
+        <span id="legendGuide"><i class="dash"></i>Light guide line</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* Shape helpers. Every shape is a path whose point order is the drawing order. */
+const r1 = n => Math.round(n * 10) / 10;
+const C = (cx, cy, r) => `M${cx} ${cy - r} A${r} ${r} 0 0 0 ${cx} ${cy + r} A${r} ${r} 0 0 0 ${cx} ${cy - r}`;
+const E = (cx, cy, rx, ry) => `M${cx} ${cy - ry} A${rx} ${ry} 0 0 0 ${cx} ${cy + ry} A${rx} ${ry} 0 0 0 ${cx} ${cy - ry}`;
+const L = (...p) => { let s = `M${p[0]} ${p[1]}`; for (let i = 2; i < p.length; i += 2) s += ` L${p[i]} ${p[i + 1]}`; return s; };
+const Z = (...p) => L(...p) + ' Z';
+const R = (x, y, w, h) => `M${x} ${y} L${x + w} ${y} L${x + w} ${y + h} L${x} ${y + h} Z`;
+const RR = (x, y, w, h, r) => `M${x + r} ${y} L${x + w - r} ${y} Q${x + w} ${y} ${x + w} ${y + r} L${x + w} ${y + h - r} Q${x + w} ${y + h} ${x + w - r} ${y + h} L${x + r} ${y + h} Q${x} ${y + h} ${x} ${y + h - r} L${x} ${y + r} Q${x} ${y} ${x + r} ${y} Z`;
+const dot = (cx, cy, r) => ({ d: C(cx, cy, r), f: 1 });
+const fill = d => ({ d, f: 1 });
+const rays = (cx, cy, a, b, n, off = 0) => {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const t = (off + i * 360 / n - 90) * Math.PI / 180;
+    out.push(L(r1(cx + a * Math.cos(t)), r1(cy + a * Math.sin(t)), r1(cx + b * Math.cos(t)), r1(cy + b * Math.sin(t))));
+  }
+  return out;
+};
+const zig = (cx, cy, ro, ri, n) => {
+  const p = [];
+  for (let i = 0; i < n * 2; i++) {
+    const t = (i * 180 / n - 90) * Math.PI / 180, r = i % 2 ? ri : ro;
+    p.push(r1(cx + r * Math.cos(t)), r1(cy + r * Math.sin(t)));
+  }
+  return Z(...p);
+};
+const bumpy = (cx, cy, r, n) => {
+  const pt = (a, rr) => { const t = (a - 90) * Math.PI / 180; return [r1(cx + rr * Math.cos(t)), r1(cy + rr * Math.sin(t))]; };
+  let [x, y] = pt(0, r); let s = `M${x} ${y}`;
+  for (let i = 1; i <= n; i++) {
+    const a0 = -(i - 1) * 360 / n, a1 = -i * 360 / n;
+    const [qx, qy] = pt((a0 + a1) / 2, r * 1.32); const [ex, ey] = pt(a1, r);
+    s += ` Q${qx} ${qy} ${ex} ${ey}`;
+  }
+  return s;
+};
+const spiral = (cx, cy, rmax, turns) => {
+  const p = [], steps = turns * 36;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps, a = -t * turns * 2 * Math.PI, r = rmax * t;
+    p.push(r1(cx + r * Math.cos(a)), r1(cy + r * Math.sin(a)));
+  }
+  return L(...p);
+};
+const cloud = (cx, cy, s = 1) => {
+  const P = (x, y) => `${r1(cx + x * s)} ${r1(cy + y * s)}`;
+  return `M${P(-40, 15)} Q${P(-58, 15)} ${P(-52, -2)} Q${P(-48, -22)} ${P(-26, -16)} Q${P(-16, -38)} ${P(4, -28)} Q${P(26, -40)} ${P(36, -16)} Q${P(58, -14)} ${P(52, 6)} Q${P(52, 15)} ${P(40, 15)} Z`;
+};
+const drop = (x, y) => `M${x} ${y} Q${x + 7} ${y + 13} ${x} ${y + 16} Q${x - 7} ${y + 13} ${x} ${y}`;
+const waves = (x0, x1, y, w = 40, h = 12) => {
+  let s = `M${x0} ${y} Q${x0 + w / 4} ${y - h} ${x0 + w / 2} ${y}`;
+  for (let x = x0 + w / 2; x < x1 - 1; x += w / 2) s += ` T${x + w / 2} ${y}`;
+  return s;
+};
+const petals = (cx, cy, d, r, n) => {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const t = (i * 360 / n - 90) * Math.PI / 180;
+    out.push(C(r1(cx + d * Math.cos(t)), r1(cy + d * Math.sin(t)), r));
+  }
+  return out;
+};
+
+/* Lessons. lv: 1 easy, 2 medium, 3 challenge. Each step: t = what to do, s = shapes. */
+const LESSONS = [
+  // ---------------- Animals ----------------
+  { id: 'cat', n: 'Cat', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the head.', s: [C(200, 150, 70)] },
+    { t: 'Add two pointy triangle ears on top.', s: [L(142, 112, 150, 45, 190, 82), L(258, 112, 250, 45, 210, 82)] },
+    { t: 'Two dots for the eyes.', s: [dot(175, 140, 7), dot(225, 140, 7)] },
+    { t: 'A small upside-down triangle nose, then a mouth like a "w".', s: [Z(192, 163, 208, 163, 200, 173), 'M200 173 Q194 188 182 184', 'M200 173 Q206 188 218 184'] },
+    { t: 'Two whiskers on each side.', s: [L(165, 168, 110, 158), L(165, 178, 110, 186), L(235, 168, 290, 158), L(235, 178, 290, 186)] },
+    { t: 'Draw a tall oval under the head for the body.', s: [E(200, 300, 60, 80)] },
+    { t: 'Two small ovals at the bottom for paws.', s: [E(175, 372, 20, 10), E(225, 372, 20, 10)] },
+    { t: 'Finish with a curly tail.', s: ['M258 330 Q330 320 320 255 Q316 232 298 238'] },
+  ]},
+  { id: 'dog', n: 'Puppy', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 160, 70)] },
+    { t: 'Add two floppy ears hanging down the sides.', s: ['M145 115 C105 120 100 200 125 212 C140 218 146 190 140 160', 'M255 115 C295 120 300 200 275 212 C260 218 254 190 260 160'] },
+    { t: 'Two dots for eyes.', s: [dot(175, 148, 8), dot(225, 148, 8)] },
+    { t: 'An oval for the snout, and a dark oval nose at the top of it.', s: [E(200, 192, 32, 24), fill(E(200, 180, 12, 8))] },
+    { t: 'A line down from the nose, a smile, and a little tongue.', s: [L(200, 188, 200, 200), 'M200 200 Q190 210 182 204', 'M200 200 Q210 210 218 204', 'M194 206 Q194 222 200 222 Q206 222 206 206'] },
+    { t: 'An oval body under the head.', s: [E(200, 302, 55, 70)] },
+    { t: 'Two oval paws at the bottom.', s: [E(170, 368, 20, 10), E(230, 368, 20, 10)] },
+    { t: 'A happy wagging tail.', s: ['M252 300 Q292 282 286 245'] },
+  ]},
+  { id: 'fish', n: 'Fish', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a wide oval for the body.', s: [E(185, 200, 100, 60)] },
+    { t: 'Add a triangle tail on the right.', s: [Z(282, 200, 345, 150, 345, 250)] },
+    { t: 'A circle eye with a dot inside.', s: [C(130, 185, 12), dot(133, 186, 5)] },
+    { t: 'A small smile, and a curved line for the gill.', s: ['M88 212 Q98 218 108 211', 'M158 160 Q138 200 158 240'] },
+    { t: 'A fin on top and a small fin at the bottom.', s: ['M170 142 Q195 100 232 148', 'M215 256 Q238 292 258 244'] },
+    { t: 'Draw little "u" shapes for scales.', s: ['M190 185 Q200 197 210 185', 'M218 205 Q228 217 238 205', 'M190 222 Q200 234 210 222', 'M232 176 Q242 188 252 176'] },
+    { t: 'Three bubbles, getting smaller as they go up.', s: [C(60, 150, 9), C(45, 115, 6), C(62, 86, 4)] },
+  ]},
+  { id: 'bird', n: 'Bird', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a wide oval for the body.', s: [E(185, 240, 95, 65)] },
+    { t: 'A circle for the head, up on the right.', s: [C(255, 165, 45)] },
+    { t: 'A triangle beak and a dot eye.', s: [Z(298, 158, 336, 172, 298, 184), dot(268, 155, 7)] },
+    { t: 'A leaf shape for the wing.', s: ['M140 228 Q185 188 232 230 Q190 252 140 228'] },
+    { t: 'A pointy tail on the left.', s: [L(92, 232, 40, 205, 55, 245, 95, 256)] },
+    { t: 'Two thin legs with little feet.', s: [L(170, 302, 166, 346), L(205, 302, 209, 346), L(152, 350, 166, 346, 178, 352), L(196, 352, 209, 346, 222, 351)] },
+    { t: 'A branch for it to sit on.', s: ['M50 354 L350 354'] },
+  ]},
+  { id: 'owl', n: 'Owl', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big tall oval for the body.', s: [E(200, 230, 90, 120)] },
+    { t: 'Two pointy feather tufts on top.', s: [L(140, 145, 130, 95, 170, 124), L(260, 145, 270, 95, 230, 124)] },
+    { t: 'Two big circle eyes.', s: [C(165, 175, 30), C(235, 175, 30)] },
+    { t: 'Dark pupils and a small triangle beak.', s: [dot(170, 178, 12), dot(230, 178, 12), Z(190, 205, 210, 205, 200, 228)] },
+    { t: 'A circle belly with little "u" feathers.', s: [E(200, 288, 55, 52), 'M178 268 Q185 278 192 268', 'M208 268 Q215 278 222 268', 'M193 290 Q200 300 207 290', 'M178 310 Q185 320 192 310', 'M208 310 Q215 320 222 310'] },
+    { t: 'A curved wing on each side.', s: ['M112 210 Q95 280 140 322', 'M288 210 Q305 280 260 322'] },
+    { t: 'Little claws and a branch.', s: [L(166, 362, 175, 348, 184, 362), L(216, 362, 225, 348, 234, 362), L(80, 364, 320, 364)] },
+  ]},
+  { id: 'rabbit', n: 'Bunny', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 190, 60)] },
+    { t: 'Two long ovals for ears.', s: [E(170, 95, 18, 55), E(230, 95, 18, 55)] },
+    { t: 'A thinner oval inside each ear.', s: [E(170, 100, 8, 36), E(230, 100, 8, 36)] },
+    { t: 'Dot eyes and a little triangle nose.', s: [dot(178, 180, 7), dot(222, 180, 7), Z(192, 198, 208, 198, 200, 208)] },
+    { t: 'A mouth and two whiskers on each side.', s: ['M200 208 Q193 221 184 217', 'M200 208 Q207 221 216 217', L(170, 203, 125, 196), L(170, 211, 125, 220), L(230, 203, 275, 196), L(230, 211, 275, 220)] },
+    { t: 'A round body under the head.', s: [E(200, 312, 70, 65)] },
+    { t: 'Two big oval feet and a fluffy round tail.', s: [E(160, 372, 28, 12), E(240, 372, 28, 12), C(278, 320, 14)] },
+  ]},
+  { id: 'turtle', n: 'Turtle', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a half circle, like a hill, for the shell.', s: ['M100 260 A100 100 0 0 1 300 260 Z'] },
+    { t: 'A thin band along the bottom of the shell.', s: [Z(90, 260, 310, 260, 304, 276, 96, 276)] },
+    { t: 'A six-sided shape in the middle of the shell.', s: [Z(175, 200, 225, 200, 245, 228, 225, 255, 175, 255, 155, 228)] },
+    { t: 'Lines from its corners out to the edge.', s: [L(175, 200, 155, 172), L(225, 200, 245, 172), L(155, 228, 104, 238), L(245, 228, 296, 238)] },
+    { t: 'A circle head with an eye and a smile.', s: [C(330, 240, 28), dot(338, 232, 5), 'M328 252 Q340 260 352 250'] },
+    { t: 'Two short legs.', s: ['M120 276 L120 300 Q135 312 150 300 L150 276', 'M250 276 L250 300 Q265 312 280 300 L280 276'] },
+    { t: 'A tiny pointy tail.', s: [L(96, 266, 68, 274, 96, 272)] },
+  ]},
+  { id: 'elephant', n: 'Elephant', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a big wide oval for the body.', s: [E(215, 230, 110, 75)] },
+    { t: 'A circle for the head on the left.', s: [C(110, 185, 55)] },
+    { t: 'A big floppy ear on the head.', s: ['M120 150 Q178 138 176 200 Q172 252 126 236'] },
+    { t: 'A long curly trunk going down.', s: ['M66 210 Q52 280 74 322 Q86 334 94 320 Q80 285 96 232'] },
+    { t: 'A dot eye and a small tusk.', s: [dot(95, 172, 6), 'M98 236 Q112 256 132 248'] },
+    { t: 'Four thick legs.', s: [R(135, 290, 32, 60), R(180, 295, 32, 55), R(248, 295, 32, 55), R(290, 285, 30, 65)] },
+    { t: 'A thin tail with a tuft at the end.', s: ['M325 225 Q346 250 340 276', L(340, 276, 333, 292), L(340, 276, 349, 290)] },
+  ]},
+  { id: 'lion', n: 'Lion', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a circle for the face.', s: [C(200, 185, 62)] },
+    { t: 'A zigzag around the face for the mane.', s: [zig(200, 185, 98, 78, 14)] },
+    { t: 'Two small round ears.', s: [C(152, 138, 14), C(248, 138, 14)] },
+    { t: 'Dot eyes and a triangle nose.', s: [dot(178, 175, 7), dot(222, 175, 7), Z(187, 196, 213, 196, 200, 210)] },
+    { t: 'A mouth and little whisker dots.', s: [L(200, 210, 200, 220), 'M200 220 Q190 231 180 225', 'M200 220 Q210 231 220 225', dot(180, 210, 2.5), dot(172, 218, 2.5), dot(220, 210, 2.5), dot(228, 218, 2.5)] },
+    { t: 'An oval body under the mane, with two paws.', s: [E(200, 330, 75, 50), E(170, 376, 20, 9), E(230, 376, 20, 9)] },
+    { t: 'A long tail with a zigzag tuft.', s: ['M272 340 Q322 332 316 292', zig(316, 280, 14, 8, 5)] },
+  ]},
+  { id: 'pig', n: 'Pig', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the head.', s: [C(200, 200, 90)] },
+    { t: 'Two triangle ears on top.', s: [L(135, 135, 120, 80, 170, 115), L(265, 135, 280, 80, 230, 115)] },
+    { t: 'An oval snout in the middle.', s: [E(200, 228, 40, 28)] },
+    { t: 'Two dark oval nostrils.', s: [fill(E(186, 228, 7, 11)), fill(E(214, 228, 7, 11))] },
+    { t: 'Two dot eyes above the snout.', s: [dot(165, 180, 8), dot(235, 180, 8)] },
+    { t: 'A smile and two round cheeks.', s: ['M172 268 Q200 284 228 268', C(140, 228, 12), C(260, 228, 12)] },
+  ]},
+  { id: 'mouse', n: 'Mouse', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 210, 65)] },
+    { t: 'Two big round ears.', s: [C(132, 142, 40), C(268, 142, 40)] },
+    { t: 'A smaller circle inside each ear.', s: [C(132, 142, 22), C(268, 142, 22)] },
+    { t: 'Dot eyes and a round nose.', s: [dot(178, 198, 7), dot(222, 198, 7), dot(200, 228, 9)] },
+    { t: 'Whiskers and a small mouth.', s: [L(184, 230, 120, 214), L(184, 236, 116, 240), L(216, 230, 280, 214), L(216, 236, 284, 240), 'M200 237 Q192 250 184 245', 'M200 237 Q208 250 216 245'] },
+    { t: 'An oval body below.', s: [E(200, 325, 55, 50)] },
+    { t: 'A long curvy tail.', s: ['M250 345 Q302 362 300 322 Q298 290 332 296'] },
+  ]},
+  { id: 'penguin', n: 'Penguin', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a tall oval for the body.', s: [E(200, 220, 85, 130)] },
+    { t: 'A smaller oval inside for the white belly.', s: [E(200, 248, 60, 98)] },
+    { t: 'Two dot eyes and a triangle beak.', s: [dot(180, 128, 7), dot(220, 128, 7), Z(188, 146, 212, 146, 200, 164)] },
+    { t: 'A wing on each side.', s: ['M117 190 Q76 236 106 288', 'M283 190 Q324 236 294 288'] },
+    { t: 'Two flat feet.', s: [L(168, 346, 150, 370, 192, 370, 188, 348), L(232, 346, 250, 370, 208, 370, 212, 348)] },
+  ]},
+  { id: 'snail', n: 'Snail', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the shell.', s: [C(180, 195, 80)] },
+    { t: 'A spiral inside. Start in the middle and go round and out.', s: [spiral(180, 195, 68, 3)] },
+    { t: 'A long flat body under the shell.', s: [RR(85, 268, 260, 32, 16)] },
+    { t: 'A tall oval head on the right.', s: [E(318, 222, 24, 56)] },
+    { t: 'Two eye stalks with dots on top.', s: [L(306, 170, 292, 128), L(328, 170, 342, 128), dot(292, 124, 7), dot(342, 124, 7)] },
+    { t: 'A big smile.', s: ['M306 214 Q318 226 330 212'] },
+  ]},
+  { id: 'frog', n: 'Frog', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a wide oval for the head and body.', s: [E(200, 232, 110, 80)] },
+    { t: 'Two circle eyes sitting on top.', s: [C(145, 152, 35), C(255, 152, 35)] },
+    { t: 'Big dark pupils.', s: [dot(145, 152, 13), dot(255, 152, 13)] },
+    { t: 'A very wide smile and two tiny nostrils.', s: ['M128 244 Q200 296 272 244', dot(190, 208, 4), dot(210, 208, 4)] },
+    { t: 'Oval back legs on each side.', s: [E(96, 302, 40, 22), E(304, 302, 40, 22)] },
+    { t: 'Front feet with three toes each.', s: [L(160, 306, 148, 332), L(160, 306, 162, 336), L(160, 306, 178, 330), L(240, 306, 252, 332), L(240, 306, 238, 336), L(240, 306, 222, 330)] },
+  ]},
+  { id: 'butterfly', n: 'Butterfly', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a thin tall oval for the body.', s: [E(200, 212, 12, 75)] },
+    { t: 'A small circle head and two curly antennae.', s: [C(200, 122, 16), 'M195 108 Q180 75 165 70', 'M205 108 Q220 75 235 70', dot(165, 70, 5), dot(235, 70, 5)] },
+    { t: 'Two big wings on top.', s: ['M190 175 Q120 70 85 140 Q70 200 190 215', 'M210 175 Q280 70 315 140 Q330 200 210 215'] },
+    { t: 'Two smaller wings below.', s: ['M190 225 Q110 230 115 290 Q135 330 192 262', 'M210 225 Q290 230 285 290 Q265 330 208 262'] },
+    { t: 'Circles on the wings to make a pattern. Make both sides match!', s: [C(135, 152, 18), C(265, 152, 18), C(152, 274, 12), C(248, 274, 12)] },
+  ]},
+  { id: 'bee', n: 'Bee', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a wide oval for the body.', s: [E(200, 220, 95, 65)] },
+    { t: 'Three curved stripes across the body.', s: ['M160 162 Q150 220 160 278', 'M200 155 Q190 220 200 285', 'M240 162 Q230 220 240 278'] },
+    { t: 'A circle head on the right.', s: [C(320, 205, 38)] },
+    { t: 'A dot eye and a smile.', s: [dot(332, 195, 6), 'M318 220 Q330 230 343 218'] },
+    { t: 'Two antennae with dots on the ends.', s: ['M314 168 Q305 132 290 126', 'M330 168 Q340 132 355 126', dot(290, 124, 5), dot(355, 124, 5)] },
+    { t: 'Two oval wings on top.', s: [E(178, 130, 30, 46), E(228, 124, 30, 48)] },
+    { t: 'A pointy stinger at the back.', s: [Z(106, 214, 80, 222, 106, 230)] },
+  ]},
+  { id: 'whale', n: 'Whale', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big wide oval for the body.', s: [E(185, 222, 130, 75)] },
+    { t: 'A tail at the back, like a "V" with points.', s: [L(308, 200, 340, 160, 332, 128, 356, 150, 382, 128, 366, 168, 314, 236)] },
+    { t: 'A dot eye and a long smile.', s: [dot(110, 214, 7), 'M60 240 Q115 264 178 246'] },
+    { t: 'A flipper under the body.', s: ['M160 272 Q148 312 190 306 Q202 290 192 276'] },
+    { t: 'A water spout on top.', s: [L(175, 148, 175, 105), 'M175 108 Q155 82 138 92', 'M175 108 Q195 82 212 92'] },
+    { t: 'Wavy water underneath.', s: [waves(30, 370, 340)] },
+  ]},
+  { id: 'octopus', n: 'Octopus', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big oval for the head.', s: [E(200, 150, 80, 85)] },
+    { t: 'Two circle eyes with dots.', s: [C(170, 150, 16), dot(172, 152, 7), C(230, 150, 16), dot(228, 152, 7)] },
+    { t: 'A little smile.', s: ['M180 190 Q200 205 220 190'] },
+    { t: 'Three wiggly arms on the left.', s: ['M135 200 Q100 250 125 290 Q140 320 105 342', 'M160 224 Q140 280 160 310 Q175 340 150 366', 'M185 234 Q180 290 195 320 Q205 350 185 374'] },
+    { t: 'Three wiggly arms on the right. Make them match.', s: ['M215 234 Q220 290 205 320 Q195 350 215 374', 'M240 224 Q260 280 240 310 Q225 340 250 366', 'M265 200 Q300 250 275 290 Q260 320 295 342'] },
+    { t: 'Bubbles floating up.', s: [C(318, 90, 10), C(340, 60, 6), C(322, 38, 4)] },
+  ]},
+  { id: 'crab', n: 'Crab', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a wide oval for the body.', s: [E(200, 230, 90, 55)] },
+    { t: 'Two eye stalks with round eyes on top.', s: [L(176, 178, 165, 136), L(224, 178, 235, 136), C(165, 124, 12), dot(165, 124, 5), C(235, 124, 12), dot(235, 124, 5)] },
+    { t: 'A big smile.', s: ['M178 240 Q200 258 222 240'] },
+    { t: 'Two arms reaching up.', s: ['M118 206 Q86 192 80 152', 'M282 206 Q314 192 320 152'] },
+    { t: 'Open claws at the end of each arm.', s: ['M80 152 Q48 142 54 110 L78 126 L86 100 Q112 120 80 152', 'M320 152 Q352 142 346 110 L322 126 L314 100 Q288 120 320 152'] },
+    { t: 'Three bent legs on each side.', s: [L(118, 242, 76, 262, 66, 294), L(126, 258, 90, 288, 86, 320), L(144, 272, 116, 302, 116, 334), L(282, 242, 324, 262, 334, 294), L(274, 258, 310, 288, 314, 320), L(256, 272, 284, 302, 284, 334)] },
+    { t: 'A line of sand to finish.', s: [L(40, 348, 360, 348)] },
+  ]},
+  { id: 'dino', n: 'Dinosaur', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a big wide oval for the body.', s: [E(200, 250, 100, 60)] },
+    { t: 'Two curved lines going up for a long neck.', s: ['M280 226 Q325 170 322 108', 'M256 202 Q295 162 292 112'] },
+    { t: 'An oval head, a dot eye and a smile.', s: [E(312, 96, 32, 20), dot(318, 89, 5), 'M325 103 Q335 108 342 100'] },
+    { t: 'A long pointy tail.', s: ['M104 240 Q60 250 28 220', 'M110 276 Q64 266 28 220'] },
+    { t: 'Four strong legs.', s: [R(135, 290, 30, 60), R(175, 296, 30, 54), R(225, 296, 30, 54), R(262, 286, 30, 64)] },
+    { t: 'Spots on its back.', s: [C(180, 232, 12), C(222, 254, 9), C(244, 224, 8)] },
+    { t: 'Draw the ground.', s: [L(15, 350, 385, 350)] },
+  ]},
+
+  // ---------------- Vehicles ----------------
+  { id: 'car', n: 'Car', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a long rectangle with round corners.', s: [RR(60, 200, 280, 80, 20)] },
+    { t: 'The roof: a slanted line up, across, and down.', s: [L(110, 200, 150, 140, 260, 140, 300, 200)] },
+    { t: 'Two windows inside the roof.', s: [Z(126, 194, 158, 150, 200, 150, 200, 194), Z(210, 150, 254, 150, 284, 194, 210, 194)] },
+    { t: 'Two big circle wheels.', s: [C(120, 280, 32), C(280, 280, 32)] },
+    { t: 'A small circle in each wheel.', s: [C(120, 280, 12), C(280, 280, 12)] },
+    { t: 'A headlight in front and a light at the back.', s: [C(322, 225, 9), R(66, 214, 10, 16)] },
+    { t: 'A door line and a handle.', s: [L(205, 200, 205, 266), L(214, 224, 230, 224)] },
+    { t: 'The road under the wheels.', s: [L(20, 312, 380, 312)] },
+  ]},
+  { id: 'bus', n: 'Bus', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a big rectangle with round corners.', s: [RR(50, 130, 300, 150, 15)] },
+    { t: 'Three square windows in a row.', s: [R(70, 150, 45, 45), R(130, 150, 45, 45), R(190, 150, 45, 45)] },
+    { t: 'A door with a line down the middle, and a front window.', s: [R(250, 150, 40, 105), L(270, 150, 270, 255), R(300, 150, 38, 50)] },
+    { t: 'A stripe along the side.', s: [L(50, 220, 250, 220)] },
+    { t: 'Two wheels.', s: [C(115, 280, 30), C(285, 280, 30)] },
+    { t: 'Small circles in the wheels.', s: [C(115, 280, 10), C(285, 280, 10)] },
+    { t: 'A headlight and the road.', s: [C(330, 250, 8), L(20, 310, 380, 310)] },
+  ]},
+  { id: 'truck', n: 'Truck', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a big rectangle for the cargo box.', s: [R(50, 130, 190, 140)] },
+    { t: 'The cab: across, slant down, and down.', s: [L(240, 170, 300, 170, 340, 215, 340, 270, 240, 270)] },
+    { t: 'A slanted window in the cab.', s: [Z(255, 182, 295, 182, 324, 214, 255, 214)] },
+    { t: 'Three wheels.', s: [C(100, 275, 30), C(200, 275, 30), C(300, 275, 30)] },
+    { t: 'A small circle in each wheel.', s: [C(100, 275, 10), C(200, 275, 10), C(300, 275, 10)] },
+    { t: 'A headlight and a door handle.', s: [R(326, 228, 12, 14), L(258, 232, 278, 232)] },
+    { t: 'The road.', s: [L(20, 305, 380, 305)] },
+  ]},
+  { id: 'rocket', n: 'Rocket', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a tall pointy shape for the body.', s: ['M200 50 Q260 110 255 270 L145 270 Q140 110 200 50 Z'] },
+    { t: 'A round window with a smaller circle inside.', s: [C(200, 150, 25), C(200, 150, 15)] },
+    { t: 'A fin on each side.', s: [L(147, 210, 100, 290, 148, 270), L(253, 210, 300, 290, 252, 270)] },
+    { t: 'The nozzle at the bottom.', s: [L(165, 270, 155, 300, 245, 300, 235, 270)] },
+    { t: 'A stripe across the body.', s: [L(146, 232, 254, 232)] },
+    { t: 'Wavy flames coming out.', s: ['M165 300 Q175 340 185 315 Q200 372 215 315 Q225 340 235 300'] },
+    { t: 'Little stars in space.', s: [L(60, 80, 80, 80), L(70, 70, 70, 90), L(320, 120, 340, 120), L(330, 110, 330, 130), L(320, 330, 340, 330), L(330, 320, 330, 340)] },
+  ]},
+  { id: 'plane', n: 'Airplane', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw a long tube shape for the body.', s: ['M60 200 Q60 170 100 170 L300 170 Q350 175 355 200 Q350 225 300 230 L100 230 Q60 230 60 200 Z'] },
+    { t: 'A tall tail fin at the back.', s: [L(80, 172, 60, 105, 110, 105, 150, 170)] },
+    { t: 'A big wing slanting down.', s: [Z(180, 210, 250, 210, 200, 300, 165, 300)] },
+    { t: 'A small wing on the far side.', s: [L(200, 170, 230, 120, 255, 120, 245, 170)] },
+    { t: 'A row of round windows.', s: [C(130, 194, 8), C(160, 194, 8), C(190, 194, 8), C(220, 194, 8), C(250, 194, 8)] },
+    { t: 'The cockpit window at the front.', s: [Z(305, 180, 332, 183, 342, 196, 305, 196)] },
+    { t: 'Two fluffy clouds.', s: [cloud(85, 320, 0.9), cloud(320, 80, 0.8)] },
+  ]},
+  { id: 'boat', n: 'Sailboat', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw the boat: a wide shape that gets narrow at the bottom.', s: [Z(80, 270, 320, 270, 285, 320, 115, 320)] },
+    { t: 'A tall mast and a little flag.', s: [L(200, 270, 200, 60), Z(200, 60, 236, 70, 200, 80)] },
+    { t: 'A big triangle sail on the right.', s: [Z(206, 88, 206, 256, 310, 256)] },
+    { t: 'A smaller sail on the left.', s: [Z(194, 112, 194, 256, 112, 256)] },
+    { t: 'A stripe on the boat.', s: [L(94, 290, 306, 290)] },
+    { t: 'Waves.', s: [waves(40, 360, 336)] },
+    { t: 'A sun in the sky.', s: [C(80, 90, 25)] },
+  ]},
+  { id: 'train', n: 'Train', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw a tall rectangle for the cab.', s: [R(220, 120, 100, 150)] },
+    { t: 'A flat roof and a window.', s: [R(210, 105, 120, 15), R(245, 145, 50, 45)] },
+    { t: 'A long rectangle in front for the engine.', s: [R(80, 180, 140, 90)] },
+    { t: 'A chimney on top, wider at the top.', s: [L(105, 180, 95, 125, 145, 125, 135, 180)] },
+    { t: 'A pointy front and a round light.', s: [L(80, 248, 50, 300, 80, 300), C(96, 202, 10)] },
+    { t: 'Three wheels. The back one is bigger.', s: [C(112, 295, 24), C(172, 295, 24), C(272, 290, 30)] },
+    { t: 'Puffs of smoke getting bigger.', s: [C(120, 100, 14), C(148, 72, 19), C(186, 44, 24)] },
+    { t: 'The track.', s: [L(20, 320, 380, 320)] },
+  ]},
+  { id: 'heli', n: 'Helicopter', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw an oval for the body.', s: [E(170, 210, 90, 60)] },
+    { t: 'A big front window.', s: ['M190 157 Q246 165 258 205 L190 205 Z'] },
+    { t: 'A long tail going right.', s: [L(252, 186, 345, 180, 345, 200, 256, 232)] },
+    { t: 'A small cross for the tail rotor.', s: [L(350, 166, 350, 214), L(326, 190, 374, 190)] },
+    { t: 'A short pole on top and a long flat rotor.', s: [L(170, 150, 170, 122), RR(50, 112, 240, 10, 5)] },
+    { t: 'Two legs and a long skid.', s: [L(125, 266, 120, 300), L(215, 266, 220, 300), 'M90 300 L250 300 Q266 300 268 288'] },
+  ]},
+  { id: 'sub', n: 'Submarine', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a long rounded shape, like a capsule.', s: [RR(70, 170, 260, 100, 50)] },
+    { t: 'A tower on top.', s: [L(160, 170, 170, 125, 240, 125, 250, 170)] },
+    { t: 'A periscope: up, then across.', s: [L(215, 125, 215, 90, 242, 90)] },
+    { t: 'Three round windows.', s: [C(140, 220, 16), C(200, 220, 16), C(260, 220, 16)] },
+    { t: 'A propeller at the back.', s: [L(70, 220, 52, 220), E(45, 204, 7, 16), E(45, 236, 7, 16)] },
+    { t: 'Bubbles going up.', s: [C(330, 140, 8), C(345, 110, 6), C(326, 88, 5)] },
+  ]},
+
+  // ---------------- Nature ----------------
+  { id: 'sun', n: 'Sun', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a big circle.', s: [C(200, 200, 70)] },
+    { t: 'Short lines all around for the rays. Leave a gap from the circle.', s: rays(200, 200, 88, 130, 12) },
+    { t: 'Two dot eyes.', s: [dot(178, 185, 8), dot(222, 185, 8)] },
+    { t: 'A big smile and round cheeks.', s: ['M170 215 Q200 245 230 215', C(158, 212, 9), C(242, 212, 9)] },
+    { t: 'A little cloud floating by.', s: [cloud(310, 330, 0.9)] },
+  ]},
+  { id: 'tree', n: 'Tree', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw the trunk: two lines that get wider at the bottom.', s: [L(185, 232, 175, 360), L(215, 232, 225, 360)] },
+    { t: 'A big bumpy cloud shape for the leaves.', s: [bumpy(200, 160, 82, 9)] },
+    { t: 'Two small branches in the trunk.', s: [L(192, 260, 170, 238), L(208, 256, 232, 232)] },
+    { t: 'Round apples in the leaves.', s: [C(160, 150, 10), C(232, 128, 10), C(212, 188, 10), C(150, 198, 10)] },
+    { t: 'The ground with some grass.', s: [L(50, 360, 350, 360), L(80, 360, 86, 344), L(92, 360, 92, 346), L(300, 360, 306, 344), L(312, 360, 312, 346)] },
+  ]},
+  { id: 'flower', n: 'Flower', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a circle for the middle.', s: [C(200, 140, 30)] },
+    { t: 'Six round petals all around it.', s: petals(200, 140, 56, 26, 6) },
+    { t: 'A long stem going down.', s: ['M200 222 Q190 280 200 325'] },
+    { t: 'A leaf on each side of the stem.', s: ['M196 270 Q152 244 142 272 Q162 292 197 282', 'M199 300 Q244 274 256 302 Q238 320 199 312'] },
+    { t: 'The rim of a flower pot.', s: [R(140, 325, 120, 20)] },
+    { t: 'The pot, narrower at the bottom.', s: [L(150, 345, 162, 388, 238, 388, 250, 345)] },
+  ]},
+  { id: 'cactus', n: 'Cactus', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a tall shape with a round top.', s: ['M175 320 L175 112 Q200 70 225 112 L225 320'] },
+    { t: 'An arm on the left, bending up.', s: ['M175 230 L142 230 Q125 230 125 214 L125 172 Q137 150 150 172 L150 205 L175 205'] },
+    { t: 'An arm on the right, bending up.', s: ['M225 200 L258 200 Q275 200 275 184 L275 142 Q263 120 250 142 L250 175 L225 175'] },
+    { t: 'Tiny lines for spikes.', s: [L(188, 132, 196, 138), L(204, 162, 212, 156), L(188, 192, 196, 198), L(204, 232, 212, 226), L(188, 262, 196, 268), L(204, 292, 212, 286)] },
+    { t: 'A small flower on top.', s: petals(200, 80, 9, 7, 5) },
+    { t: 'A flower pot.', s: [R(150, 320, 100, 15), L(158, 335, 170, 380, 230, 380, 242, 335)] },
+  ]},
+  { id: 'mushroom', n: 'Mushroom', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a big dome for the cap.', s: ['M80 220 Q80 80 200 80 Q320 80 320 220 Z'] },
+    { t: 'A thick stem under the cap.', s: ['M165 220 L160 330 Q200 345 240 330 L235 220'] },
+    { t: 'Circles of different sizes for spots.', s: [C(150, 150, 18), C(240, 130, 22), C(205, 186, 13), C(280, 190, 12), C(116, 196, 10)] },
+    { t: 'A happy face on the stem.', s: [dot(186, 268, 5), dot(214, 268, 5), 'M190 286 Q200 295 210 286'] },
+    { t: 'Grass at the bottom.', s: [L(60, 336, 340, 336), L(90, 336, 95, 320), L(102, 336, 102, 322), L(290, 336, 296, 320), L(308, 336, 308, 322)] },
+  ]},
+  { id: 'rainbow', n: 'Rainbow', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a big arch, like a bridge.', s: ['M70 280 A130 130 0 0 1 330 280'] },
+    { t: 'A slightly smaller arch inside.', s: ['M90 280 A110 110 0 0 1 310 280'] },
+    { t: 'Another one inside that.', s: ['M110 280 A90 90 0 0 1 290 280'] },
+    { t: 'The smallest arch.', s: ['M130 280 A70 70 0 0 1 270 280'] },
+    { t: 'A fluffy cloud at the left end.', s: [cloud(100, 318, 1)] },
+    { t: 'A fluffy cloud at the right end.', s: [cloud(300, 318, 1)] },
+  ]},
+  { id: 'snowman', n: 'Snowman', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a big circle at the bottom.', s: [C(200, 300, 75)] },
+    { t: 'A middle-sized circle on top of it.', s: [C(200, 190, 55)] },
+    { t: 'A small circle for the head.', s: [C(200, 110, 40)] },
+    { t: 'A top hat: a box and a line for the brim.', s: [R(172, 30, 56, 42), L(155, 72, 245, 72)] },
+    { t: 'Dot eyes, a carrot nose, and a dotted smile.', s: [dot(186, 102, 5), dot(214, 102, 5), Z(200, 112, 236, 118, 200, 123), dot(184, 130, 3), dot(194, 135, 3), dot(206, 135, 3), dot(216, 130, 3)] },
+    { t: 'Three buttons down the middle.', s: [dot(200, 170, 6), dot(200, 195, 6), dot(200, 220, 6)] },
+    { t: 'Stick arms with little twigs.', s: [L(148, 178, 95, 142), L(112, 154, 100, 130), L(252, 178, 305, 142), L(288, 154, 300, 130)] },
+    { t: 'Snowy ground.', s: [L(60, 375, 340, 375)] },
+  ]},
+
+  // ---------------- Food ----------------
+  { id: 'apple', n: 'Apple', c: 'Food', lv: 1, steps: [
+    { t: 'Draw the apple: two round bumps on top, rounder at the bottom.', s: ['M200 120 Q150 90 115 130 Q80 180 110 260 Q140 330 200 300 Q260 330 290 260 Q320 180 285 130 Q250 90 200 120 Z'] },
+    { t: 'A short stem.', s: ['M200 120 Q195 90 210 70'] },
+    { t: 'A leaf next to the stem.', s: ['M205 95 Q235 65 265 80 Q240 105 205 95'] },
+    { t: 'A curved line for a shiny spot.', s: ['M135 170 Q128 200 140 226'] },
+  ]},
+  { id: 'icecream', n: 'Ice cream', c: 'Food', lv: 1, steps: [
+    { t: 'Draw an upside-down triangle for the cone.', s: [Z(140, 200, 260, 200, 200, 370)] },
+    { t: 'Criss-cross lines on the cone.', s: [L(165.3, 215, 210, 342), L(185.3, 215, 220, 313), L(234.7, 215, 190, 342), L(214.7, 215, 180, 313)] },
+    { t: 'A scoop with a drippy bottom.', s: ['M130 200 Q125 140 200 130 Q275 140 270 200 Q255 215 240 200 Q225 220 205 202 Q185 220 170 200 Q150 215 130 200 Z'] },
+    { t: 'A round scoop on top.', s: [C(200, 100, 42)] },
+    { t: 'A cherry with a stem.', s: [C(205, 50, 12), 'M207 38 Q212 24 226 18'] },
+    { t: 'Tiny lines for sprinkles.', s: [L(180, 90, 186, 98), L(214, 86, 221, 80), L(196, 114, 201, 121), L(164, 166, 171, 160), L(230, 170, 236, 176), L(200, 156, 206, 150)] },
+  ]},
+  { id: 'cupcake', n: 'Cupcake', c: 'Food', lv: 1, steps: [
+    { t: 'Draw the paper cup: wider at the top.', s: [Z(130, 230, 270, 230, 250, 340, 150, 340)] },
+    { t: 'Lines down the cup.', s: [L(165, 230, 174, 340), L(200, 230, 200, 340), L(235, 230, 226, 340)] },
+    { t: 'Bumpy frosting on top, like a cloud.', s: ['M120 235 Q108 200 145 195 Q140 160 180 160 Q190 128 225 145 Q262 150 255 190 Q292 196 280 235 Z'] },
+    { t: 'A cherry with a stem.', s: [C(212, 126, 14), 'M214 112 Q220 94 234 88'] },
+    { t: 'Sprinkles on the frosting.', s: [L(160, 200, 167, 194), L(195, 180, 202, 186), L(230, 200, 236, 206), L(150, 222, 157, 216), L(250, 222, 256, 216), L(205, 216, 212, 210)] },
+  ]},
+  { id: 'pizza', n: 'Pizza', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a triangle with a curved top.', s: ['M200 340 L110 110 Q200 75 290 110 Z'] },
+    { t: 'The crust along the top.', s: ['M110 110 L102 90 Q200 52 298 90 L290 110'] },
+    { t: 'Circles for pepperoni.', s: [C(168, 140, 16), C(235, 138, 16), C(205, 200, 16), C(198, 266, 12)] },
+    { t: 'Small circles for olives.', s: [C(158, 192, 6), C(235, 214, 6), C(214, 150, 5)] },
+  ]},
+  { id: 'watermelon', n: 'Watermelon', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a half circle, like a bowl.', s: ['M60 160 A140 140 0 0 0 340 160 Z'] },
+    { t: 'A curved line inside for the skin.', s: ['M80 160 A120 120 0 0 0 320 160'] },
+    { t: 'Small dark seeds.', s: [fill(E(150, 200, 5, 9)), fill(E(200, 232, 5, 9)), fill(E(250, 200, 5, 9)), fill(E(175, 256, 5, 9)), fill(E(225, 256, 5, 9)), fill(E(200, 186, 5, 9))] },
+    { t: 'A plate underneath.', s: ['M40 318 Q200 360 360 318'] },
+  ]},
+
+  // ---------------- Things ----------------
+  { id: 'house', n: 'House', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a big square for the walls.', s: [R(90, 190, 220, 170)] },
+    { t: 'A triangle roof on top.', s: [Z(70, 190, 200, 80, 330, 190)] },
+    { t: 'A door in the middle with a dot knob.', s: [R(175, 280, 50, 80), dot(214, 322, 4)] },
+    { t: 'Two windows, each with a cross.', s: [R(115, 215, 50, 45), L(140, 215, 140, 260), L(115, 237, 165, 237), R(235, 215, 50, 45), L(260, 215, 260, 260), L(235, 237, 285, 237)] },
+    { t: 'A chimney and curly smoke.', s: [L(250, 122, 250, 90, 280, 90, 280, 148), 'M265 84 Q254 70 267 60 Q280 50 270 34'] },
+    { t: 'The ground and a path to the door.', s: [L(40, 360, 360, 360), L(185, 360, 170, 392), L(215, 360, 230, 392)] },
+  ]},
+  { id: 'castle', n: 'Castle', c: 'Things', lv: 3, steps: [
+    { t: 'Draw a big rectangle for the main wall.', s: [R(110, 170, 180, 190)] },
+    { t: 'Up-and-down blocks along the top.', s: [L(110, 170, 110, 150, 135, 150, 135, 170, 160, 170, 160, 150, 185, 150, 185, 170, 215, 170, 215, 150, 240, 150, 240, 170, 265, 170, 265, 150, 290, 150, 290, 170)] },
+    { t: 'A tall tower on the left with a pointy roof.', s: [R(60, 120, 50, 240), Z(52, 120, 85, 60, 118, 120)] },
+    { t: 'A tall tower on the right with a pointy roof.', s: [R(290, 120, 50, 240), Z(282, 120, 315, 60, 348, 120)] },
+    { t: 'Flags on both roofs.', s: [L(85, 60, 85, 34), Z(85, 34, 110, 42, 85, 50), L(315, 60, 315, 34), Z(315, 34, 340, 42, 315, 50)] },
+    { t: 'An arched gate with a line in the middle.', s: ['M170 360 L170 290 A30 30 0 0 1 230 290 L230 360', L(200, 260, 200, 360)] },
+    { t: 'Windows in the towers and the wall.', s: [R(75, 170, 20, 30), R(305, 170, 20, 30), 'M150 222 L150 202 A10 10 0 0 1 170 202 L170 222 Z', 'M230 222 L230 202 A10 10 0 0 1 250 202 L250 222 Z'] },
+    { t: 'The ground.', s: [L(30, 360, 370, 360)] },
+  ]},
+  { id: 'robot', n: 'Robot', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a rectangle for the head.', s: [R(140, 70, 120, 90)] },
+    { t: 'An antenna with a ball, and two ears.', s: [L(200, 70, 200, 42), C(200, 34, 8), R(128, 95, 12, 30), R(260, 95, 12, 30)] },
+    { t: 'Two circle eyes with dots.', s: [C(172, 105, 14), dot(172, 105, 6), C(228, 105, 14), dot(228, 105, 6)] },
+    { t: 'A mouth like a grill.', s: [R(170, 130, 60, 15), L(185, 130, 185, 145), L(200, 130, 200, 145), L(215, 130, 215, 145)] },
+    { t: 'A short neck and a big body.', s: [R(185, 160, 30, 15), R(120, 175, 160, 130)] },
+    { t: 'A panel with three buttons.', s: [R(160, 200, 80, 50), dot(180, 225, 6), dot(200, 225, 6), dot(220, 225, 6)] },
+    { t: 'Bendy arms with round hands.', s: [L(120, 195, 85, 195, 85, 265), L(280, 195, 315, 195, 315, 265), C(85, 275, 10), C(315, 275, 10)] },
+    { t: 'Two legs and flat feet.', s: [R(145, 305, 35, 55), R(220, 305, 35, 55), R(135, 360, 55, 15), R(210, 360, 55, 15)] },
+  ]},
+  { id: 'umbrella', n: 'Umbrella', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a dome with a bumpy bottom edge.', s: ['M70 200 Q70 80 200 80 Q330 80 330 200 Q308 182 287 200 Q265 182 243 200 Q222 182 200 200 Q178 182 157 200 Q135 182 113 200 Q92 182 70 200'] },
+    { t: 'Curved lines from the top to the bumps.', s: ['M200 80 Q168 140 157 200', 'M200 80 L200 200', 'M200 80 Q232 140 243 200'] },
+    { t: 'A little tip on top.', s: [L(200, 80, 200, 60)] },
+    { t: 'A handle shaped like a "J".', s: ['M200 200 L200 320 Q200 346 180 346 Q160 346 160 326'] },
+    { t: 'Rain drops.', s: [drop(80, 60), drop(320, 50), drop(60, 260), drop(340, 250), drop(110, 330), drop(300, 340)] },
+  ]},
+  { id: 'balloon', n: 'Hot air balloon', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a big balloon, round on top and narrow at the bottom.', s: ['M200 60 Q300 60 300 160 Q300 220 240 270 L160 270 Q100 220 100 160 Q100 60 200 60 Z'] },
+    { t: 'Two curved stripes from top to bottom.', s: ['M200 60 Q148 150 175 270', 'M200 60 Q252 150 225 270'] },
+    { t: 'Two ropes going down.', s: [L(165, 270, 175, 320), L(235, 270, 225, 320)] },
+    { t: 'A basket.', s: [R(170, 320, 60, 45)] },
+    { t: 'Lines on the basket.', s: [L(185, 320, 185, 365), L(200, 320, 200, 365), L(215, 320, 215, 365), L(170, 342, 230, 342)] },
+    { t: 'Clouds.', s: [cloud(70, 310, 0.8), cloud(335, 110, 0.7)] },
+    { t: 'Birds made of two little curves.', s: ['M50 100 Q60 90 70 100 Q80 90 90 100', 'M310 270 Q318 262 326 270 Q334 262 342 270'] },
+  ]},
+  { id: 'lighthouse', n: 'Lighthouse', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a tall tower, wider at the bottom.', s: [Z(160, 340, 180, 140, 220, 140, 240, 340)] },
+    { t: 'Lines across for stripes.', s: [L(174, 200, 226, 200), L(171, 230, 229, 230), L(168, 260, 232, 260), L(165, 290, 235, 290)] },
+    { t: 'A thin balcony on top.', s: [R(166, 132, 68, 8)] },
+    { t: 'A small room for the light, with a window.', s: [R(176, 100, 48, 32), R(188, 106, 24, 20)] },
+    { t: 'A pointy roof.', s: [Z(168, 100, 200, 66, 232, 100)] },
+    { t: 'Light beams shining out both sides.', s: [L(226, 110, 340, 84), L(226, 124, 340, 152), L(174, 110, 60, 84), L(174, 124, 60, 152)] },
+    { t: 'An arched door.', s: ['M188 340 L188 314 A12 12 0 0 1 212 314 L212 340'] },
+    { t: 'Waves at the bottom.', s: [waves(20, 380, 352)] },
+  ]},
+
+  // ---------------- Fantasy ----------------
+  { id: 'monster', n: 'Monster', c: 'Fantasy', lv: 1, steps: [
+    { t: 'Draw a big blob shape for the body.', s: ['M110 320 Q95 160 200 110 Q305 160 290 320 Z'] },
+    { t: 'Two pointy horns.', s: [L(150, 140, 130, 84, 176, 124), L(250, 140, 270, 84, 224, 124)] },
+    { t: 'One big eye with a dark pupil.', s: [C(200, 190, 35), dot(205, 196, 14)] },
+    { t: 'A big open mouth.', s: ['M150 250 Q200 296 250 250 Z'] },
+    { t: 'Two pointy teeth.', s: [Z(170, 250, 180, 266, 190, 252), Z(210, 252, 220, 266, 230, 250)] },
+    { t: 'Arms with three fingers.', s: ['M103 230 Q70 230 66 200', L(66, 200, 54, 190), L(66, 200, 64, 184), L(66, 200, 76, 188), 'M297 230 Q330 230 334 200', L(334, 200, 346, 190), L(334, 200, 336, 184), L(334, 200, 324, 188)] },
+    { t: 'Two oval feet.', s: [E(150, 330, 30, 14), E(250, 330, 30, 14)] },
+    { t: 'Spots!', s: [C(140, 288, 8), C(262, 290, 10), C(255, 165, 6)] },
+  ]},
+  { id: 'alien', n: 'Alien', c: 'Fantasy', lv: 2, steps: [
+    { t: 'Draw a wide flat oval for the flying saucer.', s: [E(200, 255, 160, 40)] },
+    { t: 'A big dome on top of it.', s: ['M75 240 A125 125 0 0 1 325 240'] },
+    { t: 'An oval head inside the dome.', s: [E(200, 195, 36, 42)] },
+    { t: 'Big dark oval eyes and a small smile.', s: [fill(E(186, 188, 9, 13)), fill(E(214, 188, 9, 13)), 'M190 215 Q200 223 210 215'] },
+    { t: 'Two antennae with balls on top.', s: [L(188, 156, 176, 134), L(212, 156, 224, 134), dot(176, 129, 6), dot(224, 129, 6)] },
+    { t: 'Round lights along the saucer.', s: [C(110, 258, 9), C(160, 268, 9), C(240, 268, 9), C(290, 258, 9)] },
+    { t: 'A light beam shining down.', s: [L(150, 293, 110, 380), L(250, 293, 290, 380)] },
+  ]},
+  { id: 'dragon', n: 'Dragon', c: 'Fantasy', lv: 3, steps: [
+    { t: 'Draw a big oval for the body.', s: [E(190, 260, 75, 85)] },
+    { t: 'An oval head up on the right.', s: [E(270, 140, 55, 42)] },
+    { t: 'Two pointy horns.', s: [L(240, 105, 230, 70, 258, 100), L(270, 98, 274, 62, 292, 102)] },
+    { t: 'An eye, a nostril and a smile.', s: [C(262, 126, 10), dot(264, 127, 5), dot(312, 134, 4), 'M288 160 Q304 166 318 155'] },
+    { t: 'A pointy bat wing on its back.', s: [L(150, 196, 92, 108, 112, 150, 80, 150, 120, 182, 100, 202, 150, 214)] },
+    { t: 'Triangle spikes down its back.', s: [Z(122, 220, 100, 226, 117, 240), Z(116, 256, 92, 263, 116, 273), Z(120, 290, 96, 300, 124, 308)] },
+    { t: 'A long tail with an arrow tip.', s: ['M155 338 Q110 376 70 350', Z(70, 350, 45, 330, 55, 362)] },
+    { t: 'Feet and a little arm.', s: [E(160, 345, 30, 14), E(235, 348, 30, 14), 'M245 228 Q276 244 270 266'] },
+    { t: 'Curved lines across the belly.', s: ['M200 240 Q220 248 240 240', 'M196 270 Q218 278 242 270', 'M200 300 Q220 308 238 300'] },
+    { t: 'A puff of fire!', s: ['M330 150 Q350 140 360 150 Q376 144 370 160 Q386 165 368 173 Q355 182 332 166'] },
+  ]},
+];
+
+
+
+/* Extra helpers for the second batch */
+const G = d => ({ d, g: 1 });
+const limb = (x1, y1, x2, y2, w) => {
+  const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, len = Math.hypot(x2 - x1, y2 - y1);
+  const rx = r1(len / 2 + w * 0.25), ry = r1(w / 2), a = Math.atan2(y2 - y1, x2 - x1);
+  const deg = r1(a * 180 / Math.PI), c = Math.cos(a), s = Math.sin(a);
+  const p1 = `${r1(cx - rx * c)} ${r1(cy - rx * s)}`, p2 = `${r1(cx + rx * c)} ${r1(cy + rx * s)}`;
+  return `M${p1} A${rx} ${ry} ${deg} 0 0 ${p2} A${rx} ${ry} ${deg} 0 0 ${p1}`;
+};
+const coil = (x0, x1, y, b, n) => {
+  const T = 2 * Math.PI * n, a = (x1 - x0 - 2 * b) / T, p = [], steps = n * 40;
+  for (let i = 0; i <= steps; i++) {
+    const t = T * i / steps;
+    p.push(r1(x0 + b + a * t - b * Math.sin(t)), r1(y - b * Math.cos(t)));
+  }
+  return L(...p);
+};
+const flame = (x, y) => `M${x} ${y} Q${x - 9} ${y - 12} ${x} ${y - 28} Q${x + 9} ${y - 12} ${x} ${y}`;
+const star = (cx, cy, r) => zig(cx, cy, r, r * 0.42, 5);
+const plus = (x, y, s = 10) => [L(x - s, y, x + s, y), L(x, y - s, x, y + s)];
+
+const LESSONS2 = [
+  // ================= Skills =================
+  { id: 'warmup-lines', n: 'Line warm-up', c: 'Skills', lv: 1, steps: [
+    { t: 'Pull one slow, straight line across the page. Move your whole arm, not just your fingers.', s: [L(50, 70, 350, 70)] },
+    { t: 'A zigzag. Keep all the points the same height.', s: [L(50, 150, 80, 120, 110, 150, 140, 120, 170, 150, 200, 120, 230, 150, 260, 120, 290, 150, 320, 120, 350, 150)] },
+    { t: 'Smooth waves, like the sea.', s: [waves(50, 350, 220, 60, 26)] },
+    { t: 'Loops, like a spring. Keep going without lifting your pencil.', s: [coil(50, 350, 300, 22, 7)] },
+    { t: 'A row of circles, all the same size. Do the whole page again tomorrow!', s: [C(70, 365, 18), C(135, 365, 18), C(200, 365, 18), C(265, 365, 18), C(330, 365, 18)] },
+  ]},
+  { id: 'warmup-shapes', n: 'Shape warm-up', c: 'Skills', lv: 1, steps: [
+    { t: 'One circle. Go round slowly and join up at the start.', s: [C(80, 80, 40)] },
+    { t: 'Two more circles. Try to make them the same size as the first.', s: [C(200, 80, 40), C(320, 80, 40)] },
+    { t: 'One square. All four sides the same length.', s: [R(40, 160, 80, 80)] },
+    { t: 'Two more squares the same size.', s: [R(160, 160, 80, 80), R(280, 160, 80, 80)] },
+    { t: 'One triangle: a point on top, then down, across, and back up.', s: [Z(80, 280, 40, 360, 120, 360)] },
+    { t: 'Two more triangles. Which shape was easiest?', s: [Z(200, 280, 160, 360, 240, 360), Z(320, 280, 280, 360, 360, 360)] },
+  ]},
+  { id: 'face-map', n: 'Face: where things go', c: 'Skills', lv: 2, steps: [
+    { t: 'Draw a big egg shape for the head, wider at the top.', s: [E(200, 200, 110, 140)] },
+    { t: 'Two light guide lines: one across the middle, one down the middle. You will rub them out later.', s: [G(L(90, 200, 310, 200)), G(L(200, 60, 200, 340))] },
+    { t: 'The eyes sit ON the middle line, not near the top. Leave one eye of space between them.', s: [E(155, 200, 22, 13), E(245, 200, 22, 13)] },
+    { t: 'Pupils, and eyebrows just above the eyes.', s: [dot(155, 200, 7), dot(245, 200, 7), 'M130 178 Q155 166 180 176', 'M220 176 Q245 166 270 178'] },
+    { t: 'The nose ends halfway between the eyes and the chin.', s: ['M196 222 L186 262 Q200 270 214 262'] },
+    { t: 'The mouth goes halfway between the nose and the chin.', s: ['M165 296 Q200 316 235 296'] },
+    { t: 'Ears go from the eye line down to the nose.', s: ['M90 195 Q64 200 70 230 Q76 262 95 258', 'M310 195 Q336 200 330 230 Q324 262 305 258'] },
+    { t: 'Hair on top of the head, not just a line.', s: ['M92 180 Q90 70 200 62 Q310 70 308 180 Q290 120 250 110 Q200 130 150 110 Q110 120 92 180'] },
+    { t: 'Rub out the dashed guide lines. That is how artists draw faces!', erase: 1, s: [] },
+  ]},
+  { id: 'feelings', n: 'Feelings faces', c: 'Skills', lv: 2, steps: [
+    { t: 'Draw four circles, two on top and two below.', s: [C(110, 110, 75), C(290, 110, 75), C(110, 290, 75), C(290, 290, 75)] },
+    { t: 'Happy: dot eyes and a smile that curves up.', s: [dot(88, 100, 6), dot(132, 100, 6), 'M80 130 Q110 160 140 130'] },
+    { t: 'Sad: eyebrows go up in the middle, and the mouth curves down.', s: [dot(268, 104, 6), dot(312, 104, 6), L(258, 90, 280, 80), L(322, 90, 300, 80), 'M262 150 Q290 126 318 150'] },
+    { t: 'Surprised: round eyes, raised eyebrows, and an "O" mouth.', s: [C(88, 278, 9), dot(88, 278, 4), C(132, 278, 9), dot(132, 278, 4), 'M76 254 Q88 246 100 254', 'M120 254 Q132 246 144 254', C(110, 326, 13)] },
+    { t: 'Angry: eyebrows slant DOWN to the middle, mouth wobbly.', s: [dot(268, 288, 6), dot(312, 288, 6), L(254, 264, 282, 277), L(326, 264, 298, 277), 'M266 332 Q290 318 314 332'] },
+  ]},
+  { id: 'person', n: 'Person standing', c: 'Skills', lv: 2, steps: [
+    { t: 'Draw a circle for the head near the top.', s: [C(200, 80, 32)] },
+    { t: 'A light line down for the body. A person is about 6 heads tall.', s: [G(L(200, 112, 200, 245))] },
+    { t: 'Light stick arms and legs. Arms reach down past the hips.', s: [G(L(200, 135, 140, 222)), G(L(200, 135, 260, 222)), G(L(200, 245, 168, 352)), G(L(200, 245, 232, 352))] },
+    { t: 'Now draw the shirt around the line.', s: [Z(172, 118, 228, 118, 240, 245, 160, 245)] },
+    { t: 'Arms around the stick arms, and round hands.', s: [L(172, 122, 135, 210, 150, 217, 182, 148), L(228, 122, 265, 210, 250, 217, 218, 148), C(140, 226, 10), C(260, 226, 10)] },
+    { t: 'Legs around the stick legs.', s: [L(162, 245, 158, 350, 186, 350, 198, 262), L(238, 245, 242, 350, 214, 350, 202, 262)] },
+    { t: 'Two shoes.', s: [E(168, 356, 22, 9), E(232, 356, 22, 9)] },
+    { t: 'A face and hair.', s: [dot(189, 78, 4), dot(211, 78, 4), 'M192 92 Q200 98 208 92', 'M168 76 Q168 42 200 46 Q232 42 232 76'] },
+    { t: 'Rub out the dashed stick lines.', erase: 1, s: [] },
+  ]},
+  { id: 'runner', n: 'Person running', c: 'Skills', lv: 3, steps: [
+    { t: 'A circle head, up and to the right.', s: [C(252, 76, 30)] },
+    { t: 'A light, slanted line for the body. Runners lean forward!', s: [G(L(240, 108, 205, 215))] },
+    { t: 'Light bent stick arms: one forward, one back.', s: [G(L(235, 130, 265, 165, 292, 140)), G(L(235, 130, 205, 158, 190, 190))] },
+    { t: 'Light bent stick legs: one knee up in front, one leg kicking back.', s: [G(L(205, 215, 252, 252, 246, 322)), G(L(205, 215, 175, 270, 122, 282))] },
+    { t: 'A long bean shape around the body line.', s: [limb(240, 108, 205, 215, 46)] },
+    { t: 'Bean shapes around each part of the arms.', s: [limb(235, 130, 265, 165, 18), limb(265, 165, 292, 140, 16), limb(235, 130, 205, 158, 18), limb(205, 158, 190, 190, 16)] },
+    { t: 'Bean shapes around each part of the legs.', s: [limb(205, 215, 252, 252, 24), limb(252, 252, 246, 322, 20), limb(205, 215, 175, 270, 24), limb(175, 270, 122, 282, 20)] },
+    { t: 'Shoes, a face and hair.', s: [E(256, 326, 18, 8), E(112, 280, 9, 15), dot(262, 72, 4), 'M260 88 Q268 92 274 86', 'M224 70 Q228 42 255 45 Q280 48 282 70'] },
+    { t: 'Speed lines behind.', s: [L(60, 120, 125, 120), L(48, 155, 110, 155), L(70, 190, 130, 190)] },
+    { t: 'Rub out the dashed lines.', erase: 1, s: [] },
+  ]},
+  { id: 'hand', n: 'Hand from shapes', c: 'Skills', lv: 2, steps: [
+    { t: 'Start with a square with round corners for the palm.', s: [RR(140, 190, 120, 120, 30)] },
+    { t: 'Four finger ovals on top. The middle finger is the tallest.', s: [E(158, 142, 15, 45), E(190, 128, 15, 56), E(222, 132, 15, 52), E(252, 150, 14, 40)] },
+    { t: 'The thumb comes out from the side, lower down.', s: [limb(148, 272, 100, 218, 32)] },
+    { t: 'Two lines for the wrist.', s: [L(162, 310, 166, 372), L(238, 310, 234, 372)] },
+    { t: 'Little curved lines where the fingers bend.', s: ['M150 158 Q158 163 166 158', 'M182 148 Q190 153 198 148', 'M214 150 Q222 155 230 150', 'M245 165 Q252 170 259 165'] },
+    { t: 'A curved line across the palm.', s: ['M175 250 Q200 270 235 245'] },
+  ]},
+  { id: 'cube', n: 'Cube', c: 'Skills', lv: 2, steps: [
+    { t: 'Draw a square for the front.', s: [R(110, 170, 140, 140)] },
+    { t: 'A second square, up and to the right. Draw the part hidden behind lightly.', s: [L(170, 110, 310, 110, 310, 250), G(L(310, 250, 170, 250, 170, 110))] },
+    { t: 'Join three corners with slanted lines.', s: [L(110, 170, 170, 110), L(250, 170, 310, 110), L(250, 310, 310, 250)] },
+    { t: 'Join the last corner lightly. It is hidden behind.', s: [G(L(110, 310, 170, 250))] },
+    { t: 'Rub out the dashed hidden lines. Now it looks solid!', erase: 1, s: [] },
+    { t: 'Shade the side with lines to make it look 3D.', s: [L(265, 157, 265, 293), L(280, 142, 280, 278), L(295, 127, 295, 263)] },
+  ]},
+  { id: 'cylinder', n: 'Cylinder', c: 'Skills', lv: 2, steps: [
+    { t: 'Draw a flat oval for the top.', s: [E(200, 100, 90, 28)] },
+    { t: 'Two straight lines down from the sides.', s: [L(110, 100, 110, 300), L(290, 100, 290, 300)] },
+    { t: 'The bottom is a CURVE, not a straight line. That makes it look round.', s: ['M110 300 A90 28 0 0 0 290 300'] },
+    { t: 'Lightly draw the back of the bottom curve.', s: [G('M110 300 A90 28 0 0 1 290 300')] },
+    { t: 'Rub out the hidden back curve.', erase: 1, s: [] },
+    { t: 'Shade one side with up-and-down lines.', s: [L(260, 123, 260, 319), L(275, 117, 275, 313)] },
+  ]},
+  { id: 'cone', n: 'Cone', c: 'Skills', lv: 1, steps: [
+    { t: 'Draw the front of a flat oval at the bottom, and the back part lightly.', s: ['M110 300 A90 28 0 0 0 290 300', G('M110 300 A90 28 0 0 1 290 300')] },
+    { t: 'Two lines up to a point in the middle.', s: [L(110, 300, 200, 70), L(290, 300, 200, 70)] },
+    { t: 'Rub out the hidden back line.', erase: 1, s: [] },
+    { t: 'Shade one side with lines that point to the tip.', s: [L(212, 110, 265, 318), L(207, 100, 245, 322), L(220, 130, 280, 312)] },
+  ]},
+  { id: 'road', n: 'Road far away', c: 'Skills', lv: 3, steps: [
+    { t: 'Draw a line straight across for the horizon, where the sky meets the land.', s: [L(20, 170, 380, 170)] },
+    { t: 'Put a dot on it. This is where the road disappears.', s: [dot(200, 170, 5)] },
+    { t: 'Two lines from the bottom corners to the dot.', s: [L(40, 390, 200, 170), L(360, 390, 200, 170)] },
+    { t: 'Dashes down the middle. They get shorter as they go away.', s: [L(200, 382, 200, 345), L(200, 322, 200, 296), L(200, 280, 200, 263), L(200, 251, 200, 240), L(200, 232, 200, 226)] },
+    { t: 'Trees along the left. Each one is smaller as it gets further away.', s: [L(70, 330, 70, 284), C(70, 262, 24), L(120, 262, 120, 238), C(120, 226, 13), L(150, 222, 150, 209), C(150, 202, 7)] },
+    { t: 'Poles on the right, getting smaller too.', s: [L(330, 340, 330, 270), L(285, 275, 285, 236), L(255, 232, 255, 212)] },
+    { t: 'Mountains on the horizon and a sun.', s: [L(20, 170, 80, 122, 140, 170), L(250, 170, 318, 115, 380, 162), C(320, 70, 22)] },
+  ]},
+  { id: 'shaded-ball', n: 'Shaded ball', c: 'Skills', lv: 2, steps: [
+    { t: 'Draw a small sun in the top corner. Light comes from here.', s: [C(70, 60, 18), ...rays(70, 60, 26, 38, 8)] },
+    { t: 'A big circle for the ball.', s: [C(200, 190, 100)] },
+    { t: 'A shiny spot on the side near the sun.', s: ['M140 158 Q148 124 182 110'] },
+    { t: 'A curved line where the shadow starts, on the side away from the sun.', s: ['M115 245 Q235 265 285 135'] },
+    { t: 'Fill the shadow side with slanted lines, close together.', s: [L(138, 248, 179, 288), L(160, 247, 203, 290), L(181, 244, 224, 287), L(200, 237, 243, 280), L(218, 228, 260, 270), L(234, 215, 275, 256), L(249, 200, 288, 238), L(262, 181, 297, 216), L(274, 160, 300, 185)] },
+    { t: 'A flat oval shadow on the ground, away from the sun.', s: [E(240, 306, 100, 18)] },
+  ]},
+
+  // ================= Characters (original) =================
+  { id: 'superkid', n: 'Super kid', c: 'Characters', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 120, 55)] },
+    { t: 'Spiky hair on top.', s: [L(152, 96, 162, 62, 180, 82, 195, 55, 210, 80, 226, 58, 248, 94)] },
+    { t: 'A mask across the eyes, with two eye holes.', s: ['M147 104 Q200 94 253 104 L253 130 Q200 122 147 130 Z', E(180, 116, 10, 6), E(220, 116, 10, 6)] },
+    { t: 'Pupils and a big smile.', s: [dot(181, 116, 3), dot(219, 116, 3), 'M182 146 Q200 160 218 146'] },
+    { t: 'A body with a star on the chest.', s: [RR(160, 175, 80, 90, 14), star(200, 215, 22)] },
+    { t: 'A cape flowing out behind.', s: ['M160 182 Q108 262 112 342 L288 342 Q292 262 240 182'] },
+    { t: 'A belt and two legs.', s: [L(160, 250, 240, 250), R(170, 265, 25, 52), R(205, 265, 25, 52)] },
+    { t: 'Boots.', s: [RR(164, 314, 34, 26, 8), RR(202, 314, 34, 26, 8)] },
+    { t: 'One fist up high, one arm down.', s: [L(240, 190, 284, 142), C(290, 133, 12), L(160, 195, 130, 240), C(126, 247, 10)] },
+  ]},
+  { id: 'ninja', n: 'Ninja', c: 'Characters', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 120, 55)] },
+    { t: 'The mask covers the face except a strip for the eyes.', s: [L(148, 104, 252, 104), L(148, 134, 252, 134)] },
+    { t: 'Eyes and serious eyebrows.', s: [dot(182, 120, 6), dot(218, 120, 6), L(170, 110, 192, 114), L(230, 110, 208, 114)] },
+    { t: 'Two headband tails flying out.', s: ['M253 100 Q290 90 306 110', 'M253 110 Q286 122 300 142'] },
+    { t: 'A body, and a "V" for the collar.', s: [RR(160, 175, 80, 90, 14), L(176, 175, 200, 205, 224, 175)] },
+    { t: 'A belt with a knot.', s: [R(160, 230, 80, 12), L(200, 242, 190, 262), L(200, 242, 210, 262)] },
+    { t: 'Legs and feet.', s: [R(170, 265, 25, 55), R(205, 265, 25, 55), E(180, 325, 20, 9), E(220, 325, 20, 9)] },
+    { t: 'Arms ready for action.', s: [L(160, 190, 125, 235), C(121, 241, 10), L(240, 190, 270, 230), C(274, 237, 10)] },
+  ]},
+  { id: 'knight', n: 'Knight', c: 'Characters', lv: 3, steps: [
+    { t: 'Draw a helmet: straight sides and a round top.', s: ['M145 175 L145 110 Q145 60 200 60 Q255 60 255 110 L255 175 Z'] },
+    { t: 'A slit to see through and three breathing holes.', s: [R(160, 110, 80, 12), dot(185, 145, 3), dot(200, 145, 3), dot(215, 145, 3)] },
+    { t: 'A feather plume on top.', s: ['M200 60 Q210 20 250 25 Q230 40 245 55 Q225 50 215 62'] },
+    { t: 'The body.', s: [RR(155, 175, 90, 95, 12)] },
+    { t: 'A shield on one arm.', s: ['M110 200 L170 200 L170 250 Q170 290 140 305 Q110 290 110 250 Z'] },
+    { t: 'A cross on the shield.', s: [L(140, 210, 140, 292), L(116, 240, 164, 240)] },
+    { t: 'A sword pointing up: blade, guard and handle.', s: [Z(286, 80, 292, 95, 292, 225, 280, 225, 280, 95), RR(265, 225, 42, 10, 4), R(281, 235, 10, 24), C(286, 264, 6)] },
+    { t: 'The arm holding the sword.', s: [L(245, 195, 281, 240)] },
+    { t: 'Legs and feet.', s: [R(165, 270, 30, 52), R(205, 270, 30, 52), RR(160, 320, 40, 16, 6), RR(200, 320, 40, 16, 6)] },
+  ]},
+  { id: 'pirate', n: 'Pirate', c: 'Characters', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 130, 55)] },
+    { t: 'A pirate hat on top with an X on it.', s: ['M135 105 Q200 38 265 105 Q200 84 135 105 Z', L(192, 70, 208, 86), L(208, 70, 192, 86)] },
+    { t: 'An eye patch and its strap.', s: [fill(E(220, 128, 12, 10)), L(150, 110, 210, 124), L(231, 131, 253, 139)] },
+    { t: 'The other eye and a grin.', s: [dot(180, 128, 6), 'M186 158 Q200 166 214 158'] },
+    { t: 'A big beard.', s: ['M157 150 Q200 214 243 150'] },
+    { t: 'A striped shirt.', s: [RR(160, 185, 80, 90, 14), L(160, 207, 240, 207), L(160, 229, 240, 229), L(160, 251, 240, 251)] },
+    { t: 'One leg and a wooden peg leg.', s: [R(170, 275, 25, 55), E(180, 334, 18, 8), Z(210, 275, 230, 275, 222, 338, 216, 338)] },
+    { t: 'An arm with a hook, and an arm with a hand.', s: [L(160, 200, 126, 244), 'M124 250 Q110 266 122 276 Q134 282 137 270', L(240, 200, 272, 245), C(276, 252, 10)] },
+  ]},
+  { id: 'wizard', n: 'Wizard', c: 'Characters', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 150, 45)] },
+    { t: 'A tall pointy hat.', s: [Z(140, 115, 200, 20, 260, 115)] },
+    { t: 'A flat oval for the hat brim.', s: [E(200, 118, 75, 12)] },
+    { t: 'A star and a little moon on the hat.', s: [star(196, 76, 12), C(222, 98, 6)] },
+    { t: 'Eyes, eyebrows and a round nose.', s: [dot(185, 145, 5), dot(215, 145, 5), L(175, 135, 192, 138), L(225, 135, 208, 138), C(200, 160, 7)] },
+    { t: 'A long beard.', s: ['M160 162 Q170 252 200 272 Q230 252 240 162'] },
+    { t: 'A robe that gets wider at the bottom.', s: [L(160, 200, 130, 350, 270, 350, 240, 200)] },
+    { t: 'An arm holding a magic wand with a star.', s: ['M240 220 Q265 235 270 252', C(272, 254, 9), L(276, 248, 330, 192), star(336, 185, 14)] },
+  ]},
+  { id: 'viking', n: 'Viking', c: 'Characters', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 140, 55)] },
+    { t: 'A round helmet on top.', s: ['M145 135 Q145 80 200 80 Q255 80 255 135 Z'] },
+    { t: 'Two curved horns.', s: ['M148 115 Q110 105 105 60 Q125 85 152 95', 'M252 115 Q290 105 295 60 Q275 85 248 95'] },
+    { t: 'Eyes and a nose.', s: [dot(182, 152, 6), dot(218, 152, 6), 'M200 154 Q208 166 198 170'] },
+    { t: 'A big mustache.', s: ['M200 178 Q185 170 172 182', 'M200 178 Q215 170 228 182'] },
+    { t: 'A beard with two braids.', s: ['M150 158 Q160 232 200 242 Q240 232 250 158', L(185, 240, 182, 270), L(215, 240, 218, 270), C(182, 274, 4), C(218, 274, 4)] },
+    { t: 'The body and a belt.', s: [L(155, 212, 150, 310, 250, 310, 245, 212), L(150, 290, 250, 290)] },
+    { t: 'A round shield.', s: [C(128, 272, 32), dot(128, 272, 6)] },
+    { t: 'Legs and boots.', s: [R(165, 310, 28, 38), R(207, 310, 28, 38), RR(160, 345, 38, 16, 6), RR(202, 345, 38, 16, 6)] },
+  ]},
+  { id: 'ghost', n: 'Friendly ghost', c: 'Characters', lv: 1, steps: [
+    { t: 'Draw a tall ghost with a round top and a wavy bottom.', s: ['M120 330 L120 170 Q120 70 200 70 Q280 70 280 170 L280 330 Q260 310 240 330 Q220 310 200 330 Q180 310 160 330 Q140 310 120 330'] },
+    { t: 'Two tall dark eyes.', s: [fill(E(175, 160, 12, 18)), fill(E(225, 160, 12, 18))] },
+    { t: 'A round "ooo" mouth.', s: [E(200, 212, 14, 18)] },
+    { t: 'Two little arms waving.', s: ['M122 210 Q94 220 92 246', 'M278 210 Q306 220 308 246'] },
+    { t: 'Round cheeks.', s: [C(158, 196, 8), C(242, 196, 8)] },
+  ]},
+  { id: 'mermaid', n: 'Mermaid', c: 'Characters', lv: 3, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 100, 40)] },
+    { t: 'Long flowing hair.', s: ['M160 96 Q160 50 200 50 Q245 50 242 100 Q256 150 246 192', 'M160 96 Q147 150 155 192'] },
+    { t: 'Eyes and a smile.', s: [dot(186, 100, 5), dot(214, 100, 5), 'M190 115 Q200 122 210 115'] },
+    { t: 'Two lines for the body, and two shells.', s: [L(182, 140, 176, 215), L(218, 140, 224, 215), C(189, 165, 9), C(211, 165, 9)] },
+    { t: 'A long curved tail.', s: ['M176 215 Q166 300 236 336', 'M224 215 Q230 280 256 320'] },
+    { t: 'A big tail fin.', s: [L(236, 336, 240, 378, 282, 350, 256, 320)] },
+    { t: 'Little "u" shapes for scales.', s: ['M190 240 Q197 248 204 240', 'M207 256 Q214 264 221 256', 'M196 276 Q203 284 210 276', 'M214 294 Q221 302 228 294'] },
+    { t: 'Arms, and bubbles floating up.', s: [L(182, 150, 150, 190), L(218, 150, 250, 190), C(300, 120, 8), C(318, 90, 5)] },
+  ]},
+  { id: 'chef', n: 'Chef', c: 'Characters', lv: 1, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 150, 50)] },
+    { t: 'A puffy chef hat with a band.', s: ['M158 102 L158 75 Q135 65 145 45 Q158 25 182 36 Q200 15 220 36 Q244 25 255 45 Q265 65 242 75 L242 102 Z', L(158, 88, 242, 88)] },
+    { t: 'Eyes, a curly mustache and a smile.', s: [dot(183, 148, 6), dot(217, 148, 6), 'M200 170 Q185 160 172 172 Q185 180 200 172 Q215 180 228 172 Q215 160 200 170', 'M188 184 Q200 191 212 184'] },
+    { t: 'A jacket with four buttons.', s: [RR(155, 200, 90, 95, 14), dot(190, 228, 4), dot(210, 228, 4), dot(190, 254, 4), dot(210, 254, 4)] },
+    { t: 'A little scarf.', s: [Z(185, 200, 215, 200, 200, 216)] },
+    { t: 'Two arms.', s: [L(155, 215, 125, 250), C(122, 256, 9), L(245, 215, 280, 240), C(283, 245, 9)] },
+    { t: 'A frying pan in one hand.', s: [L(290, 241, 306, 236), E(336, 232, 30, 10)] },
+    { t: 'Legs and shoes.', s: [R(170, 295, 25, 45), R(205, 295, 25, 45), E(182, 344, 18, 8), E(218, 344, 18, 8)] },
+  ]},
+  { id: 'cowboy', n: 'Cowboy', c: 'Characters', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(200, 140, 50)] },
+    { t: 'A wide flat oval for the hat brim.', s: [E(200, 100, 95, 14)] },
+    { t: 'The top of the hat, with a dent in the middle.', s: ['M155 98 L160 55 Q180 44 200 56 Q220 44 240 55 L245 98', L(157, 86, 243, 86)] },
+    { t: 'Eyes and a smile.', s: [dot(183, 140, 6), dot(217, 140, 6), 'M185 160 Q200 172 215 160'] },
+    { t: 'A bandana around the neck.', s: [Z(165, 182, 235, 182, 200, 212)] },
+    { t: 'The body and a vest.', s: [RR(160, 190, 80, 90, 14), L(180, 195, 185, 270), L(220, 195, 215, 270)] },
+    { t: 'A belt with a buckle.', s: [R(160, 262, 80, 10), R(193, 260, 14, 14)] },
+    { t: 'Legs and boots.', s: [R(170, 280, 25, 48), R(205, 280, 25, 48), RR(165, 325, 35, 18, 6), RR(203, 325, 35, 18, 6)] },
+    { t: 'One arm swinging a rope loop, one arm down.', s: [L(240, 200, 282, 158), E(302, 122, 32, 18), L(160, 205, 130, 250), C(127, 256, 9)] },
+  ]},
+
+  // ================= Animals =================
+  { id: 'bear', n: 'Bear', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the head.', s: [C(200, 170, 75)] },
+    { t: 'Two round ears.', s: [C(140, 108, 24), C(260, 108, 24)] },
+    { t: 'Smaller circles inside the ears.', s: [C(140, 108, 12), C(260, 108, 12)] },
+    { t: 'Two dot eyes.', s: [dot(170, 158, 7), dot(230, 158, 7)] },
+    { t: 'An oval muzzle and a dark nose.', s: [E(200, 202, 36, 28), fill(E(200, 190, 12, 8))] },
+    { t: 'A mouth.', s: [L(200, 198, 200, 210), 'M200 210 Q190 220 182 214', 'M200 210 Q210 220 218 214'] },
+    { t: 'A round body and a belly.', s: [E(200, 312, 70, 70), E(200, 322, 38, 36)] },
+    { t: 'Two paws.', s: [E(160, 378, 24, 12), E(240, 378, 24, 12)] },
+  ]},
+  { id: 'fox', n: 'Fox', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw the face: wide at the top, pointy at the chin.', s: ['M110 140 Q200 120 290 140 Q270 220 200 282 Q130 220 110 140 Z'] },
+    { t: 'Two tall pointy ears.', s: [L(122, 140, 110, 60, 175, 126), L(278, 140, 290, 60, 225, 126)] },
+    { t: 'Smaller triangles inside the ears.', s: [L(128, 128, 122, 82, 158, 118), L(272, 128, 278, 82, 242, 118)] },
+    { t: 'Curved lines for the white cheeks.', s: ['M118 170 Q160 196 186 244', 'M282 170 Q240 196 214 244'] },
+    { t: 'Oval eyes.', s: [fill(E(165, 176, 7, 10)), fill(E(235, 176, 7, 10))] },
+    { t: 'A dark nose at the tip.', s: [dot(200, 266, 9)] },
+  ]},
+  { id: 'giraffe', n: 'Giraffe', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw an oval for the body.', s: [E(170, 260, 80, 45)] },
+    { t: 'Two long lines for the neck.', s: [L(215, 225, 255, 92), L(245, 240, 285, 98)] },
+    { t: 'An oval head at the top.', s: [E(285, 80, 35, 24)] },
+    { t: 'Two little horns with balls, and an ear.', s: [L(275, 58, 272, 40), L(295, 58, 298, 40), dot(272, 36, 5), dot(298, 36, 5), L(262, 66, 240, 54, 258, 78)] },
+    { t: 'An eye, a nostril and a smile.', s: [dot(290, 74, 4), dot(312, 86, 3), 'M300 94 Q310 98 316 92'] },
+    { t: 'Four long thin legs.', s: [R(105, 292, 14, 78), R(130, 298, 14, 72), R(195, 298, 14, 72), R(222, 290, 14, 80)] },
+    { t: 'Spots on the body and neck.', s: [C(140, 250, 12), C(180, 240, 10), C(204, 276, 12), C(150, 282, 9), C(248, 172, 7), C(258, 132, 6)] },
+    { t: 'A thin tail.', s: ['M92 250 Q70 275 72 300'] },
+  ]},
+  { id: 'monkey', n: 'Monkey', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the head.', s: [C(200, 180, 80)] },
+    { t: 'Two round ears on the sides.', s: [C(115, 180, 25), C(285, 180, 25)] },
+    { t: 'Small circles inside the ears.', s: [C(115, 180, 12), C(285, 180, 12)] },
+    { t: 'A face shape like a heart inside the head.', s: ['M200 150 Q170 120 150 150 Q125 185 150 225 Q175 265 200 262 Q225 265 250 225 Q275 185 250 150 Q230 120 200 150 Z'] },
+    { t: 'Eyes and two little nostrils.', s: [dot(178, 175, 7), dot(222, 175, 7), dot(193, 205, 3), dot(207, 205, 3)] },
+    { t: 'A big smile.', s: ['M170 225 Q200 250 230 225'] },
+    { t: 'A tuft of hair on top.', s: ['M190 100 Q200 84 205 102 Q215 88 218 106'] },
+  ]},
+  { id: 'cow', n: 'Cow', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a tall oval for the head.', s: [E(200, 180, 70, 85)] },
+    { t: 'A wide oval at the bottom for the nose.', s: [E(200, 250, 60, 38)] },
+    { t: 'Two big nostrils.', s: [fill(E(180, 250, 8, 11)), fill(E(220, 250, 8, 11))] },
+    { t: 'Two curved horns.', s: ['M150 122 Q124 92 140 70', 'M250 122 Q276 92 260 70'] },
+    { t: 'Ears sticking out sideways.', s: [E(115, 150, 30, 14), E(285, 150, 30, 14)] },
+    { t: 'Two dot eyes.', s: [dot(175, 170, 8), dot(225, 170, 8)] },
+    { t: 'Spots!', s: ['M215 108 Q245 104 248 132 Q232 150 214 136 Z', 'M150 190 Q140 214 160 220 Q176 206 166 190 Z'] },
+  ]},
+  { id: 'sheep', n: 'Sheep', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big fluffy cloud shape for the wool.', s: [bumpy(195, 240, 85, 10)] },
+    { t: 'An oval head on the right.', s: [E(300, 200, 28, 38)] },
+    { t: 'Two floppy ears.', s: [E(266, 180, 16, 8), E(334, 180, 16, 8)] },
+    { t: 'Eyes and a little smile.', s: [dot(290, 196, 5), dot(310, 196, 5), 'M294 222 Q300 228 306 222'] },
+    { t: 'A tiny fluffy tuft on the head.', s: [bumpy(300, 166, 12, 5)] },
+    { t: 'Four thin legs.', s: [R(140, 320, 14, 45), R(175, 326, 14, 40), R(222, 326, 14, 40), R(256, 320, 14, 45)] },
+    { t: 'A round tail.', s: [C(100, 228, 12)] },
+  ]},
+  { id: 'duck', n: 'Duck', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a wide oval for the body.', s: [E(190, 258, 105, 55)] },
+    { t: 'A circle for the head.', s: [C(270, 160, 42)] },
+    { t: 'A flat round beak.', s: ['M308 150 Q346 148 346 162 Q342 176 308 172'] },
+    { t: 'A dot eye.', s: [dot(278, 150, 6)] },
+    { t: 'A wing.', s: ['M140 244 Q190 218 236 248 Q190 278 140 244'] },
+    { t: 'A pointy tail.', s: [L(88, 250, 58, 216, 96, 234)] },
+    { t: 'Water.', s: [waves(40, 360, 318)] },
+  ]},
+  { id: 'chick', n: 'Chick in an egg', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big round arch for the chick.', s: ['M135 228 A75 75 0 1 1 265 228'] },
+    { t: 'Dot eyes and a little triangle beak.', s: [dot(175, 175, 8), dot(225, 175, 8), Z(188, 198, 212, 198, 200, 215)] },
+    { t: 'Two curly feathers on top.', s: ['M195 115 Q188 92 204 84', 'M205 116 Q216 98 230 99'] },
+    { t: 'Little wings.', s: ['M128 205 Q104 222 128 245', 'M272 205 Q296 222 272 245'] },
+    { t: 'A zigzag for the cracked shell.', s: [L(110, 240, 135, 215, 155, 242, 180, 214, 200, 242, 220, 214, 245, 242, 265, 215, 290, 240)] },
+    { t: 'The bottom of the egg.', s: ['M110 240 Q112 345 200 345 Q288 345 290 240'] },
+  ]},
+  { id: 'ladybug', n: 'Ladybug', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the body.', s: [C(200, 220, 95)] },
+    { t: 'A round head on top.', s: ['M152 148 Q160 95 200 95 Q240 95 248 148'] },
+    { t: 'A line down the middle of the back.', s: [L(200, 128, 200, 315)] },
+    { t: 'Round spots.', s: [C(155, 200, 16), C(245, 200, 16), C(160, 265, 14), C(240, 265, 14)] },
+    { t: 'Two eyes.', s: [C(182, 120, 10), dot(184, 122, 5), C(218, 120, 10), dot(216, 122, 5)] },
+    { t: 'Two antennae.', s: ['M185 98 Q175 70 160 65', 'M215 98 Q225 70 240 65', dot(160, 63, 5), dot(240, 63, 5)] },
+    { t: 'Three little legs on each side.', s: [L(110, 190, 86, 180), L(105, 225, 80, 228), L(112, 262, 90, 280), L(290, 190, 314, 180), L(295, 225, 320, 228), L(288, 262, 310, 280)] },
+  ]},
+  { id: 'spider', n: 'Spider', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw an oval for the body.', s: [E(200, 232, 50, 60)] },
+    { t: 'A circle head on top.', s: [C(200, 150, 32)] },
+    { t: 'Two big eyes.', s: [C(188, 145, 8), dot(189, 146, 4), C(212, 145, 8), dot(211, 146, 4)] },
+    { t: 'A smile.', s: ['M190 165 Q200 172 210 165'] },
+    { t: 'Four bent legs on the left.', s: [L(155, 202, 100, 172, 80, 212), L(152, 226, 90, 216, 70, 262), L(155, 250, 100, 262, 85, 310), L(162, 272, 120, 300, 115, 345)] },
+    { t: 'Four bent legs on the right. Make them match.', s: [L(245, 202, 300, 172, 320, 212), L(248, 226, 310, 216, 330, 262), L(245, 250, 300, 262, 315, 310), L(238, 272, 280, 300, 285, 345)] },
+    { t: 'A thread to hang from.', s: [L(200, 118, 200, 20)] },
+  ]},
+  { id: 'snake', n: 'Snake', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a long wavy line, like an "S" on its side.', s: ['M70 320 Q60 250 130 250 Q200 250 200 190 Q200 120 270 120'] },
+    { t: 'A second wavy line below it, the same shape.', s: ['M100 330 Q95 280 140 280 Q230 280 230 190 Q230 150 270 150'] },
+    { t: 'Join them at the end to make a pointy tail.', s: ['M70 320 Q80 342 100 330'] },
+    { t: 'An oval head.', s: [E(292, 135, 32, 24)] },
+    { t: 'An eye and a forked tongue.', s: [dot(298, 128, 5), L(323, 140, 345, 140), L(345, 140, 355, 132), L(345, 140, 355, 148)] },
+    { t: 'Spots along the body.', s: [C(91, 280, 6), C(135, 265, 6), C(195, 246, 6), C(215, 190, 6), C(229, 149, 6)] },
+  ]},
+  { id: 'shark', n: 'Shark', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a long pointy body.', s: ['M50 210 Q120 150 250 160 Q310 165 340 200 Q310 235 250 240 Q120 250 50 210 Z'] },
+    { t: 'A tail like a sideways "V".', s: [L(60, 205, 20, 160, 40, 210, 20, 260, 60, 215)] },
+    { t: 'A big fin on top.', s: [L(170, 158, 205, 100, 232, 162)] },
+    { t: 'A small fin underneath.', s: [L(180, 244, 165, 285, 215, 242)] },
+    { t: 'An eye and a mouth.', s: [dot(300, 192, 5), 'M290 220 Q310 224 326 210'] },
+    { t: 'Gill lines.', s: ['M266 186 Q261 200 266 216', 'M253 188 Q248 202 253 218'] },
+    { t: 'Waves at the top.', s: [waves(20, 380, 60)] },
+  ]},
+  { id: 'dolphin', n: 'Dolphin', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw the body as a big curve, with a long nose.', s: ['M70 280 Q120 120 290 140 Q330 150 348 168 Q325 175 300 172 Q170 170 100 290 Z'] },
+    { t: 'A tail at the bottom end.', s: [L(80, 282, 48, 296, 72, 312, 94, 298, 104, 330, 110, 292)] },
+    { t: 'A fin on its back.', s: ['M180 137 Q200 95 228 92 Q215 118 230 140'] },
+    { t: 'A flipper.', s: ['M210 166 Q200 206 225 200 Q232 186 228 168'] },
+    { t: 'An eye and a smile.', s: [dot(295, 155, 5), 'M312 168 Q322 170 330 166'] },
+    { t: 'Waves and splashes.', s: [waves(30, 370, 352), drop(150, 318), drop(60, 330)] },
+  ]},
+  { id: 'jellyfish', n: 'Jellyfish', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a dome with a scalloped bottom.', s: ['M110 190 Q110 90 200 90 Q290 90 290 190 Q275 205 260 190 Q245 205 230 190 Q215 205 200 190 Q185 205 170 190 Q155 205 140 190 Q125 205 110 190'] },
+    { t: 'Eyes and a smile.', s: [dot(175, 150, 7), dot(225, 150, 7), 'M185 170 Q200 180 215 170'] },
+    { t: 'Two wiggly tentacles on the outside.', s: ['M130 200 Q115 240 135 270 Q150 300 130 340', 'M270 200 Q285 240 265 270 Q250 300 270 340'] },
+    { t: 'Two more on the inside.', s: ['M170 205 Q160 250 178 280 Q192 310 172 360', 'M230 205 Q240 250 222 280 Q208 310 228 360'] },
+    { t: 'A frilly one in the middle.', s: ['M195 205 Q205 230 195 255 Q185 280 200 300'] },
+    { t: 'Bubbles.', s: [C(320, 110, 8), C(335, 80, 5)] },
+  ]},
+  { id: 'starfish', n: 'Starfish', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big five-pointed star. Go point, in, point, in.', s: [zig(200, 210, 140, 62, 5)] },
+    { t: 'Two dot eyes.', s: [dot(180, 200, 7), dot(220, 200, 7)] },
+    { t: 'A smile.', s: ['M180 225 Q200 242 220 225'] },
+    { t: 'A dot on each arm.', s: [dot(200, 115, 4), dot(290, 181, 4), dot(256, 287, 4), dot(144, 287, 4), dot(110, 181, 4)] },
+    { t: 'Sand at the bottom.', s: [L(30, 372, 370, 372)] },
+  ]},
+  { id: 'seahorse', n: 'Seahorse', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(215, 115, 30)] },
+    { t: 'A long tube snout.', s: [L(240, 104, 285, 98, 287, 118, 242, 126)] },
+    { t: 'A tall oval body.', s: [E(215, 210, 40, 70)] },
+    { t: 'A curly tail.', s: ['M210 279 Q205 330 235 335 Q260 335 255 310 Q250 292 232 300'] },
+    { t: 'A zigzag fin on the back.', s: [L(178, 190, 150, 200, 178, 215, 152, 228, 180, 240)] },
+    { t: 'Little spikes on the head, and an eye.', s: [L(200, 88, 205, 70, 215, 86, 222, 70, 228, 90), C(220, 110, 7), dot(221, 110, 3)] },
+    { t: 'Lines across the belly.', s: ['M225 170 Q240 172 250 168', 'M225 200 Q242 202 254 198', 'M225 230 Q240 232 250 228'] },
+  ]},
+  { id: 'panda', n: 'Panda', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a big circle for the head.', s: [C(200, 170, 80)] },
+    { t: 'Two dark round ears.', s: [dot(130, 105, 26), dot(270, 105, 26)] },
+    { t: 'Ovals around the eyes for the eye patches.', s: [E(168, 168, 18, 24), E(232, 168, 18, 24)] },
+    { t: 'Eyes inside the patches.', s: [dot(172, 165, 6), dot(228, 165, 6)] },
+    { t: 'A nose and a mouth.', s: [fill(E(200, 200, 14, 9)), 'M200 209 Q190 222 180 215', 'M200 209 Q210 222 220 215'] },
+    { t: 'A round body.', s: [E(200, 312, 75, 64)] },
+    { t: 'Two arms.', s: [E(135, 312, 20, 35), E(265, 312, 20, 35)] },
+    { t: 'Two feet.', s: [E(165, 375, 25, 12), E(235, 375, 25, 12)] },
+  ]},
+  { id: 'koala', n: 'Koala', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw a wide oval for the head.', s: [E(200, 190, 85, 75)] },
+    { t: 'Two big round ears.', s: [C(115, 135, 40), C(285, 135, 40)] },
+    { t: 'Smaller circles inside the ears.', s: [C(115, 138, 20), C(285, 138, 20)] },
+    { t: 'A big dark oval nose.', s: [fill(E(200, 200, 22, 32))] },
+    { t: 'Eyes and a small mouth.', s: [dot(160, 180, 7), dot(240, 180, 7), 'M188 242 Q200 250 212 242'] },
+    { t: 'An oval body.', s: [E(200, 320, 65, 50)] },
+    { t: 'A branch across.', s: [L(30, 300, 370, 300)] },
+    { t: 'Paws holding the branch.', s: [E(150, 300, 18, 12), E(250, 300, 18, 12)] },
+  ]},
+  { id: 'hippo', n: 'Hippo', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw an oval for the top of the head.', s: [E(200, 150, 70, 55)] },
+    { t: 'A big wide oval for the nose part.', s: [E(200, 250, 105, 65)] },
+    { t: 'Two small ears.', s: [E(140, 100, 14, 20), E(260, 100, 14, 20)] },
+    { t: 'Two dot eyes.', s: [dot(170, 140, 7), dot(230, 140, 7)] },
+    { t: 'Two big nostrils.', s: [fill(E(160, 225, 9, 12)), fill(E(240, 225, 9, 12))] },
+    { t: 'A wide smile.', s: ['M140 275 Q200 300 260 275'] },
+    { t: 'Water.', s: [waves(30, 370, 332)] },
+  ]},
+  { id: 'tiger', n: 'Tiger', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a big wide oval for the head.', s: [E(200, 195, 95, 85)] },
+    { t: 'Two round ears.', s: ['M125 145 Q110 90 160 112', 'M275 145 Q290 90 240 112'] },
+    { t: 'Oval eyes.', s: [fill(E(160, 180, 8, 11)), fill(E(240, 180, 8, 11))] },
+    { t: 'Two circles for the muzzle.', s: [C(180, 240, 25), C(220, 240, 25)] },
+    { t: 'A triangle nose and a mouth.', s: [fill(Z(186, 214, 214, 214, 200, 228)), 'M190 268 Q200 275 210 268'] },
+    { t: 'Stripes on the forehead.', s: [L(200, 112, 200, 140), L(180, 116, 185, 138), L(220, 116, 215, 138)] },
+    { t: 'Stripes on the sides of the face.', s: [L(108, 180, 135, 190), L(106, 205, 135, 208), L(110, 230, 138, 226), L(292, 180, 265, 190), L(294, 205, 265, 208), L(290, 230, 262, 226)] },
+    { t: 'Whisker dots.', s: [dot(172, 240, 2.5), dot(182, 250, 2.5), dot(228, 240, 2.5), dot(218, 250, 2.5)] },
+  ]},
+  { id: 'parrot', n: 'Parrot', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw a circle for the head.', s: [C(210, 120, 45)] },
+    { t: 'A hooked beak.', s: ['M252 108 Q285 110 280 140 Q270 150 252 140'] },
+    { t: 'A round eye.', s: [C(222, 110, 9), dot(224, 110, 4)] },
+    { t: 'The body.', s: ['M175 145 Q140 230 185 300 L235 300 Q265 220 245 150'] },
+    { t: 'A long wing.', s: ['M190 170 Q160 230 195 290 Q215 240 205 175'] },
+    { t: 'Long tail feathers.', s: [L(195, 300, 180, 380, 205, 360, 215, 385, 225, 300)] },
+    { t: 'A perch and feet.', s: [L(110, 300, 320, 300), 'M200 300 Q195 312 205 312', 'M225 300 Q220 312 230 312'] },
+  ]},
+  { id: 'bat', n: 'Bat', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw an oval for the body.', s: [E(200, 210, 30, 45)] },
+    { t: 'A circle head.', s: [C(200, 150, 26)] },
+    { t: 'Two pointy ears.', s: [L(184, 135, 180, 108, 196, 126), L(216, 135, 220, 108, 204, 126)] },
+    { t: 'Eyes and a smile with tiny fangs.', s: [dot(191, 148, 4), dot(209, 148, 4), 'M190 162 Q200 170 210 162', L(195, 165, 197, 172, 199, 166)] },
+    { t: 'The left wing, with bumpy edges.', s: ['M172 190 Q130 150 60 165 Q80 185 75 210 Q100 200 110 225 Q130 210 145 235 Q160 220 175 228'] },
+    { t: 'The right wing. Make it match.', s: ['M228 190 Q270 150 340 165 Q320 185 325 210 Q300 200 290 225 Q270 210 255 235 Q240 220 225 228'] },
+    { t: 'A moon behind.', s: [C(320, 70, 30)] },
+  ]},
+  { id: 'caterpillar', n: 'Caterpillar', c: 'Animals', lv: 1, steps: [
+    { t: 'Draw four circles in a row for the body, getting bigger.', s: [C(90, 250, 32), C(140, 240, 34), C(192, 232, 36), C(246, 226, 38)] },
+    { t: 'A big circle for the head.', s: [C(305, 200, 45)] },
+    { t: 'Eyes and a smile.', s: [dot(292, 190, 7), dot(320, 190, 7), 'M292 215 Q306 228 322 214'] },
+    { t: 'Two antennae.', s: [L(290, 160, 275, 125), L(320, 160, 335, 125), dot(275, 122, 6), dot(335, 122, 6)] },
+    { t: 'Short legs.', s: [L(85, 282, 82, 298), L(135, 274, 132, 292), L(188, 268, 186, 288), L(242, 264, 240, 284)] },
+    { t: 'A leaf to walk on.', s: ['M30 302 Q200 330 370 272'] },
+  ]},
+  { id: 'flamingo', n: 'Flamingo', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw an oval for the body.', s: [E(180, 200, 70, 40)] },
+    { t: 'Two curvy lines for a long "S" neck.', s: ['M235 172 Q280 140 262 100 Q248 66 280 56', 'M250 190 Q300 150 280 100 Q270 76 292 74'] },
+    { t: 'A small head and a bent beak.', s: [C(292, 62, 16), L(306, 58, 326, 70, 318, 82, 302, 74)] },
+    { t: 'An eye and a wing.', s: [dot(292, 58, 3.5), 'M130 196 Q180 176 225 200 Q180 222 130 196'] },
+    { t: 'One straight leg and one bent leg.', s: [L(180, 240, 180, 370), L(200, 370, 180, 370), L(165, 238, 135, 280, 172, 290)] },
+    { t: 'A pointy tail.', s: [L(110, 196, 85, 186, 108, 210)] },
+    { t: 'Water.', s: [waves(60, 340, 372)] },
+  ]},
+  { id: 'squirrel', n: 'Squirrel', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw an oval for the body.', s: [E(200, 260, 55, 70)] },
+    { t: 'A circle head.', s: [C(230, 165, 40)] },
+    { t: 'Two pointy ears.', s: [L(212, 132, 218, 100, 238, 128), L(240, 127, 254, 98, 262, 134)] },
+    { t: 'An eye and a nose.', s: [dot(245, 158, 5), dot(268, 172, 4)] },
+    { t: 'A big fluffy tail curling up.', s: ['M150 300 Q60 300 70 200 Q80 120 150 140 Q110 160 120 210 Q130 260 160 250'] },
+    { t: 'An acorn in its paws.', s: [E(255, 242, 14, 16), 'M240 234 Q255 216 270 234 Z'] },
+    { t: 'Feet and the ground.', s: [E(190, 330, 25, 10), E(235, 330, 22, 10), L(40, 342, 360, 342)] },
+  ]},
+  { id: 'deer', n: 'Deer', c: 'Animals', lv: 2, steps: [
+    { t: 'Draw the face: wide at the top, narrow at the bottom.', s: ['M150 140 Q200 120 250 140 Q260 220 220 290 Q200 305 180 290 Q140 220 150 140 Z'] },
+    { t: 'Two ears sticking out.', s: [E(115, 160, 32, 14), E(285, 160, 32, 14)] },
+    { t: 'Antlers: a main line with little branches.', s: [L(165, 130, 140, 60), L(150, 88, 120, 75), L(146, 75, 160, 48), L(235, 130, 260, 60), L(250, 88, 280, 75), L(254, 75, 240, 48)] },
+    { t: 'Two dot eyes.', s: [dot(175, 190, 7), dot(225, 190, 7)] },
+    { t: 'A dark nose.', s: [fill(E(200, 276, 16, 11))] },
+    { t: 'Little spots on the cheeks.', s: [C(160, 230, 6), C(240, 230, 6)] },
+  ]},
+
+  // ================= Vehicles =================
+  { id: 'tractor', n: 'Tractor', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw a tall rectangle for the cab.', s: [R(90, 110, 100, 150)] },
+    { t: 'A window.', s: [R(110, 130, 60, 55)] },
+    { t: 'A lower rectangle in front for the engine.', s: [R(190, 190, 120, 70)] },
+    { t: 'An exhaust pipe.', s: [R(270, 150, 12, 40)] },
+    { t: 'A big back wheel with a circle inside.', s: [C(130, 280, 55), C(130, 280, 20)] },
+    { t: 'A small front wheel with a circle inside.', s: [C(280, 300, 35), C(280, 300, 12)] },
+    { t: 'Short lines on the big wheel for the grip.', s: rays(130, 280, 45, 55, 12) },
+    { t: 'The ground.', s: [L(20, 335, 380, 335)] },
+  ]},
+  { id: 'digger', n: 'Digger', c: 'Vehicles', lv: 3, steps: [
+    { t: 'Draw a long rounded shape for the tracks.', s: [RR(60, 280, 220, 50, 25)] },
+    { t: 'Four wheels inside the tracks.', s: [C(90, 305, 15), C(150, 305, 15), C(210, 305, 15), C(250, 305, 15)] },
+    { t: 'A rectangle body on top.', s: [R(80, 220, 170, 60)] },
+    { t: 'A cab with a window.', s: [R(90, 150, 80, 70), R(105, 165, 50, 40)] },
+    { t: 'The big arm going up.', s: [L(240, 228, 305, 138, 325, 150, 252, 246)] },
+    { t: 'The second part of the arm, going down.', s: [L(312, 142, 345, 228), L(328, 150, 360, 224)] },
+    { t: 'The bucket.', s: ['M340 225 L375 225 L370 265 Q345 275 330 250 Z'] },
+    { t: 'Teeth on the bucket.', s: [L(345, 268, 342, 280), L(355, 270, 354, 282), L(365, 266, 366, 278)] },
+  ]},
+  { id: 'racecar', n: 'Race car', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw the long low body.', s: [L(40, 255, 45, 230, 150, 222, 190, 195, 250, 195, 270, 222, 355, 228, 362, 255, 40, 255)] },
+    { t: 'The driver\u2019s helmet and visor.', s: [C(220, 182, 20), L(222, 176, 240, 176, 240, 186)] },
+    { t: 'A wing on the back.', s: [R(40, 180, 55, 12), L(65, 192, 65, 230)] },
+    { t: 'Two wheels.', s: [C(110, 262, 30), C(300, 262, 30)] },
+    { t: 'Circles in the wheels.', s: [C(110, 262, 10), C(300, 262, 10)] },
+    { t: 'A number circle on the side.', s: [C(165, 238, 13), L(165, 231, 165, 245)] },
+    { t: 'Speed lines behind.', s: [L(5, 210, 32, 210), L(2, 232, 30, 232)] },
+    { t: 'The road.', s: [L(20, 292, 380, 292)] },
+  ]},
+  { id: 'motorbike', n: 'Motorbike', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw two big wheels.', s: [C(100, 280, 45), C(300, 280, 45)] },
+    { t: 'Small circles in the wheels.', s: [C(100, 280, 10), C(300, 280, 10)] },
+    { t: 'The fuel tank: a rounded shape in the middle.', s: ['M150 210 Q200 175 255 205 L245 230 L160 230 Z'] },
+    { t: 'A seat.', s: [RR(108, 198, 50, 14, 7)] },
+    { t: 'The engine box.', s: [R(170, 232, 60, 40)] },
+    { t: 'The frame and front fork.', s: [L(100, 280, 160, 230), L(255, 205, 300, 280)] },
+    { t: 'Handlebars and a headlight.', s: [L(250, 170, 262, 205), L(238, 170, 262, 170), E(268, 196, 8, 12)] },
+    { t: 'The road.', s: [L(20, 325, 380, 325)] },
+  ]},
+  { id: 'bicycle', n: 'Bicycle', c: 'Vehicles', lv: 3, steps: [
+    { t: 'Draw the back wheel.', s: [C(100, 270, 60)] },
+    { t: 'The front wheel, the same size.', s: [C(300, 270, 60)] },
+    { t: 'A dot in the middle of each wheel.', s: [dot(100, 270, 5), dot(300, 270, 5)] },
+    { t: 'The back triangle of the frame.', s: [Z(100, 270, 180, 270, 150, 170)] },
+    { t: 'The front triangle of the frame.', s: [L(150, 170, 250, 170, 180, 270)] },
+    { t: 'The front fork down to the wheel.', s: [L(250, 170, 300, 270)] },
+    { t: 'A seat and handlebars.', s: [L(150, 170, 148, 158), L(132, 156, 168, 156), L(250, 170, 245, 140, 270, 135)] },
+    { t: 'Pedals and the ground.', s: [C(180, 270, 12), L(180, 270, 190, 290), L(182, 290, 198, 290), L(20, 330, 380, 330)] },
+  ]},
+  { id: 'scooter', n: 'Scooter', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a long flat board.', s: [RR(100, 280, 190, 18, 9)] },
+    { t: 'Two small wheels.', s: [C(110, 315, 20), C(300, 315, 20)] },
+    { t: 'A tall slanted pole.', s: [L(285, 282, 320, 110)] },
+    { t: 'Handlebars with round grips.', s: [L(295, 108, 345, 112), C(295, 108, 6), C(345, 112, 6)] },
+    { t: 'Speed lines.', s: [L(20, 250, 70, 250), L(30, 272, 80, 272)] },
+    { t: 'The ground.', s: [L(20, 335, 380, 335)] },
+  ]},
+  { id: 'ship', n: 'Big ship', c: 'Vehicles', lv: 2, steps: [
+    { t: 'Draw the hull: wide on top, narrower at the bottom.', s: [Z(40, 250, 360, 250, 320, 320, 80, 320)] },
+    { t: 'A long deck on top.', s: [R(110, 200, 180, 50)] },
+    { t: 'A smaller deck above it.', s: [R(140, 160, 120, 40)] },
+    { t: 'Round windows on the hull.', s: [C(110, 282, 9), C(150, 282, 9), C(190, 282, 9), C(230, 282, 9), C(270, 282, 9)] },
+    { t: 'Square windows on the deck.', s: [R(125, 215, 25, 18), R(165, 215, 25, 18), R(205, 215, 25, 18), R(245, 215, 25, 18)] },
+    { t: 'Two chimneys with stripes.', s: [R(165, 115, 25, 45), R(215, 115, 25, 45), L(165, 128, 190, 128), L(215, 128, 240, 128)] },
+    { t: 'Puffs of smoke.', s: [C(190, 96, 12), C(206, 70, 16)] },
+    { t: 'Waves.', s: [waves(20, 380, 336)] },
+  ]},
+  { id: 'skateboard', n: 'Skateboard', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a long board with round ends.', s: [RR(60, 210, 280, 18, 9)] },
+    { t: 'A stripe along the board.', s: [L(90, 219, 310, 219)] },
+    { t: 'Two wheel holders under the board.', s: [L(110, 228, 100, 245, 140, 245, 130, 228), L(270, 228, 260, 245, 300, 245, 290, 228)] },
+    { t: 'Four wheels.', s: [C(105, 258, 13), C(135, 258, 13), C(265, 258, 13), C(295, 258, 13)] },
+    { t: 'The ground and speed lines.', s: [L(20, 272, 380, 272), L(10, 205, 40, 205), L(15, 225, 45, 225)] },
+  ]},
+  { id: 'blimp', n: 'Blimp', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a big long oval.', s: [E(200, 170, 140, 65)] },
+    { t: 'Two tail fins at the back.', s: [L(72, 145, 35, 100, 95, 128), L(72, 195, 35, 240, 95, 212)] },
+    { t: 'Curved lines for the panels.', s: ['M140 113 Q125 170 140 228', 'M200 105 Q190 170 200 235', 'M260 113 Q275 170 260 228'] },
+    { t: 'A little cabin underneath.', s: [RR(160, 240, 80, 30, 8)] },
+    { t: 'Round windows in the cabin.', s: [C(180, 255, 6), C(200, 255, 6), C(220, 255, 6)] },
+    { t: 'Clouds.', s: [cloud(320, 320, 0.8), cloud(90, 330, 0.7)] },
+  ]},
+  { id: 'cablecar', n: 'Cable car', c: 'Vehicles', lv: 1, steps: [
+    { t: 'Draw a long slanted line for the cable.', s: [L(20, 80, 380, 40)] },
+    { t: 'The wheels on the cable and a pole down.', s: [R(182, 50, 36, 14), L(200, 64, 200, 100)] },
+    { t: 'A roof.', s: [Z(125, 122, 140, 100, 260, 100, 275, 122)] },
+    { t: 'The cabin with round corners.', s: [RR(130, 122, 140, 128, 16)] },
+    { t: 'Two windows.', s: [R(150, 140, 45, 45), R(205, 140, 45, 45)] },
+    { t: 'A stripe.', s: [L(130, 210, 270, 210)] },
+    { t: 'Mountains below.', s: [L(20, 390, 110, 300, 170, 350, 260, 280, 380, 390)] },
+  ]},
+
+  // ================= Space =================
+  { id: 'planet', n: 'Ringed planet', c: 'Space', lv: 1, steps: [
+    { t: 'Draw a big circle for the planet.', s: [C(200, 200, 80)] },
+    { t: 'A long flat ring around it, going behind at the top.', s: ['M125 172 A150 35 0 0 0 50 200 A150 35 0 0 0 350 200 A150 35 0 0 0 275 172'] },
+    { t: 'Stripes on the planet.', s: ['M150 140 Q200 150 250 140', 'M128 168 Q200 180 272 168'] },
+    { t: 'A little moon.', s: [C(330, 80, 15)] },
+    { t: 'Stars.', s: [...plus(70, 80), ...plus(320, 320), ...plus(90, 330, 7)] },
+  ]},
+  { id: 'moon', n: 'Sleepy moon', c: 'Space', lv: 1, steps: [
+    { t: 'Draw a crescent: a big curve, then a smaller curve back.', s: ['M240 76 A130 130 0 1 0 240 324 A140 140 0 0 1 240 76 Z'] },
+    { t: 'A sleepy closed eye and a smile.', s: ['M115 170 Q125 180 135 170', 'M118 230 Q132 242 146 228'] },
+    { t: 'A big star.', s: [star(310, 100, 22)] },
+    { t: 'Two smaller stars.', s: [star(330, 250, 16), star(300, 345, 12)] },
+    { t: 'Tiny dots for faraway stars.', s: [dot(280, 180, 3), dot(360, 170, 3), dot(250, 40, 3), dot(360, 320, 3)] },
+  ]},
+  { id: 'astronaut', n: 'Astronaut', c: 'Space', lv: 2, steps: [
+    { t: 'Draw a big circle for the helmet.', s: [C(200, 130, 60)] },
+    { t: 'A rounded window for the visor.', s: [RR(160, 105, 80, 50, 22)] },
+    { t: 'The body with round corners.', s: [RR(145, 190, 110, 110, 20)] },
+    { t: 'A control panel with two buttons.', s: [R(175, 215, 50, 35), dot(188, 232, 5), dot(212, 232, 5)] },
+    { t: 'Puffy arms and round gloves.', s: [RR(105, 195, 40, 85, 18), RR(255, 195, 40, 85, 18), C(125, 290, 15), C(275, 290, 15)] },
+    { t: 'Legs and boots.', s: [RR(155, 300, 40, 58, 12), RR(205, 300, 40, 58, 12), RR(150, 352, 50, 20, 8), RR(200, 352, 50, 20, 8)] },
+    { t: 'An antenna on the helmet.', s: [L(240, 85, 255, 60), dot(256, 57, 5)] },
+    { t: 'Stars around.', s: [...plus(60, 60), ...plus(340, 160), ...plus(60, 350, 7)] },
+  ]},
+  { id: 'satellite', n: 'Satellite', c: 'Space', lv: 2, steps: [
+    { t: 'Draw a square for the body.', s: [R(170, 170, 60, 60)] },
+    { t: 'Two long rectangles for the solar panels.', s: [R(60, 180, 100, 40), R(240, 180, 100, 40)] },
+    { t: 'Lines across the panels.', s: [L(85, 180, 85, 220), L(110, 180, 110, 220), L(135, 180, 135, 220), L(265, 180, 265, 220), L(290, 180, 290, 220), L(315, 180, 315, 220)] },
+    { t: 'Short lines joining the panels to the body.', s: [L(160, 200, 170, 200), L(230, 200, 240, 200)] },
+    { t: 'A dish and antenna on top.', s: [L(200, 150, 200, 170), E(200, 140, 30, 10), L(200, 140, 200, 110), dot(200, 106, 4)] },
+    { t: 'A round window.', s: [C(200, 200, 12)] },
+    { t: 'Stars.', s: [...plus(70, 90), ...plus(330, 320), ...plus(320, 90, 7)] },
+  ]},
+  { id: 'shootingstar', n: 'Shooting star', c: 'Space', lv: 1, steps: [
+    { t: 'Draw a big star.', s: [star(270, 130, 60)] },
+    { t: 'A happy face.', s: [dot(258, 128, 5), dot(282, 128, 5), 'M260 145 Q270 152 280 145'] },
+    { t: 'Three curved lines for the trail.', s: ['M230 160 Q150 240 60 280', 'M245 175 Q170 260 90 310', 'M215 145 Q140 215 50 245'] },
+    { t: 'Sparkles.', s: [...plus(100, 100), ...plus(330, 300)] },
+  ]},
+  { id: 'shuttle', n: 'Space shuttle', c: 'Space', lv: 2, steps: [
+    { t: 'Draw a tall body with a round nose.', s: ['M200 40 Q235 80 235 150 L235 300 L165 300 L165 150 Q165 80 200 40 Z'] },
+    { t: 'Two big wings.', s: [L(165, 200, 90, 300, 165, 300), L(235, 200, 310, 300, 235, 300)] },
+    { t: 'Two little windows.', s: [R(188, 90, 10, 12), R(202, 90, 10, 12)] },
+    { t: 'A stripe and a star.', s: [L(165, 170, 235, 170), star(200, 232, 14)] },
+    { t: 'Two engines at the bottom.', s: [L(170, 300, 160, 330, 190, 330, 185, 300), L(215, 300, 210, 330, 240, 330, 230, 300)] },
+    { t: 'Flames.', s: ['M163 332 Q175 372 187 332', 'M213 332 Q225 372 237 332'] },
+  ]},
+
+  // ================= Nature =================
+  { id: 'storm', n: 'Storm cloud', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a big puffy cloud.', s: [cloud(200, 140, 2.2)] },
+    { t: 'A grumpy face.', s: [dot(180, 128, 6), dot(220, 128, 6), 'M185 152 Q200 144 215 152'] },
+    { t: 'A zigzag lightning bolt.', s: [Z(205, 180, 170, 250, 200, 250, 180, 320, 240, 230, 210, 230, 230, 180)] },
+    { t: 'Rain drops.', s: [drop(120, 200), drop(150, 240), drop(270, 210), drop(300, 250), drop(130, 290), drop(280, 300)] },
+  ]},
+  { id: 'volcano', n: 'Volcano', c: 'Nature', lv: 2, steps: [
+    { t: 'Draw the mountain with a flat top.', s: [L(40, 350, 150, 140, 250, 140, 360, 350)] },
+    { t: 'An oval for the hole at the top.', s: [E(200, 140, 50, 12)] },
+    { t: 'Lava dripping down.', s: ['M150 140 Q165 190 175 165 Q190 210 200 175 Q215 220 228 165 Q238 190 250 140'] },
+    { t: 'Lava blobs shooting up.', s: [C(170, 80, 14), C(205, 55, 18), C(240, 85, 12), L(190, 125, 172, 96), L(210, 125, 210, 76), L(225, 128, 236, 100)] },
+    { t: 'A puff of smoke.', s: [cloud(100, 60, 0.7)] },
+    { t: 'The ground.', s: [L(20, 350, 380, 350)] },
+  ]},
+  { id: 'palm', n: 'Palm tree', c: 'Nature', lv: 2, steps: [
+    { t: 'Draw two curved lines for the trunk.', s: ['M190 360 Q175 260 215 160', 'M215 360 Q200 260 235 162'] },
+    { t: 'Lines across the trunk.', s: [L(186, 300, 210, 300), L(190, 250, 214, 250), L(201, 200, 223, 200)] },
+    { t: 'Two leaves on the left.', s: ['M225 160 Q170 115 105 165 Q165 135 225 160', 'M225 160 Q185 85 125 92 Q180 110 225 160'] },
+    { t: 'Two leaves on the right.', s: ['M225 160 Q265 85 325 92 Q270 110 225 160', 'M225 160 Q285 120 345 168 Q285 140 225 160'] },
+    { t: 'Coconuts.', s: [C(215, 176, 10), C(236, 178, 10)] },
+    { t: 'A little island.', s: ['M60 360 Q200 322 340 360'] },
+    { t: 'Waves.', s: [waves(20, 380, 376)] },
+  ]},
+  { id: 'pine', n: 'Pine tree', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a triangle at the top.', s: [Z(200, 62, 140, 150, 260, 150)] },
+    { t: 'A bigger triangle below it.', s: [Z(200, 110, 120, 220, 280, 220)] },
+    { t: 'The biggest triangle at the bottom.', s: [Z(200, 170, 100, 300, 300, 300)] },
+    { t: 'A trunk.', s: [R(185, 300, 30, 50)] },
+    { t: 'A star on top.', s: [star(200, 48, 18)] },
+    { t: 'Round decorations.', s: [C(170, 200, 8), C(230, 190, 8), C(200, 262, 8), C(150, 282, 8), C(250, 276, 8)] },
+    { t: 'The ground.', s: [L(40, 350, 360, 350)] },
+  ]},
+  { id: 'leaf', n: 'Leaf', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a leaf shape, pointy at the top.', s: ['M200 60 Q320 140 280 270 Q240 340 200 340 Q160 340 120 270 Q80 140 200 60 Z'] },
+    { t: 'A line down the middle that keeps going for the stem.', s: [L(200, 80, 200, 385)] },
+    { t: 'Two slanted lines at the top.', s: [L(200, 150, 250, 120), L(200, 150, 150, 120)] },
+    { t: 'Two more in the middle.', s: [L(200, 210, 262, 175), L(200, 210, 138, 175)] },
+    { t: 'Two more at the bottom.', s: [L(200, 270, 255, 240), L(200, 270, 145, 240)] },
+  ]},
+  { id: 'mountains', n: 'Mountains', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw a big pointy mountain.', s: [L(30, 330, 160, 100, 290, 330)] },
+    { t: 'A smaller mountain behind it on the right.', s: [L(222, 210, 275, 150, 370, 330)] },
+    { t: 'Snow on the tops, with a zigzag edge.', s: [L(127, 157, 160, 100, 193, 157, 177, 146, 160, 162, 143, 146, 127, 157), L(244, 185, 275, 150, 293, 185, 282, 178, 268, 190, 255, 178, 244, 185)] },
+    { t: 'A sun.', s: [C(320, 80, 25)] },
+    { t: 'The ground.', s: [L(20, 330, 380, 330)] },
+    { t: 'A river getting wider as it comes closer.', s: ['M140 330 Q170 355 150 395', 'M175 330 Q200 355 190 395'] },
+  ]},
+  { id: 'tulip', n: 'Tulip', c: 'Nature', lv: 1, steps: [
+    { t: 'Draw the flower: three points on top, round at the bottom.', s: ['M150 120 L170 160 L200 115 L230 160 L250 120 Q260 200 200 220 Q140 200 150 120 Z'] },
+    { t: 'A long stem.', s: ['M200 220 Q195 290 200 350'] },
+    { t: 'A long leaf on the left.', s: ['M198 330 Q140 300 130 230 Q175 260 198 300'] },
+    { t: 'A long leaf on the right.', s: ['M202 320 Q260 290 268 220 Q225 250 202 290'] },
+    { t: 'The ground.', s: [L(120, 350, 280, 350)] },
+  ]},
+  { id: 'sunflower', n: 'Sunflower', c: 'Nature', lv: 2, steps: [
+    { t: 'Draw a circle for the middle.', s: [C(200, 140, 40)] },
+    { t: 'Pointy petals all around.', s: [zig(200, 140, 85, 42, 12)] },
+    { t: 'Dots for seeds.', s: [dot(190, 130, 3), dot(210, 130, 3), dot(200, 145, 3), dot(185, 152, 3), dot(215, 152, 3), dot(200, 120, 3)] },
+    { t: 'A tall stem.', s: ['M200 226 Q190 300 200 382'] },
+    { t: 'Two big leaves.', s: ['M196 300 Q130 270 110 300 Q140 330 196 320', 'M200 340 Q270 310 290 335 Q260 365 200 355'] },
+  ]},
+
+  // ================= Food =================
+  { id: 'banana', n: 'Banana', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a long curved line.', s: ['M90 120 Q100 300 310 280'] },
+    { t: 'A second curve inside it, closer at the ends.', s: ['M110 115 Q140 250 300 255'] },
+    { t: 'Close the tip.', s: ['M300 255 Q320 262 310 280'] },
+    { t: 'A little stem at the top.', s: [L(90, 120, 95, 95, 115, 98, 110, 115)] },
+    { t: 'A line along the middle.', s: ['M100 150 Q125 270 280 270'] },
+  ]},
+  { id: 'cherries', n: 'Cherries', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a circle for one cherry.', s: [C(140, 280, 50)] },
+    { t: 'A second cherry.', s: [C(260, 290, 50)] },
+    { t: 'Two stems that meet at the top.', s: ['M150 232 Q170 140 230 80', 'M255 242 Q250 150 230 80'] },
+    { t: 'A leaf with a line in it.', s: ['M230 80 Q270 40 320 60 Q280 100 230 80', L(236, 79, 300, 64)] },
+    { t: 'Shiny spots.', s: ['M115 262 Q118 246 130 240', 'M235 272 Q238 256 250 250'] },
+  ]},
+  { id: 'strawberry', n: 'Strawberry', c: 'Food', lv: 1, steps: [
+    { t: 'Draw the berry: round on top, pointy at the bottom.', s: ['M200 340 Q90 280 110 180 Q130 130 200 140 Q270 130 290 180 Q310 280 200 340 Z'] },
+    { t: 'Pointy leaves on top.', s: [L(150, 150, 170, 115, 185, 145, 200, 105, 215, 145, 230, 115, 250, 150)] },
+    { t: 'A little stem.', s: [L(200, 105, 205, 80)] },
+    { t: 'Lots of tiny seeds.', s: [dot(160, 190, 3), dot(200, 185, 3), dot(240, 190, 3), dot(150, 235, 3), dot(185, 230, 3), dot(220, 230, 3), dot(255, 235, 3), dot(170, 275, 3), dot(205, 275, 3), dot(240, 270, 3), dot(198, 312, 3)] },
+  ]},
+  { id: 'carrot', n: 'Carrot', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a long triangle with a round top.', s: ['M150 120 Q200 110 250 125 Q230 250 200 360 Q170 250 150 120 Z'] },
+    { t: 'Three leaves on top.', s: ['M195 118 Q160 80 150 40 Q185 70 200 115', 'M200 115 Q195 65 205 25 Q215 70 205 115', 'M205 118 Q245 80 255 42 Q235 85 210 118'] },
+    { t: 'Short lines across the carrot.', s: [L(170, 170, 195, 175), L(215, 210, 232, 206), L(178, 245, 198, 250), L(205, 290, 218, 286)] },
+  ]},
+  { id: 'burger', n: 'Burger', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a dome for the top bun.', s: ['M90 180 Q90 90 200 90 Q310 90 310 180 Z'] },
+    { t: 'Sesame seeds.', s: [fill(E(160, 130, 6, 3)), fill(E(200, 115, 6, 3)), fill(E(240, 130, 6, 3)), fill(E(185, 152, 6, 3)), fill(E(225, 152, 6, 3))] },
+    { t: 'Wavy lettuce.', s: [waves(80, 320, 192, 30, 12)] },
+    { t: 'Cheese with a drip.', s: [L(85, 202, 315, 202, 300, 220, 260, 220, 250, 240, 240, 220, 95, 220, 85, 202)] },
+    { t: 'The burger patty.', s: [RR(85, 225, 230, 35, 17)] },
+    { t: 'The bottom bun.', s: ['M90 265 L310 265 Q310 305 270 305 L130 305 Q90 305 90 265 Z'] },
+  ]},
+  { id: 'donut', n: 'Donut', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a big circle.', s: [C(200, 200, 110)] },
+    { t: 'A small circle in the middle for the hole.', s: [C(200, 200, 35)] },
+    { t: 'A wavy line for the edge of the icing.', s: [bumpy(200, 200, 88, 12)] },
+    { t: 'A circle around the hole for the icing.', s: [C(200, 200, 45)] },
+    { t: 'Sprinkles.', s: [L(150, 140, 158, 132), L(240, 130, 248, 138), L(275, 190, 270, 200), L(250, 262, 258, 256), L(180, 275, 172, 268), L(125, 215, 122, 225), L(200, 125, 208, 128)] },
+  ]},
+  { id: 'lollipop', n: 'Lollipop', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a big circle.', s: [C(200, 150, 90)] },
+    { t: 'A swirl inside. Start in the middle.', s: [spiral(200, 150, 80, 3)] },
+    { t: 'A stick.', s: [R(192, 240, 16, 140)] },
+    { t: 'A bow on the stick.', s: [Z(200, 254, 165, 234, 165, 274), Z(200, 254, 235, 234, 235, 274)] },
+  ]},
+  { id: 'cake', n: 'Birthday cake', c: 'Food', lv: 2, steps: [
+    { t: 'Draw a wide rectangle for the bottom layer.', s: [R(90, 240, 220, 90)] },
+    { t: 'A smaller rectangle on top.', s: [R(120, 170, 160, 70)] },
+    { t: 'Drippy icing lines on both layers.', s: [waves(120, 280, 188, 40, -14), waves(90, 310, 266, 44, -14)] },
+    { t: 'Three candles.', s: [R(150, 120, 14, 50), R(193, 120, 14, 50), R(236, 120, 14, 50)] },
+    { t: 'A flame on each candle.', s: [flame(157, 116), flame(200, 116), flame(243, 116)] },
+    { t: 'A plate.', s: [L(60, 332, 340, 332)] },
+  ]},
+  { id: 'popsicle', n: 'Ice pop', c: 'Food', lv: 1, steps: [
+    { t: 'Draw a tall shape with a round top.', s: ['M140 300 L140 120 Q140 60 200 60 Q260 60 260 120 L260 300 Z'] },
+    { t: 'A stick at the bottom.', s: [RR(185, 300, 30, 80, 12)] },
+    { t: 'Two stripes across.', s: [L(140, 170, 260, 170), L(140, 236, 260, 236)] },
+    { t: 'A happy face between the stripes.', s: [dot(180, 196, 6), dot(220, 196, 6), 'M185 212 Q200 222 215 212'] },
+    { t: 'A drip.', s: ['M160 300 Q160 320 168 320 Q176 320 176 300'] },
+  ]},
+  { id: 'pear', n: 'Pear', c: 'Food', lv: 1, steps: [
+    { t: 'Draw the pear: thin on top, round and wide at the bottom.', s: ['M200 90 Q235 90 238 150 Q240 185 270 220 Q300 270 270 315 Q240 350 200 350 Q160 350 130 315 Q100 270 130 220 Q160 185 162 150 Q165 90 200 90 Z'] },
+    { t: 'A short stem.', s: ['M200 90 Q205 70 220 60'] },
+    { t: 'A leaf.', s: ['M206 75 Q190 45 160 50 Q175 75 206 75'] },
+    { t: 'A shiny line.', s: ['M150 250 Q140 280 155 305'] },
+  ]},
+
+  // ================= Things =================
+  { id: 'kite', n: 'Kite', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a diamond: top, right, bottom, left.', s: [Z(200, 50, 280, 150, 200, 290, 120, 150)] },
+    { t: 'A cross inside.', s: [L(200, 50, 200, 290), L(120, 150, 280, 150)] },
+    { t: 'A wavy tail.', s: ['M200 290 Q170 320 200 350 Q230 380 200 395'] },
+    { t: 'Bows on the tail.', s: [Z(185, 320, 172, 312, 172, 328), Z(185, 320, 198, 312, 198, 328), Z(215, 376, 202, 368, 202, 384), Z(215, 376, 228, 368, 228, 384)] },
+    { t: 'A string.', s: [L(160, 220, 40, 390)] },
+    { t: 'A cloud.', s: [cloud(320, 80, 0.8)] },
+  ]},
+  { id: 'crown', n: 'Crown', c: 'Things', lv: 1, steps: [
+    { t: 'Draw the crown: up and down to make three points.', s: [Z(100, 300, 100, 150, 150, 210, 200, 120, 250, 210, 300, 150, 300, 300)] },
+    { t: 'A line across for the band.', s: [L(100, 260, 300, 260)] },
+    { t: 'Balls on the points.', s: [C(100, 140, 10), C(200, 108, 12), C(300, 140, 10)] },
+    { t: 'Jewels on the band.', s: [C(150, 280, 10), C(200, 280, 12), C(250, 280, 10)] },
+    { t: 'A diamond gem in the middle.', s: [Z(200, 190, 215, 215, 200, 240, 185, 215)] },
+  ]},
+  { id: 'gift', n: 'Present', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a box.', s: [R(100, 200, 200, 150)] },
+    { t: 'A lid a little wider than the box.', s: [R(85, 165, 230, 35)] },
+    { t: 'A ribbon down the middle.', s: [L(185, 165, 185, 350), L(215, 165, 215, 350)] },
+    { t: 'A big bow on top.', s: ['M200 165 Q150 110 140 150 Q150 175 200 165', 'M200 165 Q250 110 260 150 Q250 175 200 165'] },
+    { t: 'Polka dots.', s: [C(130, 240, 8), C(270, 300, 8), C(140, 320, 8), C(265, 235, 8)] },
+  ]},
+  { id: 'teacup', n: 'Teacup', c: 'Things', lv: 1, steps: [
+    { t: 'Draw the cup: flat on top, round at the bottom.', s: ['M110 170 L290 170 Q290 300 200 300 Q110 300 110 170 Z'] },
+    { t: 'A flat oval on top for the rim.', s: [E(200, 170, 90, 18)] },
+    { t: 'A handle on the side.', s: ['M285 200 Q340 200 335 235 Q330 265 280 255'] },
+    { t: 'A saucer underneath.', s: [E(200, 308, 140, 22)] },
+    { t: 'Wavy steam.', s: ['M170 150 Q160 120 175 100 Q190 80 178 55', 'M220 150 Q210 120 225 100 Q240 80 228 55'] },
+    { t: 'A heart on the cup.', s: ['M200 252 Q170 227 180 212 Q190 202 200 217 Q210 202 220 212 Q230 227 200 252 Z'] },
+  ]},
+  { id: 'clock', n: 'Alarm clock', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a big circle.', s: [C(200, 210, 100)] },
+    { t: 'A smaller circle inside.', s: [C(200, 210, 85)] },
+    { t: 'Two bells on top and a knob.', s: ['M112 140 A38 38 0 0 1 160 102 Z', 'M288 140 A38 38 0 0 0 240 102 Z', L(200, 110, 200, 94), C(200, 88, 7)] },
+    { t: 'Two legs.', s: [L(140, 293, 120, 330), L(260, 293, 280, 330)] },
+    { t: 'Short lines for the hours.', s: rays(200, 210, 70, 80, 12) },
+    { t: 'Two hands: a long one and a short one.', s: [L(200, 210, 200, 152), L(200, 210, 240, 232)] },
+    { t: 'A dot in the middle.', s: [dot(200, 210, 6)] },
+  ]},
+  { id: 'book', n: 'Open book', c: 'Things', lv: 1, steps: [
+    { t: 'Draw the left page with curved top and bottom.', s: ['M200 120 Q140 95 70 110 L70 300 Q140 285 200 310 Z'] },
+    { t: 'The right page.', s: ['M200 120 Q260 95 330 110 L330 300 Q260 285 200 310'] },
+    { t: 'The middle line.', s: [L(200, 120, 200, 310)] },
+    { t: 'Curved lines of writing on the left.', s: ['M95 150 Q140 140 180 155', 'M95 180 Q140 170 180 185', 'M95 210 Q140 200 180 215', 'M95 240 Q140 230 180 245'] },
+    { t: 'Curved lines of writing on the right.', s: ['M220 155 Q260 140 305 150', 'M220 185 Q260 170 305 180', 'M220 215 Q260 200 305 210', 'M220 245 Q260 230 305 240'] },
+    { t: 'The cover peeking out underneath.', s: ['M60 120 L60 312 Q140 300 200 325 Q260 300 340 312 L340 120'] },
+  ]},
+  { id: 'pencil', n: 'Pencil', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a long rectangle.', s: [R(110, 170, 190, 60)] },
+    { t: 'A pointy tip on the right.', s: [Z(300, 170, 370, 200, 300, 230)] },
+    { t: 'A dark point at the very end.', s: [fill(Z(350, 191, 370, 200, 350, 209))] },
+    { t: 'A metal band on the left.', s: [R(90, 170, 20, 60), L(97, 170, 97, 230), L(103, 170, 103, 230)] },
+    { t: 'A round eraser.', s: ['M90 170 L65 170 Q50 170 50 185 L50 215 Q50 230 65 230 L90 230'] },
+    { t: 'Two lines along the pencil.', s: [L(110, 190, 300, 190), L(110, 210, 300, 210)] },
+  ]},
+  { id: 'guitar', n: 'Guitar', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a big circle for the bottom of the guitar.', s: [C(200, 280, 70)] },
+    { t: 'A smaller circle on top of it.', s: [C(200, 180, 52)] },
+    { t: 'A round sound hole.', s: [C(200, 232, 20)] },
+    { t: 'A long neck going up.', s: [R(188, 40, 24, 90)] },
+    { t: 'The head with tuning pegs.', s: [RR(180, 12, 40, 32, 6), C(172, 20, 5), C(172, 36, 5), C(228, 20, 5), C(228, 36, 5)] },
+    { t: 'Lines across the neck.', s: [L(188, 70, 212, 70), L(188, 95, 212, 95), L(188, 118, 212, 118)] },
+    { t: 'A bridge near the bottom.', s: [R(175, 300, 50, 12)] },
+    { t: 'Three strings.', s: [L(195, 30, 195, 300), L(200, 30, 200, 300), L(205, 30, 205, 300)] },
+  ]},
+  { id: 'drum', n: 'Drum', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a flat oval for the top.', s: [E(200, 150, 110, 30)] },
+    { t: 'Two sides going down, and a curved bottom.', s: [L(90, 150, 90, 290), L(310, 150, 310, 290), 'M90 290 A110 30 0 0 0 310 290'] },
+    { t: 'A curved band near the top.', s: ['M90 175 A110 30 0 0 0 310 175'] },
+    { t: 'A curved band near the bottom.', s: ['M90 265 A110 30 0 0 0 310 265'] },
+    { t: 'A zigzag between the bands.', s: [L(95, 178, 130, 292, 165, 202, 200, 296, 235, 202, 270, 292, 305, 178)] },
+    { t: 'Two drumsticks.', s: [L(250, 30, 170, 120), C(170, 120, 6), L(330, 50, 235, 125), C(235, 125, 6)] },
+  ]},
+  { id: 'bulb', n: 'Light bulb', c: 'Things', lv: 1, steps: [
+    { t: 'Draw the glass: round on top, narrow at the bottom.', s: ['M160 230 Q100 180 120 120 Q140 60 200 60 Q260 60 280 120 Q300 180 240 230 L240 260 L160 260 Z'] },
+    { t: 'Three bands for the screw, and a round end.', s: [R(160, 260, 80, 15), R(165, 275, 70, 15), R(170, 290, 60, 15), 'M180 305 Q200 325 220 305'] },
+    { t: 'The wiggly wire inside.', s: ['M180 260 L180 200 Q190 180 200 200 Q210 180 220 200 L220 260'] },
+    { t: 'A shiny line.', s: ['M145 140 Q150 110 170 95'] },
+    { t: 'Light shining out.', s: [L(200, 40, 200, 15), L(120, 70, 100, 50), L(280, 70, 300, 50), L(85, 150, 55, 150), L(315, 150, 345, 150)] },
+  ]},
+  { id: 'key', n: 'Key', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a big circle for the top of the key.', s: [C(130, 200, 60)] },
+    { t: 'A hole in it.', s: [C(130, 200, 22)] },
+    { t: 'A long stick going right.', s: [L(188, 188, 340, 188, 340, 212, 188, 212)] },
+    { t: 'Teeth at the end.', s: [L(290, 212, 290, 240, 310, 240, 310, 212), L(320, 212, 320, 235, 335, 235, 335, 212)] },
+  ]},
+  { id: 'tent', n: 'Tent', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a big triangle.', s: [Z(200, 90, 80, 320, 320, 320)] },
+    { t: 'A door: a small triangle with a line down the middle.', s: [Z(200, 190, 165, 320, 235, 320), L(200, 190, 200, 320)] },
+    { t: 'A pole on top with a flag.', s: [L(200, 90, 200, 65), Z(200, 65, 225, 72, 200, 80)] },
+    { t: 'Ropes to the ground.', s: [L(122, 240, 60, 330), L(278, 240, 340, 330)] },
+    { t: 'The ground.', s: [L(30, 320, 370, 320)] },
+    { t: 'A campfire.', s: [L(320, 372, 352, 356), L(320, 356, 352, 372), 'M336 356 Q322 340 336 320 Q350 340 336 356'] },
+  ]},
+  { id: 'chest', n: 'Treasure chest', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a box.', s: [R(90, 200, 220, 130)] },
+    { t: 'A curved lid on top.', s: ['M90 200 L90 160 Q200 100 310 160 L310 200'] },
+    { t: 'Two straps down the box.', s: [R(125, 200, 20, 130), R(255, 200, 20, 130)] },
+    { t: 'A lock with a keyhole.', s: [R(185, 188, 30, 35), dot(200, 202, 4), L(200, 202, 200, 214)] },
+    { t: 'Gold coins on the ground.', s: [E(100, 342, 14, 6), E(126, 350, 14, 6), E(320, 345, 14, 6)] },
+    { t: 'Sparkles.', s: [...plus(90, 120), ...plus(320, 110)] },
+  ]},
+  { id: 'anchor', n: 'Anchor', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a ring at the top.', s: [C(200, 70, 22)] },
+    { t: 'A long rectangle down from the ring.', s: [R(190, 92, 20, 230)] },
+    { t: 'A bar across near the top.', s: [RR(140, 130, 120, 16, 8)] },
+    { t: 'A big curve at the bottom.', s: ['M90 250 Q110 340 200 345 Q290 340 310 250'] },
+    { t: 'Pointy tips on both ends.', s: [L(90, 250, 72, 272, 105, 275), L(310, 250, 328, 272, 295, 275)] },
+    { t: 'A rope through the ring.', s: ['M178 70 Q120 120 150 200 Q175 260 140 300'] },
+  ]},
+  { id: 'trophy', n: 'Trophy', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a cup: flat on top, round at the bottom.', s: ['M130 80 L270 80 Q270 210 200 220 Q130 210 130 80 Z'] },
+    { t: 'Two handles.', s: ['M132 100 Q80 100 85 140 Q90 170 140 170', 'M268 100 Q320 100 315 140 Q310 170 260 170'] },
+    { t: 'A short stem.', s: [R(188, 220, 24, 50)] },
+    { t: 'A base in two steps.', s: [R(150, 270, 100, 25), R(135, 295, 130, 30)] },
+    { t: 'A star on the cup.', s: [star(200, 140, 30)] },
+  ]},
+  { id: 'balloons', n: 'Balloons', c: 'Things', lv: 1, steps: [
+    { t: 'Draw an oval balloon on the left.', s: [E(150, 140, 45, 58)] },
+    { t: 'One on the right.', s: [E(250, 130, 45, 58)] },
+    { t: 'One in the middle, a bit lower.', s: [E(200, 190, 45, 58)] },
+    { t: 'Little knots at the bottom.', s: [Z(150, 198, 143, 208, 157, 208), Z(250, 188, 243, 198, 257, 198), Z(200, 248, 193, 258, 207, 258)] },
+    { t: 'Strings that meet at the bottom.', s: ['M150 208 Q160 280 200 360', 'M250 198 Q240 280 200 360', 'M200 258 Q190 310 200 360'] },
+    { t: 'A bow where they meet.', s: [Z(200, 360, 182, 350, 182, 370), Z(200, 360, 218, 350, 218, 370)] },
+    { t: 'Shiny spots.', s: ['M126 116 Q129 100 141 95', 'M226 106 Q229 90 241 85', 'M176 166 Q179 150 191 145'] },
+  ]},
+  { id: 'soccer', n: 'Soccer ball', c: 'Things', lv: 2, steps: [
+    { t: 'Draw a big circle.', s: [C(200, 200, 120)] },
+    { t: 'A dark five-sided shape in the middle.', s: [fill(Z(200, 160, 238, 188, 224, 232, 176, 232, 162, 188))] },
+    { t: 'A line from each corner out toward the edge.', s: [L(200, 160, 200, 95), L(238, 188, 300, 168), L(224, 232, 262, 290), L(176, 232, 138, 290), L(162, 188, 100, 168)] },
+    { t: 'Split each line into two, like a "Y".', s: [L(200, 95, 155, 89), L(200, 95, 245, 89), L(300, 168, 292, 123), L(300, 168, 320, 208), L(262, 290, 302, 264), L(262, 290, 229, 316), L(138, 290, 171, 316), L(138, 290, 98, 264), L(100, 168, 80, 208), L(100, 168, 108, 123)] },
+  ]},
+  { id: 'basketball', n: 'Basketball', c: 'Things', lv: 1, steps: [
+    { t: 'Draw a big circle.', s: [C(200, 200, 110)] },
+    { t: 'A line down and a line across.', s: [L(200, 90, 200, 310), L(90, 200, 310, 200)] },
+    { t: 'Two curved lines on the sides.', s: ['M125 120 Q170 200 125 280', 'M275 120 Q230 200 275 280'] },
+    { t: 'Lines to show it bouncing.', s: [L(40, 120, 70, 130), L(35, 160, 65, 165), L(150, 340, 250, 340)] },
+  ]},
+];
+
+LESSONS.push(...LESSONS2);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var NS = 'http://www.w3.org/2000/svg';
+  var CATS = ['All', 'Skills', 'Characters', 'Animals', 'Vehicles', 'Space', 'Nature', 'Food', 'Things', 'Fantasy'];
+  var LEVEL = { 1: 'Easy', 2: 'Medium', 3: 'Challenge' };
+  var TILT = ['-1.2deg', '0.8deg', '-0.4deg', '1.1deg', '-0.9deg', '0.5deg'];
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var state = { filter: 'All', lesson: null, step: 0, speed: 1, runId: 0 };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Saved progress (stays on this device only) ---------- */
+  function loadDone() {
+    try { return JSON.parse(localStorage.getItem('drawwithme.done') || '[]'); } catch (e) { return []; }
+  }
+  function saveDone(id) {
+    var d = loadDone();
+    if (d.indexOf(id) === -1) d.push(id);
+    try { localStorage.setItem('drawwithme.done', JSON.stringify(d)); } catch (e) { /* storage blocked: fine */ }
+  }
+  function loadSpeed() {
+    try { var v = parseFloat(localStorage.getItem('drawwithme.speed')); return v > 0 ? v : 1; } catch (e) { return 1; }
+  }
+  function saveSpeed(v) { try { localStorage.setItem('drawwithme.speed', String(v)); } catch (e) {} }
+
+  /* ---------- Shapes ---------- */
+  function shapeD(sh) { return typeof sh === 'string' ? sh : sh.d; }
+  function isFill(sh) { return typeof sh === 'object' && !!sh.f; }
+  function isGuide(sh) { return typeof sh === 'object' && !!sh.g; }
+  function allShapes(lesson) {
+    var out = [];
+    lesson.steps.forEach(function (st) { st.s.forEach(function (sh) { if (!isGuide(sh)) out.push(sh); }); });
+    return out;
+  }
+  function hasGuides(lesson) {
+    return lesson.steps.some(function (st) { return st.s.some(isGuide); });
+  }
+  function pathMarkup(shapes, color, width) {
+    return shapes.map(function (sh) {
+      return '<path d="' + shapeD(sh) + '" stroke="' + color + '" stroke-width="' + width + '" fill="' + (isFill(sh) ? color : 'none') + '"/>';
+    }).join('');
+  }
+  function addPath(sh, color, width) {
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', shapeD(sh));
+    p.style.stroke = color;
+    p.style.fill = isFill(sh) ? color : 'none';
+    p.setAttribute('stroke-width', isGuide(sh) ? Math.min(width, 2.5) : width);
+    if (isGuide(sh)) p.style.strokeDasharray = '7 9';
+    $('layer').appendChild(p);
+    return p;
+  }
+
+  /* ---------- Home ---------- */
+  function renderChips() {
+    var html = CATS.map(function (c) {
+      var n = c === 'All' ? LESSONS.length : LESSONS.filter(function (l) { return l.c === c; }).length;
+      return '<button class="chip" data-cat="' + c + '" aria-pressed="' + (state.filter === c) + '">' + c + '<span>' + n + '</span></button>';
+    }).join('');
+    $('chips').innerHTML = html;
+  }
+  function renderGrid() {
+    var done = loadDone();
+    var list = LESSONS.filter(function (l) { return state.filter === 'All' || l.c === state.filter; });
+    $('grid').innerHTML = list.map(function (l, i) {
+      return '<button class="card" data-id="' + l.id + '" style="--tilt:' + TILT[i % TILT.length] + '" aria-label="' + l.n + ', ' + LEVEL[l.lv] + ', ' + l.steps.length + ' steps">' +
+        (done.indexOf(l.id) > -1 ? '<span class="done">Done</span>' : '') +
+        '<svg viewBox="0 0 400 400" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + pathMarkup(allShapes(l), '#2A2A2A', 6) + '</svg>' +
+        '<span class="name">' + l.n + '</span>' +
+        '<span class="meta">' + LEVEL[l.lv] + ', ' + l.steps.length + ' steps</span>' +
+        '</button>';
+    }).join('');
+  }
+  function showHome() {
+    state.runId++;
+    $('lesson').hidden = true;
+    $('home').hidden = false;
+    renderChips();
+    renderGrid();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- Lesson ---------- */
+  function openLesson(id) {
+    var l = LESSONS.filter(function (x) { return x.id === id; })[0];
+    if (!l) return;
+    state.lesson = l;
+    state.step = 0;
+    $('home').hidden = true;
+    $('lesson').hidden = false;
+    $('title').textContent = l.n;
+    window.scrollTo(0, 0);
+    renderStep();
+  }
+
+  function renderPips() {
+    var n = state.lesson.steps.length, html = '';
+    for (var i = 1; i <= n; i++) {
+      html += '<span class="pip ' + (i < state.step || state.step > n ? 'past' : i === state.step ? 'now' : '') + '"></span>';
+    }
+    $('pips').innerHTML = html;
+  }
+
+  function renderStep() {
+    var l = state.lesson, n = l.steps.length, s = state.step;
+    var id = ++state.runId;
+    var layer = $('layer');
+    layer.innerHTML = '';
+    $('dot').setAttribute('opacity', '0');
+    $('stage').classList.remove('cheer');
+    renderPips();
+
+    var intro = s === 0, finish = s > n;
+    $('prev').disabled = intro;
+    $('speedRow').hidden = intro || finish;
+    $('legend').hidden = intro || finish;
+    $('legendGuide').hidden = !hasGuides(l);
+    $('again').hidden = intro;
+    $('againLabel').textContent = finish ? 'Draw it again' : 'Watch again';
+
+    if (intro) {
+      $('counter').textContent = n + ' steps';
+      allShapes(l).forEach(function (sh) { addPath(sh, 'var(--ghost)', 3); });
+      $('say').textContent = 'This is what you will draw.';
+      $('sub').textContent = 'Get a pencil and paper. Draw lightly at first, so mistakes are easy to rub out.';
+      $('next').textContent = 'Start';
+      return;
+    }
+    if (finish) {
+      $('counter').textContent = 'Finished';
+      allShapes(l).forEach(function (sh) { addPath(sh, 'var(--ink)', 3.5); });
+      void $('stage').offsetWidth;
+      $('stage').classList.add('cheer');
+      var nm = l.n.toLowerCase();
+      $('say').textContent = 'You drew ' + (/^[aeiou]/.test(nm) ? 'an ' : 'a ') + nm + '!';
+      $('sub').textContent = 'Now go over your best lines darker, and color it in if you like.';
+      $('next').textContent = 'Pick another drawing';
+      saveDone(l.id);
+      return;
+    }
+
+    $('counter').textContent = 'Step ' + s + ' of ' + n;
+    $('say').textContent = l.steps[s - 1].t;
+    $('sub').textContent = s === 1 ? 'Watch the orange line, then draw it on your paper. Tap the picture to watch again.' : '';
+    $('next').textContent = s === n ? 'Finish' : 'Next step';
+
+    var lastErase = -1;
+    for (var j = 0; j < s; j++) { if (l.steps[j].erase) lastErase = j; }
+    for (var i = 0; i < s - 1; i++) {
+      l.steps[i].s.forEach(function (sh) {
+        if (isGuide(sh) && lastErase > i) return;
+        addPath(sh, 'var(--old)', 3);
+      });
+    }
+    var shapes = l.steps[s - 1].s;
+    var els = shapes.map(function (sh) { return addPath(sh, 'var(--new)', 4.5); });
+    if (reduceMotion) return;
+
+    els.forEach(function (el, k) {
+      var len = el.getTotalLength();
+      el.style.strokeDasharray = len + ' ' + len;
+      el.style.strokeDashoffset = len;
+      if (isFill(shapes[k])) el.style.fill = 'none';
+    });
+    animate(id, els, shapes, 0);
+  }
+
+  function animate(id, els, shapes, i) {
+    var dot = $('dot');
+    if (id !== state.runId) return;
+    if (i >= els.length) { dot.setAttribute('opacity', '0'); return; }
+    var el = els[i], len = el.getTotalLength(), p0 = el.getPointAtLength(0);
+    dot.setAttribute('cx', p0.x);
+    dot.setAttribute('cy', p0.y);
+    dot.setAttribute('opacity', '1');
+    var pause = (i === 0 ? 650 : 380) * state.speed;
+    setTimeout(function () {
+      if (id !== state.runId) return;
+      var start = null, dur = Math.max(420, len * 6.5) * state.speed;
+      function frame(now) {
+        if (id !== state.runId) return;
+        if (start === null) start = now;
+        var k = Math.min(1, (now - start) / dur);
+        el.style.strokeDashoffset = len * (1 - k);
+        var q = el.getPointAtLength(len * k);
+        dot.setAttribute('cx', q.x);
+        dot.setAttribute('cy', q.y);
+        if (k < 1) { requestAnimationFrame(frame); return; }
+        el.style.strokeDasharray = isGuide(shapes[i]) ? '7 9' : '';
+        el.style.strokeDashoffset = '';
+        if (isFill(shapes[i])) el.style.fill = 'var(--new)';
+        setTimeout(function () { animate(id, els, shapes, i + 1); }, 220 * state.speed);
+      }
+      requestAnimationFrame(frame);
+    }, pause);
+  }
+
+  function go(delta) {
+    var n = state.lesson.steps.length;
+    state.step = Math.max(0, Math.min(n + 1, state.step + delta));
+    renderStep();
+  }
+
+  /* ---------- Events ---------- */
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    state.filter = b.getAttribute('data-cat');
+    renderChips();
+    renderGrid();
+  });
+  $('grid').addEventListener('click', function (e) {
+    var c = e.target.closest('.card');
+    if (c) openLesson(c.getAttribute('data-id'));
+  });
+  $('surprise').addEventListener('click', function () {
+    var done = loadDone();
+    var pool = LESSONS.filter(function (l) { return done.indexOf(l.id) === -1; });
+    if (!pool.length) pool = LESSONS;
+    openLesson(pool[Math.floor(Math.random() * pool.length)].id);
+  });
+  $('backHome').addEventListener('click', showHome);
+  $('prev').addEventListener('click', function () { go(-1); });
+  $('next').addEventListener('click', function () {
+    if (state.step > state.lesson.steps.length) { showHome(); return; }
+    go(1);
+  });
+  $('again').addEventListener('click', function () {
+    if (state.step > state.lesson.steps.length) { state.step = 1; }
+    renderStep();
+  });
+  $('stage').addEventListener('click', function () {
+    var n = state.lesson.steps.length;
+    if (state.step >= 1 && state.step <= n) renderStep();
+  });
+  $('speedRow').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-speed]');
+    if (!b) return;
+    setSpeed(parseFloat(b.getAttribute('data-speed')));
+    renderStep();
+  });
+  function setSpeed(v) {
+    state.speed = v;
+    saveSpeed(v);
+    Array.prototype.forEach.call(document.querySelectorAll('#speedRow button'), function (x) {
+      x.setAttribute('aria-pressed', String(parseFloat(x.getAttribute('data-speed')) === v));
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if ($('lesson').hidden) return;
+    if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); $('next').click(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); if (!$('prev').disabled) go(-1); }
+    else if (e.key === ' ') { e.preventDefault(); $('again').click(); }
+    else if (e.key === 'Escape') { showHome(); }
+  });
+
+  setSpeed(loadSpeed());
+  showHome();
+})();
+</script>
+</body>
+</html>
