@@ -482,6 +482,98 @@
       color: var(--text-muted);
       font-weight: 600;
     }
+
+    .clue-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .clue-emoji {
+      font-size: 3.2rem;
+      line-height: 1;
+      display: none;
+    }
+
+    .clue-emoji.visible {
+      display: block;
+    }
+
+    .round-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .round-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .round-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--slot-border);
+      background: var(--bg-app);
+    }
+
+    .round-dot.current { border-color: var(--primary); }
+    .round-dot.won { background: var(--accent-emerald); border-color: var(--accent-emerald-dark); }
+    .round-dot.missed { background: var(--slot-border); }
+
+    .offer {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--accent-emerald-bg);
+      color: var(--accent-emerald-dark);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-weight: 800;
+    }
+
+    .offer.visible {
+      display: flex;
+    }
+
+    .round-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(28, 27, 41, 0.55);
+    }
+
+    .round-overlay.visible {
+      display: flex;
+    }
+
+    .round-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 30px 26px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .round-card .big { font-size: 3.4rem; line-height: 1; }
+    .round-card h2 { color: var(--primary); font-size: 1.6rem; }
+    .round-card p { color: var(--text-muted); font-weight: 700; }
+    .round-card .btn { justify-content: center; }
   </style>
 </head>
 <body>
@@ -500,10 +592,11 @@
 
     <div class="stats-bar">
       <select id="levelFilter" class="select-pill" aria-label="Difficulty Filter">
-        <option value="all">All Levels</option>
-        <option value="1">Level 1 (Easy)</option>
-        <option value="2">Level 2 (Medium)</option>
-        <option value="3">Level 3 (Challenge)</option>
+        <option value="1">🌱 Easy</option>
+        <option value="2">🌿 Medium</option>
+        <option value="3">🌳 Hard</option>
+        <option value="4">🚀 Advanced</option>
+        <option value="all">🎲 Mix it up</option>
       </select>
       <div class="stat-pill">🔥 <span id="streakVal">0</span></div>
       <div class="stat-pill">⭐ <span id="scoreVal">0</span></div>
@@ -517,15 +610,28 @@
           <span class="badge" id="categoryBadge">Category: Loading...</span>
           <span class="badge" id="wordCountBadge">Deck: 0 Words</span>
         </div>
+        <div class="round-bar">
+          <span id="roundLabel">Puzzle 1 of 10</span>
+          <div class="round-dots" id="roundDots"></div>
+        </div>
         <button class="btn" id="speakBtn">🔊 Listen</button>
       </div>
 
       <div class="clue-box">
-        <div class="clue-text" id="clueText">Loading puzzle...</div>
-        <div class="phonics-tip" id="phonicsTip"></div>
+        <div class="clue-emoji" id="clueEmoji"></div>
+        <div>
+          <div class="clue-text" id="clueText">Loading puzzle...</div>
+          <div class="phonics-tip" id="phonicsTip"></div>
+        </div>
       </div>
 
       <div class="feedback-banner" id="feedbackBanner">Tap tiles or type on your keyboard!</div>
+
+      <div class="offer" id="levelOffer">
+        <span id="offerText">You're on fire!</span>
+        <button class="btn btn-emerald" id="offerYesBtn">Yes, let's go!</button>
+        <button class="btn" id="offerNoBtn">Stay here</button>
+      </div>
 
       <div class="board-section">
         <div class="slot-row" id="slotRow"></div>
@@ -534,7 +640,7 @@
 
       <div class="anagram-panel" id="anagramPanel">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong>Discovered Words (<span id="anaFoundCount">0</span> / <span id="anaTotalCount">0</span>) · Bonus words: <span id="anaBonusCount">0</span></strong>
+          <strong>Found <span id="anaFoundCount">0</span> of <span id="anaGoal">0</span> to win · Hidden words: <span id="anaTotalCount">0</span> · Bonus words: <span id="anaBonusCount">0</span></strong>
           <button class="btn" id="revealAnagramBtn" style="padding:6px 12px; font-size:0.84rem;">Reveal All</button>
         </div>
         <div class="anagram-groups" id="anagramGroups"></div>
@@ -555,6 +661,17 @@
       </div>
     </section>
   </main>
+
+  <div class="round-overlay" id="roundOverlay" role="dialog" aria-modal="true" aria-labelledby="roundTitle">
+    <div class="round-card">
+      <div class="big" id="roundEmoji">🏆</div>
+      <h2 id="roundTitle">Round complete!</h2>
+      <p id="roundSummary"></p>
+      <button class="btn btn-emerald" id="roundUpBtn" hidden></button>
+      <button class="btn btn-primary" id="roundAgainBtn">Play another round</button>
+      <button class="btn" id="roundDownBtn" hidden></button>
+    </div>
+  </div>
 
   <script src="./data/word-banks-bundle.js"></script>
   <script>
@@ -616,7 +733,7 @@
 
     const state = {
       mode: 'scramble',
-      level: 'all',
+      level: localStorage.getItem('ka_word_level') || '1',
       datasets: { scramble: [], anagram: [], pattern: [], affix: [] },
       currentPuzzle: null,
       rack: [],
@@ -627,15 +744,29 @@
       // Real words a kid may find in a rack that are not one of its target chips
       bonusWords: new Set(),
       solved: false,
-      // Word Scramble hint ladder: 0 = riddle only, 1 = easier clue, 2 = first letter, 3 = last letter
+      // Every real word we know, so Missing Tiles decoys never spell a second word
+      dictionary: new Set(),
+      // Word Scramble hint ladder: how many of hintSteps have been used
       hintLevel: 0,
+      hintSteps: [],
       wrongTries: 0,
+      anagramGoal: 0,
+      // A round is 10 puzzles; results holds true (solved) or false (skipped or shown) for each
+      round: { results: [], stars: 0 },
+      finished: false,
+      // 5 solves in a row offers the next level; 2 "Show me" in a row gives one easier puzzle
+      levelRun: 0,
+      revealRun: 0,
+      easierNext: false,
       score: parseInt(localStorage.getItem('ka_word_score') || '0', 10),
       streak: parseInt(localStorage.getItem('ka_word_streak') || '0', 10)
     };
 
-    const SCRAMBLE_MAX_HINTS = 3;
     const SCRAMBLE_POINTS = [15, 12, 9, 6]; // stars for a solve after 0, 1, 2 or 3 hints
+    const ROUND_SIZE = 10;
+    const LEVEL_NAMES = { 1: '🌱 Easy', 2: '🌿 Medium', 3: '🌳 Hard', 4: '🚀 Advanced' };
+    // Anagram words to find to win a rack; Advanced means every hidden word
+    const ANAGRAM_GOAL = { 1: 5, 2: 8, 3: 12, 4: Infinity };
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, type = 'sine', duration = 0.12) {
@@ -669,8 +800,7 @@
         state.datasets.pattern = window.KA_WORD_BANKS.pattern;
         state.datasets.affix = window.KA_WORD_BANKS.affix;
         state.bonusWords = new Set(window.KA_WORD_BANKS.bonus || []);
-        updateScoreUI();
-        loadNextPuzzle();
+        startGame();
         return;
       }
 
@@ -699,7 +829,14 @@
         state.datasets.pattern = FALLBACK_SCRAMBLE;
         state.datasets.affix = FALLBACK_AFFIX;
       }
+      startGame();
+    }
+
+    function startGame() {
+      state.dictionary = new Set([...state.bonusWords, ...state.datasets.scramble.map(x => x.word)]);
+      document.getElementById('levelFilter').value = state.level;
       updateScoreUI();
+      startRound();
       loadNextPuzzle();
     }
 
@@ -712,32 +849,49 @@
       return copy;
     }
 
-    function getFilteredDeck() {
+    function getFilteredDeck(easier) {
       const rawDeck = state.datasets[state.mode] || state.datasets.scramble;
-      if (state.level === 'all' || state.mode === 'anagram') return rawDeck;
-      const lvl = parseInt(state.level, 10);
+      if (state.level === 'all') return rawDeck;
+      let lvl = parseInt(state.level, 10);
+      if (easier && lvl > 1) lvl--;
       const filtered = rawDeck.filter(item => item.level === lvl);
       return filtered.length ? filtered : rawDeck;
     }
 
+    function pickRandom(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
     function loadNextPuzzle() {
-      const deck = getFilteredDeck();
-      document.getElementById('wordCountBadge').textContent = `Deck: ${deck.length} Puzzles`;
+      const deck = getFilteredDeck(state.easierNext);
+      state.easierNext = false;
       const modeSeen = seenIds[state.mode] || new Set();
       let unseen = deck.filter(x => !modeSeen.has(x.id));
       if (unseen.length === 0) {
-        modeSeen.clear();
+        deck.forEach(x => modeSeen.delete(x.id));
         unseen = deck;
       }
-      const item = unseen[Math.floor(Math.random() * unseen.length)];
+      // Most Prefix & Suffix words use -ING, so pick the affix first to keep the mix varied
+      if (state.mode === 'affix') {
+        const affix = pickRandom([...new Set(unseen.map(x => x.affix))]);
+        unseen = unseen.filter(x => x.affix === affix);
+      }
+      const item = pickRandom(unseen);
       modeSeen.add(item.id);
       state.currentPuzzle = item;
       state.vowelsHighlighted = false;
       state.solved = false;
+      state.finished = false;
       state.hintLevel = 0;
+      state.hintSteps = [];
       state.wrongTries = 0;
+      document.getElementById('wordCountBadge').textContent = `${LEVEL_NAMES[item.level] || 'Practice'} · ${deck.length} puzzles`;
       document.getElementById('phonicsTip').classList.remove('visible');
+      const emoji = document.getElementById('clueEmoji');
+      emoji.textContent = item.emoji || '';
+      emoji.classList.toggle('visible', !!item.emoji && (state.mode === 'scramble' || state.mode === 'pattern'));
       setFeedback('Tap tiles or type on your keyboard!', '');
+      renderRound();
 
       if (state.mode === 'scramble') setupScrambleMode(item);
       else if (state.mode === 'anagram') setupAnagramMode(item);
@@ -751,8 +905,11 @@
     function setupScrambleMode(item) {
       document.getElementById('anagramPanel').classList.remove('active');
       document.getElementById('categoryBadge').textContent = `Category: ${item.category}`;
-      document.getElementById('clueText').textContent = item.clue;
+      // Easy starts with the short, plain clue and the first letter already in place
+      const easy = item.level === 1 && item.nudge;
+      document.getElementById('clueText').textContent = easy ? item.nudge : item.clue;
       document.getElementById('phonicsTip').textContent = '';
+      state.hintSteps = easy ? ['riddle', 'last'] : ['nudge', 'first', 'last'];
 
       const chars = item.word.toUpperCase().split('');
       let scrambled = shuffleArray(chars);
@@ -760,6 +917,35 @@
 
       state.rack = scrambled.map((char, idx) => ({ char, id: idx, used: false }));
       state.slots = chars.map(() => ({ char: '', rackId: null, locked: false, label: '' }));
+      if (easy && chars.length > 2) lockCorrectLetter(0);
+    }
+
+    // Which letters Missing Tiles hides: Easy 1 (a vowel if it can), Medium 2, Hard 3,
+    // Advanced every letter but the first (and the last, for words longer than 4)
+    function pickHiddenSlots(word, level) {
+      const n = word.length;
+      if (!level || level >= 4) {
+        return [...Array(n).keys()].filter(i => i !== 0 && !(i === n - 1 && n > 4));
+      }
+      const candidates = shuffleArray([...Array(n).keys()].slice(1));
+      if (level === 1) {
+        const vowel = candidates.find(i => 'AEIOU'.includes(word[i]));
+        return [vowel !== undefined ? vowel : candidates[0]];
+      }
+      return candidates.slice(0, Math.min(level, n - 1)).sort((a, b) => a - b);
+    }
+
+    // Extra letters that never fit a hidden slot to make a different real word
+    function pickDecoys(word, hidden, count) {
+      const needed = hidden.map(i => word[i]);
+      const decoys = [];
+      for (const ch of shuffleArray('AEIOURSTLNMDBPCGHK'.split(''))) {
+        if (decoys.length === count) break;
+        if (needed.includes(ch)) continue;
+        const makesWord = hidden.some(i => state.dictionary.has(word.slice(0, i) + ch + word.slice(i + 1)));
+        if (!makesWord) decoys.push(ch);
+      }
+      return decoys;
     }
 
     function setupPatternMode(item) {
@@ -768,26 +954,23 @@
       document.getElementById('clueText').textContent = item.clue;
       document.getElementById('phonicsTip').textContent = `💡 Hint: ${item.nudge || item.phonicsHint}`;
 
-      const chars = item.word.toUpperCase().split('');
-      const missingChars = [];
-      state.slots = chars.map((ch, idx) => {
-        const keepLocked = (idx === 0 || (idx === chars.length - 1 && chars.length > 4));
-        if (keepLocked) return { char: ch, rackId: -1, locked: true, label: '' };
-        missingChars.push(ch);
-        return { char: '', rackId: null, locked: false, label: '' };
-      });
+      const word = item.word.toUpperCase();
+      const hidden = pickHiddenSlots(word, item.level);
+      state.slots = word.split('').map((ch, idx) => hidden.includes(idx)
+        ? { char: '', rackId: null, locked: false, label: '' }
+        : { char: ch, rackId: -1, locked: true, label: '' });
 
-      const alphabet = 'AEIOURSTLN';
-      missingChars.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-      missingChars.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-
-      state.rack = shuffleArray(missingChars).map((char, idx) => ({ char, id: idx, used: false }));
+      const tiles = [...hidden.map(i => word[i]), ...pickDecoys(word, hidden, 2)];
+      state.rack = shuffleArray(tiles).map((char, idx) => ({ char, id: idx, used: false }));
     }
 
     function setupAnagramMode(item) {
       document.getElementById('anagramPanel').classList.add('active');
       document.getElementById('categoryBadge').textContent = `Anagram Studio: ${item.category}`;
-      document.getElementById('clueText').textContent = item.clue;
+      const total = Object.values(item.targets || {}).flat().length;
+      state.anagramGoal = Math.min(ANAGRAM_GOAL[item.level] || Infinity, total);
+      const goalText = state.anagramGoal === total ? `Find all ${total} words!` : `Find ${state.anagramGoal} words to win!`;
+      document.getElementById('clueText').textContent = `${goalText} The longest word uses every tile. ${item.clue}`;
       document.getElementById('phonicsTip').textContent = `💡 The longest word: ${item.nudge || 'Try using every letter!'}`;
       state.bonusFound = new Set();
 
@@ -840,7 +1023,9 @@
         container.appendChild(col);
       });
 
-      document.getElementById('anaFoundCount').textContent = state.anagramFound.size;
+      // Bonus words count toward the goal too
+      document.getElementById('anaFoundCount').textContent = state.anagramFound.size + state.bonusFound.size;
+      document.getElementById('anaGoal').textContent = state.anagramGoal;
       document.getElementById('anaTotalCount').textContent = total;
       document.getElementById('anaBonusCount').textContent = state.bonusFound.size;
     }
@@ -959,21 +1144,25 @@
         revealBtn.hidden = true;
         return;
       }
-      const left = SCRAMBLE_MAX_HINTS - state.hintLevel;
+      const left = state.hintSteps.length - state.hintLevel;
       hintBtn.disabled = state.solved || left === 0;
       hintBtn.textContent = `🧩 Hint (${left} left)`;
       revealBtn.hidden = state.solved || (state.hintLevel === 0 && state.wrongTries === 0);
     }
 
     function useScrambleHint() {
-      if (state.solved || state.hintLevel >= SCRAMBLE_MAX_HINTS) return;
+      if (state.solved || state.hintLevel >= state.hintSteps.length) return;
+      const step = state.hintSteps[state.hintLevel];
       state.hintLevel++;
       const tip = document.getElementById('phonicsTip');
       const word = state.currentPuzzle.word.toUpperCase();
-      if (state.hintLevel === 1) {
+      if (step === 'nudge') {
         tip.textContent = `💡 ${state.currentPuzzle.nudge || 'Say the riddle out loud and picture it.'}`;
         tip.classList.add('visible');
-      } else if (state.hintLevel === 2) {
+      } else if (step === 'riddle') {
+        tip.textContent = `💡 Another clue: ${state.currentPuzzle.clue}`;
+        tip.classList.add('visible');
+      } else if (step === 'first') {
         lockCorrectLetter(0);
         setFeedback(`The first letter is ${word[0]}. It is locked in for you.`, '');
       } else {
@@ -991,6 +1180,7 @@
       const word = state.currentPuzzle.word.toUpperCase();
       word.split('').forEach((_, i) => lockCorrectLetter(i));
       state.solved = true;
+      finishPuzzle(false, true);
       updateHintButtons();
       renderBoard();
       setFeedback(`The word was ${word}. Read the riddle again and see how it fits!`, '');
@@ -1009,6 +1199,7 @@
           state.streak++;
           updateScoreUI();
           playSuccessChime();
+          finishPuzzle(true, false);
           speakText(state.currentPuzzle.word);
           setFeedback(`🎉 Snap Success! ${expectedParts.join(' + ')} ➔ ${state.currentPuzzle.word}!`, 'success');
         } else {
@@ -1043,20 +1234,28 @@
           playTone(200, 'sawtooth', 0.18);
           setFeedback(`Hmm, "${attempt}" is not a word we know. Try another!`, 'error');
         }
+        if (!state.finished && state.anagramFound.size + state.bonusFound.size >= state.anagramGoal) {
+          finishPuzzle(true, false);
+          setFeedback(`🎉 You found ${state.anagramGoal} words, you win this one! Keep finding more, or tap Next.`, 'success');
+        }
         clearUnlockedSlots();
         return;
       }
 
       const target = state.currentPuzzle.word.toUpperCase();
-      if (attempt === target) {
+      // In Missing Tiles, another real word that fits the shown letters counts too
+      if (attempt === target || (state.mode === 'pattern' && state.dictionary.has(attempt))) {
         const points = state.mode === 'scramble' ? SCRAMBLE_POINTS[state.hintLevel] : 15;
         state.solved = true;
         addPoints(points);
         state.streak++;
         updateScoreUI();
         playSuccessChime();
-        speakText(target);
-        setFeedback(`🎉 Correct! You unscrambled ${target}! (+${points} ⭐)`, 'success');
+        speakText(attempt);
+        finishPuzzle(true, false);
+        setFeedback(state.mode === 'pattern'
+          ? `🎉 Correct! You filled in ${attempt}! (+${points} ⭐)`
+          : `🎉 Correct! You unscrambled ${target}! (+${points} ⭐)`, 'success');
       } else {
         state.streak = 0;
         state.wrongTries++;
@@ -1069,7 +1268,105 @@
 
     function addPoints(pts) {
       state.score += pts;
+      state.round.stars += pts;
       updateScoreUI();
+    }
+
+    function startRound() {
+      state.round = { results: [], stars: 0 };
+      state.levelRun = 0;
+      state.revealRun = 0;
+      hideOffer();
+      renderRound();
+    }
+
+    function renderRound() {
+      const done = state.round.results.length;
+      const current = Math.min(done + (state.finished ? 0 : 1), ROUND_SIZE);
+      document.getElementById('roundLabel').textContent = `Puzzle ${Math.max(current, 1)} of ${ROUND_SIZE}`;
+      const dots = document.getElementById('roundDots');
+      dots.innerHTML = '';
+      for (let i = 0; i < ROUND_SIZE; i++) {
+        const dot = document.createElement('span');
+        const result = state.round.results[i];
+        dot.className = `round-dot ${result === true ? 'won' : result === false ? 'missed' : (i === done ? 'current' : '')}`;
+        dots.appendChild(dot);
+      }
+    }
+
+    // Called once per puzzle: solved it, skipped it (Next), or tapped Show me / Reveal All
+    function finishPuzzle(solved, revealed) {
+      if (state.finished) return;
+      state.finished = true;
+      state.round.results.push(solved);
+      renderRound();
+      if (revealed) {
+        state.levelRun = 0;
+        state.revealRun++;
+        if (state.revealRun >= 2) {
+          state.easierNext = true;
+          state.revealRun = 0;
+        }
+      } else if (solved) {
+        state.revealRun = 0;
+        state.levelRun++;
+        const lvl = parseInt(state.level, 10);
+        if (state.levelRun >= 5 && lvl < 4) {
+          state.levelRun = 0;
+          showOffer(lvl + 1);
+        }
+      }
+    }
+
+    function showOffer(nextLevel) {
+      document.getElementById('offerText').textContent = `You're on fire! Ready for ${LEVEL_NAMES[nextLevel]}?`;
+      document.getElementById('levelOffer').dataset.level = nextLevel;
+      document.getElementById('levelOffer').classList.add('visible');
+    }
+
+    function hideOffer() {
+      document.getElementById('levelOffer').classList.remove('visible');
+    }
+
+    function setLevel(level) {
+      state.level = String(level);
+      localStorage.setItem('ka_word_level', state.level);
+      document.getElementById('levelFilter').value = state.level;
+      startRound();
+      loadNextPuzzle();
+    }
+
+    function showRoundEnd() {
+      const solved = state.round.results.filter(Boolean).length;
+      const lvl = parseInt(state.level, 10);
+      let emoji = '🌟', title = 'Good practice!';
+      if (solved >= 8) { emoji = '🏆'; title = 'Superstar round!'; }
+      else if (solved >= 5) { emoji = '🎉'; title = 'Great job!'; }
+      document.getElementById('roundEmoji').textContent = emoji;
+      document.getElementById('roundTitle').textContent = title;
+      document.getElementById('roundSummary').textContent =
+        `You solved ${solved} of ${ROUND_SIZE} puzzles and earned ${state.round.stars} ⭐ this round.`;
+      const up = document.getElementById('roundUpBtn');
+      const down = document.getElementById('roundDownBtn');
+      up.hidden = !(solved >= 8 && lvl < 4);
+      down.hidden = !(solved <= 3 && lvl > 1);
+      if (!up.hidden) up.textContent = `Try ${LEVEL_NAMES[lvl + 1]}`;
+      if (!down.hidden) down.textContent = `Try ${LEVEL_NAMES[lvl - 1]}`;
+      document.getElementById('roundOverlay').classList.add('visible');
+      playSuccessChime();
+    }
+
+    function closeRoundEnd() {
+      document.getElementById('roundOverlay').classList.remove('visible');
+    }
+
+    function goNext() {
+      if (!state.finished) finishPuzzle(false, false);
+      if (state.round.results.length >= ROUND_SIZE) {
+        showRoundEnd();
+        return;
+      }
+      loadNextPuzzle();
     }
 
     function updateScoreUI() {
@@ -1138,13 +1435,30 @@
         document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.mode = btn.dataset.mode;
+        startRound();
         loadNextPuzzle();
       });
     });
 
-    document.getElementById('levelFilter').addEventListener('change', (e) => {
-      state.level = e.target.value;
+    document.getElementById('levelFilter').addEventListener('change', (e) => setLevel(e.target.value));
+
+    document.getElementById('offerYesBtn').addEventListener('click', () => {
+      setLevel(document.getElementById('levelOffer').dataset.level);
+    });
+    document.getElementById('offerNoBtn').addEventListener('click', hideOffer);
+
+    document.getElementById('roundAgainBtn').addEventListener('click', () => {
+      closeRoundEnd();
+      startRound();
       loadNextPuzzle();
+    });
+    document.getElementById('roundUpBtn').addEventListener('click', () => {
+      closeRoundEnd();
+      setLevel(parseInt(state.level, 10) + 1);
+    });
+    document.getElementById('roundDownBtn').addEventListener('click', () => {
+      closeRoundEnd();
+      setLevel(parseInt(state.level, 10) - 1);
     });
 
     document.getElementById('shuffleBtn').addEventListener('click', () => {
@@ -1185,21 +1499,23 @@
     document.getElementById('revealBtn').addEventListener('click', revealScrambleAnswer);
     document.getElementById('clearBtn').addEventListener('click', clearUnlockedSlots);
     document.getElementById('submitBtn').addEventListener('click', checkSubmission);
-    document.getElementById('nextBtn').addEventListener('click', loadNextPuzzle);
+    document.getElementById('nextBtn').addEventListener('click', goNext);
 
     document.getElementById('speakBtn').addEventListener('click', () => {
       if (!state.currentPuzzle) return;
-      // Read only the clue, never the answer
-      speakText(state.currentPuzzle.clue);
+      // Read only the clue on screen, never the answer
+      speakText(document.getElementById('clueText').textContent);
     });
 
     document.getElementById('revealAnagramBtn').addEventListener('click', () => {
       if (!state.currentPuzzle || !state.currentPuzzle.targets) return;
       Object.values(state.currentPuzzle.targets).flat().forEach(w => state.anagramFound.add(w));
+      finishPuzzle(false, true);
       renderAnagramMatrix();
     });
 
     window.addEventListener('keydown', (e) => {
+      if (document.getElementById('roundOverlay').classList.contains('visible')) return;
       const key = e.key.toUpperCase();
       if (state.mode === 'affix' && /^[1-9]$/.test(key)) {
         const idx = parseInt(key, 10) - 1;
