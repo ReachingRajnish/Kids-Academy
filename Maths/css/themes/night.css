@@ -7,7 +7,7 @@
   --panel-edge: #1a2150;
   --glow-c: 0 0 0 2px color-mix(in srgb, var(--c) 70%, white), 0 10px 30px color-mix(in srgb, var(--c) 45%, transparent);
 }
-:root[data-theme="night"] body { background: radial-gradient(circle at 50% -10%, #34408c, var(--deep) 60%) fixed; }
+:root[data-theme="night"] body { background: var(--deep) radial-gradient(circle at 50% -10%, #34408c, var(--deep) 60%) fixed; }
 :root[data-theme="night"] .screen { --ink: #f4f3ff; --muted: #b9b7e0; color: var(--ink); }
 :root[data-theme="night"] .lead, :root[data-theme="night"] .section-title, :root[data-theme="night"] .shelf h2, :root[data-theme="night"] .brand h1 { color: #fff; }
 :root[data-theme="night"] .btn-link { color: #c8c6f0; }

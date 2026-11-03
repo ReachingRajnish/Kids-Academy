@@ -37,6 +37,7 @@
       p.gems = p.gems || 0;
       p.creatures = p.creatures || [];
       p.chests = p.chests || {};
+      p.log = p.log || {};
       p.streak = p.streak || { last: null, count: 0 };
     });
     return d;
@@ -109,8 +110,20 @@
         if (f && --f.m <= 0) delete p.facts[skill][problem.key];
       } else {
         const facts = p.facts[skill] || (p.facts[skill] = {});
-        facts[problem.key] = { m: Math.min((f ? f.m : 0) + 2, 6), p: problem.params, key: problem.key };
+        facts[problem.key] = { m: Math.min((f ? f.m : 0) + 2, 6), p: problem.params, key: problem.key, memo: problem.memo };
       }
+    },
+
+    // Rounds and seconds played each day, for the grown-ups page. Only the last 60 days are kept.
+    logRound(secs) {
+      const p = current();
+      const d = new Date();
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const log = p.log || (p.log = {});
+      const e = log[day] || (log[day] = { rounds: 0, secs: 0 });
+      e.rounds++;
+      e.secs += Math.min(secs, 1800);
+      Object.keys(log).sort().slice(0, -60).forEach(k => delete log[k]);
     },
 
     missedFacts(skill) {

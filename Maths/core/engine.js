@@ -65,7 +65,7 @@
     const s = {
       level: params.level, round: Math.min(params.round || ROUND, game.round || ROUND), i: 0, tries: 0, results: [], avoid: [],
       missStreak: 0, easier: false, busy: true, stopped: false, finished: false,
-      problem: null, gameCleanup: null, timers: [],
+      problem: null, gameCleanup: null, timers: [], started: Date.now(),
     };
 
     const after = (ms, fn) => { s.timers.push(setTimeout(() => { if (!s.stopped) fn(); }, ms * MA.games.speed)); };
@@ -101,7 +101,7 @@
       msg.className = 'game-msg';
       if (s.i >= s.round) return finish();
 
-      const level = s.easier && s.level > 1 ? s.level - 1 : s.level;
+      const level = s.easier && s.level > 1 && !game.steady ? s.level - 1 : s.level;
       s.easier = false;
       const skill = game.levels[level - 1].id;
       const review = MA.store.missedFacts(skill).filter(f => !s.avoid.includes(f.key));
@@ -231,6 +231,7 @@
       const profile = MA.store.current();
       profile.stars += earned;
       progress.plays++;
+      MA.store.logRound(Math.round((Date.now() - s.started) / 1000));
       progress.last = s.level;
       const before = progress.best[s.level] || 0;
       // Short daily rounds count for stars and practice, but only full rounds open levels.

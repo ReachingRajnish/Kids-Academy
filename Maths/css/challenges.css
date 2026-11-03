@@ -1,0 +1,97 @@
+/* Maths Adventure: Phase 6 styles. Maths Stories, Robo Check, boss rounds and the grown-ups page. */
+
+/* ---------- Maths Stories ---------- */
+.ws-book {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(640px, 100%);
+  padding: 16px 20px; border-radius: 22px; background: #fffdf6; box-shadow: var(--shadow);
+}
+.ws-pic { font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.2; text-align: center; letter-spacing: 2px; max-width: 520px; word-break: break-all; }
+.ws-pic.big { font-size: clamp(3rem, 8vw, 4.4rem); }
+.ws-text { font-size: clamp(1.25rem, 2.8vw, 1.7rem); font-weight: 600; text-align: center; line-height: 1.35; }
+.ws-choices .choice { min-width: 140px; }
+
+/* ---------- Robo Check ---------- */
+.rb-row { display: flex; align-items: center; gap: clamp(12px, 3vw, 32px); flex-wrap: wrap; justify-content: center; }
+.rb-bot { position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s; }
+.rb-antenna { width: 6px; height: 26px; background: #64748b; border-radius: 3px; position: relative; }
+.rb-antenna::before { content: ''; position: absolute; top: -12px; left: -7px; width: 20px; height: 20px; border-radius: 50%; background: #f59e0b; }
+.rb-head {
+  width: clamp(120px, 18vh, 160px); aspect-ratio: 1.15; border-radius: 30px; background: linear-gradient(160deg, #cbd5e1, #94a3b8);
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; place-items: center; padding: 18px 16px 16px; box-shadow: var(--shadow);
+}
+.rb-eye { width: 28px; height: 28px; border-radius: 50%; background: #1e293b; box-shadow: inset -6px -6px 0 #38bdf8; }
+.rb-mouth { grid-column: 1 / -1; width: 56%; height: 12px; border-radius: 6px; background: #1e293b; transition: all 0.2s; }
+.rb-bot.happy .rb-mouth { height: 22px; border-radius: 0 0 30px 30px; background: #16a34a; }
+.rb-bot.oops .rb-mouth { height: 18px; border-radius: 30px 30px 0 0; background: #e11d48; }
+.rb-bot.shake { animation: shake 0.45s; }
+.rb-bubble {
+  position: relative; padding: 18px 26px; border-radius: 26px; background: #fff; box-shadow: var(--shadow);
+  font-size: clamp(2rem, 5.6vw, 3.4rem); font-weight: 700; white-space: nowrap;
+}
+.rb-bubble::before { content: ''; position: absolute; left: -16px; top: 50%; transform: translateY(-50%); border: 12px solid transparent; border-right: 16px solid #fff; border-left: 0; }
+.rb-choices .choice { min-width: 170px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+.rb-choices .choice[data-value="True"] { color: #15803d; }
+.rb-choices .choice[data-value="False"] { color: #be123c; }
+.rb-choices .choice.yes { color: #fff; }
+
+/* ---------- Boss rounds ---------- */
+.boss-bar {
+  display: flex; align-items: center; gap: 8px; width: fit-content; max-width: 100%;
+  padding: 3px 14px 3px 6px; border-radius: 999px; background: #2b1430; color: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+.game-name:has(.boss-bar) > :not(.boss-bar) { display: none; }
+.boss-face { font-size: 1.8rem; line-height: 1; animation: bob 1.6s ease-in-out infinite; }
+.boss-bar b { font-size: 1rem; }
+.boss-hearts { display: flex; gap: 2px; font-size: 0.95rem; }
+.boss-hearts i { font-style: normal; color: rgba(255, 255, 255, 0.25); }
+.boss-hearts i.on { color: #fb7185; }
+.stop.boss { width: clamp(76px, 10vw, 108px); border-radius: 26px; background: #fde2e8; }
+.stop.boss.open { animation: glow 1.4s ease-in-out infinite; }
+
+/* ---------- The grown-ups page ---------- */
+.grownups-screen { max-width: 900px; }
+.gu-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.gu-tab { display: flex; align-items: center; gap: 6px; padding: 6px 14px 6px 6px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.7); font-weight: 600; }
+.gu-tab.on { background: #fff; box-shadow: 0 0 0 3px var(--c); }
+.gu-card { background: #fffdf8; border-radius: 22px; padding: 16px 18px; margin-bottom: 14px; box-shadow: var(--shadow); color: #2b2d42; }
+.gu-card h2 { font-size: 1.3rem; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.gu-note { color: #6b6d80; font-size: 0.95rem; margin: -4px 0 10px; }
+.gu-empty { color: #6b6d80; }
+.gu-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.gu-stat { display: flex; flex-direction: column; align-items: center; padding: 10px; border-radius: 16px; background: #f4f1fa; }
+.gu-stat span { font-size: 1.6rem; }
+.gu-stat b { font-size: 1.6rem; }
+.gu-stat small { color: #6b6d80; }
+.gu-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; }
+.gu-day { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.gu-bar { width: 70%; height: 110px; display: flex; align-items: flex-end; border-radius: 10px; background: #f1edf8; overflow: hidden; }
+.gu-bar i { display: block; width: 100%; background: linear-gradient(#60a5fa, #2563eb); border-radius: 10px 10px 0 0; }
+.gu-day small { color: #6b6d80; }
+.gu-day b { font-size: 0.85rem; }
+.gu-skills { display: flex; flex-direction: column; gap: 6px; }
+.gu-skill { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 14px; background: #f8f6fc; }
+.gu-skill small { display: block; color: #6b6d80; }
+.gu-gi { font-size: 1.5rem; }
+.gu-pct { font-weight: 700; font-size: 1.15rem; }
+.gu-band { padding: 2px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+.gu-skill.strong .gu-band { background: #dcfce7; color: #166534; }
+.gu-skill.ok .gu-band { background: #fef3c7; color: #92400e; }
+.gu-skill.weak .gu-band { background: #fee2e2; color: #991b1b; }
+.gu-facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.gu-settings { justify-content: flex-start; margin-top: 4px; }
+.gu-danger { color: #be123c; }
+.gu-gate input { text-align: center; font-size: 1.6rem; }
+.gu-link { opacity: 0.85; }
+
+@media (max-width: 560px) {
+  .rb-bubble { padding: 12px 16px; white-space: normal; text-align: center; }
+  .rb-bubble::before { display: none; }
+  .rb-choices .choice { min-width: 0; flex: 1 1 40%; }
+  .gu-skill { grid-template-columns: auto 1fr auto; }
+  .gu-band { grid-column: 2 / -1; justify-self: start; }
+  .gu-bar { height: 80px; }
+  .boss-bar { padding: 2px 10px 2px 4px; gap: 6px; }
+  .boss-bar b { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .boss-face { font-size: 1.4rem; }
+  .boss-hearts { font-size: 0.62rem; gap: 1px; }
+}

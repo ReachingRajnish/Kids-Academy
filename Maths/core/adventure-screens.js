@@ -101,7 +101,7 @@
 
     const map = h('div', { class: 'map', style: { '--c': w.color } });
     const cols = innerWidth > innerHeight * 1.05 ? 5 : 3;
-    const pts = layout(w.stops.length + 1, cols);
+    const pts = layout(w.stops.length + 2, cols);
     map.append(h('div', { class: 'map-path', html:
       `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <path d="${pathD(pts)}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="14" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
@@ -131,15 +131,39 @@
       }
     });
 
-    const finished = A.worldDone(w);
+    // The boss waits after the last stop and guards the treasure.
+    const stopsDone = A.worldDone(w);
+    const bs = A.bossStop(w);
+    const beaten = A.bossBeaten(w);
+    const [bossFace, bossName] = MA.bosses[w.id] || ['👾', 'The Boss'];
+    const bp = pts[w.stops.length];
+    const boss = h('button', { class: 'stop boss' + (beaten ? ' done' : stopsDone ? ' open' : ' locked') + (stopsDone && !beaten ? ' current' : ''),
+      type: 'button', 'data-boss': '1', 'aria-label': `Boss: ${bossName}${beaten ? ', beaten' : stopsDone ? '' : ', locked'}`,
+      style: { left: bp.x + '%', top: bp.y + '%' } },
+      h('span', { class: 'stop-icon' }, stopsDone || beaten ? bossFace : '🔒'),
+      beaten ? MA.ui.stars(A.best(bs)) : null);
+    boss.addEventListener('click', () => {
+      if (!stopsDone) return MA.ui.toast('Clear every stop to meet the boss!');
+      const card = h('div', { class: 'modal-card stop-card', style: { '--c': '#be123c' } },
+        h('button', { class: 'icon-btn close-x', type: 'button', 'aria-label': 'Close', onclick: () => close() }, '✕'),
+        h('span', { class: 'game-icon' }, bossFace),
+        h('h2', { text: bossName }),
+        h('p', { text: 'A mix of the whole world. Knock off every heart!' }),
+        A.best(bs) ? h('p', {}, 'Your best: ', MA.ui.stars(A.best(bs))) : h('p', { text: `Get ${A.PASS} stars to win the treasure.` }),
+        h('button', { class: 'btn btn-main btn-big', type: 'button', 'data-play': '1', onclick: () => { close(); playStop(bs, from); } }, 'Fight ▶'));
+      const close = MA.ui.modal(card, { dismiss: true });
+    });
+    map.append(boss);
+
+    const finished = stopsDone && beaten;
     const chestOpen = !!p.chests[w.id];
     const chest = h('button', { class: 'stop chest' + (chestOpen ? ' done' : finished ? ' ready' : ' locked'), type: 'button', 'data-chest': '1',
       'aria-label': chestOpen ? 'Treasure chest, opened' : finished ? 'Open the treasure chest' : 'Treasure chest, locked',
-      style: { left: pts[w.stops.length].x + '%', top: pts[w.stops.length].y + '%' } },
+      style: { left: pts[w.stops.length + 1].x + '%', top: pts[w.stops.length + 1].y + '%' } },
       h('span', { class: 'stop-icon' }, chestOpen ? '🎁' : '🧰'));
     chest.addEventListener('click', () => {
       if (chestOpen) return MA.ui.toast('You already opened this treasure!');
-      if (!finished) return MA.ui.toast('Clear every stop to open the treasure!');
+      if (!finished) return MA.ui.toast(stopsDone ? 'Beat the boss to open the treasure!' : 'Clear every stop to open the treasure!');
       const c = A.openChest(w);
       MA.sound.play('win');
       MA.ui.confetti();

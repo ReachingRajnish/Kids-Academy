@@ -92,6 +92,9 @@
   const best = stop => MA.store.game(stop.game).best[stop.level] || 0;
   const passed = stop => best(stop) >= PASS;
   const worldDone = w => w.stops.every(passed);
+  // Each world ends with a boss round (boss level = world number). Beating it opens the treasure chest.
+  const bossStop = w => ({ game: 'boss', level: WORLDS.indexOf(w) + 1 });
+  const bossBeaten = w => passed(bossStop(w));
 
   // A world opens when the one before is finished, or when its first stop gets 3 stars (the jump-ahead challenge).
   function worldOpen(i) {
@@ -160,7 +163,7 @@
     const qf = MA.store.game('quick-facts');
     add({ game: 'quick-facts', level: Math.min(qf.unlocked, MA.games.get('quick-facts').levels.length) });
 
-    for (const g of shuffle(MA.games.list())) {
+    for (const g of shuffle(MA.games.list().filter(g => !g.hidden))) {
       if (items.length >= DAILY_SIZE) break;
       add({ game: g.id, level: Math.min(MA.store.game(g.id).unlocked, g.levels.length) });
     }
@@ -184,7 +187,7 @@
   // ---------- Chests and creatures ----------
   function openChest(w) {
     const p = player();
-    if (p.chests[w.id] || !worldDone(w)) return null;
+    if (p.chests[w.id] || !worldDone(w) || !bossBeaten(w)) return null;
     p.chests[w.id] = true;
     p.gems += GEMS.chest;
     if (!p.creatures.includes(w.creature)) p.creatures.push(w.creature);
@@ -235,7 +238,7 @@
 
   MA.adventure = {
     WORLDS, CREATURES, GOALS, GEMS, PASS, DAILY_ROUND,
-    best, passed, worldDone, worldOpen, stopOpen, currentStop, currentWorld,
+    best, passed, worldDone, bossStop, bossBeaten, worldOpen, stopOpen, currentStop, currentWorld,
     day, claimGoal, daily, claimDailyGift, openChest, hatch,
   };
 })(window.MA);

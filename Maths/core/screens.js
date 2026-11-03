@@ -180,14 +180,15 @@
       h('div', { class: 'settings-row' },
         MA.voice.available ? toggle('voice', '🔊', '🔈', 'Read aloud') : null,
         toggle('sound', '🎵', '🔇', 'Sounds'),
-        h('button', { class: 'toggle', type: 'button', 'data-themes': '1', onclick: () => MA.themes.picker() }, '🎨 Theme'))));
+        h('button', { class: 'toggle', type: 'button', 'data-themes': '1', onclick: () => MA.themes.picker() }, '🎨 Theme'),
+        h('button', { class: 'toggle gu-link', type: 'button', 'data-grownups': '1', onclick: () => MA.grownups.open() }, '🔒 Grown-ups'))));
   });
 
   // ---------- Games shelf ----------
   MA.ui.screen('play', root => {
     if (!MA.store.current()) return MA.ui.go('profiles');
     const shelves = {};
-    MA.games.list().filter(g => g.shelf !== BRAIN).forEach(g => (shelves[g.shelf] = shelves[g.shelf] || []).push(g));
+    MA.games.list().filter(g => g.shelf !== BRAIN && !g.hidden).forEach(g => (shelves[g.shelf] = shelves[g.shelf] || []).push(g));
     root.append(h('div', { class: 'screen play-screen' },
       topBar('Play', () => MA.ui.go('hub')),
       Object.entries(shelves).map(([shelf, games]) => h('section', { class: 'shelf' },

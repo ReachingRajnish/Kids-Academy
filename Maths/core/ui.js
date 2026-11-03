@@ -26,7 +26,7 @@
     window.scrollTo(0, 0);
     document.body.dataset.screen = name;
     const home = document.getElementById('kaHome');
-    if (home) home.style.display = name === 'game' || name === 'sprint' ? 'none' : 'inline-flex';
+    if (home) home.style.display = ['game', 'sprint', 'grownups'].includes(name) ? 'none' : 'inline-flex';
     const result = screens[name](root, params || {});
     if (typeof result === 'function') cleanup = result;
   }
