@@ -9,7 +9,7 @@
   const AREAS = [
     { id: 'adventure', icon: '🗺️', name: 'Adventure', text: 'Follow the map and find treasure', color: '#f29a1f' },
     { id: 'play', icon: '🎮', name: 'Play', text: 'Pick any game', color: '#22a95b' },
-    { id: 'practice', icon: '⚡', name: 'Practice', text: 'Drills and times tables', color: '#3b82f6', soon: true },
+    { id: 'practice', icon: '⚡', name: 'Practice', text: 'Times tables and speed runs', color: '#3b82f6' },
     { id: 'brain', icon: '🧩', name: 'Brain Games', text: 'Puzzles and memory', color: '#a855f7', soon: true },
     { id: 'collection', icon: '🏆', name: 'Collection', text: 'Your creatures', color: '#e5484d' },
   ];

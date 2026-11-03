@@ -26,7 +26,7 @@
     window.scrollTo(0, 0);
     document.body.dataset.screen = name;
     const home = document.getElementById('kaHome');
-    if (home) home.style.display = name === 'game' ? 'none' : 'inline-flex';
+    if (home) home.style.display = name === 'game' || name === 'sprint' ? 'none' : 'inline-flex';
     const result = screens[name](root, params || {});
     if (typeof result === 'function') cleanup = result;
   }
@@ -221,6 +221,19 @@
     return wrap;
   }
 
+  // An array: rows of things, for times tables. opts: { icon, split (a row number to draw a line under), size }.
+  function array(rows, cols, opts) {
+    opts = opts || {};
+    const grid = h('div', { class: 'arr' + (opts.icon ? ' icons' : ''), style: { '--cols': cols, '--size': opts.size || '' },
+      'aria-label': `${rows} rows of ${cols}` });
+    for (let r = 0; r < rows; r++) {
+      const row = h('div', { class: 'arr-row' + (opts.split && r === opts.split ? ' split' : '') });
+      for (let c = 0; c < cols; c++) row.append(h('span', { class: 'arr-dot', text: opts.icon || '' }));
+      grid.append(row);
+    }
+    return grid;
+  }
+
   function confetti() {
     const box = h('div', { class: 'confetti', 'aria-hidden': 'true' });
     const colors = ['#ff8a3d', '#ffd23f', '#4fc3f7', '#66bb6a', '#ab47bc', '#ef5350'];
@@ -237,5 +250,5 @@
     setTimeout(() => box.remove(), 3200);
   }
 
-  MA.ui = { screen, go, modal, confirm, toast, keypad, padAnswer, mascot, stars, dots, confetti, choices, blocks };
+  MA.ui = { screen, go, modal, confirm, toast, keypad, padAnswer, mascot, stars, dots, confetti, choices, blocks, array };
 })(window.MA);

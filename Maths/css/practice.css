@@ -1,0 +1,100 @@
+/* Maths Adventure: Phase 4 styles. Times Train, Array Garden, Fair Share and the Practice area. */
+
+/* ---------- Arrays (shared) ---------- */
+.arr { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.arr-row { display: flex; gap: 4px; }
+.arr-row.split { margin-top: 10px; padding-top: 10px; border-top: 4px dashed #e5484d; }
+.arr-dot { width: var(--size, 20px); height: var(--size, 20px); border-radius: 50%; background: #4f9cf9; }
+.arr.icons .arr-dot { background: none; border-radius: 0; width: auto; height: auto; font-size: var(--size, clamp(1.6rem, 4vw, 2.4rem)); line-height: 1.1; }
+.show-me .arr { margin: 6px 0; }
+
+/* ---------- Times Train ---------- */
+.tt-eq { font-size: clamp(2.6rem, 7vw, 4.6rem); display: flex; align-items: center; gap: 0.25em; flex-wrap: wrap; justify-content: center; }
+.tt-eq .pa-line { font-size: 1em; }
+.tt-train { display: flex; align-items: flex-end; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tt-engine { font-size: clamp(3rem, 7vw, 4.4rem); line-height: 1; transform: scaleX(-1); }
+.tt-car {
+  display: grid; place-items: center; min-width: clamp(64px, 9vw, 92px); height: clamp(60px, 9vw, 84px); padding: 0 6px;
+  border-radius: 14px 14px 6px 6px; background: #0d9488; color: #fff; font-size: clamp(1.6rem, 3.6vw, 2.4rem); font-weight: 700;
+  box-shadow: 0 6px 0 #0f766e;
+}
+.tt-car:nth-child(odd) { background: #f59e0b; box-shadow: 0 6px 0 #b45309; }
+.tt-car.gap { background: #fff; box-shadow: 0 6px 0 #c9bfdd; color: var(--ink); }
+.tt-car .pa-line { font-size: 1em; }
+.tt-car .pa-box { min-width: 1.8em; border-radius: 10px; }
+
+/* ---------- Array Garden ---------- */
+.ag-bed { padding: 14px 18px; border-radius: 22px; background: #7c5a3a; box-shadow: inset 0 0 0 6px #5b3f26, 0 6px 0 #4a3320; }
+.ag-plot { display: grid; grid-template-columns: repeat(var(--cols), clamp(40px, 7vw, 62px)); gap: 5px; padding: 12px; border-radius: 22px; background: #5b3f26; }
+.ag-soil { aspect-ratio: 1; border: 0; border-radius: 10px; background: #8b6a48; font-size: clamp(1.3rem, 3.4vw, 2rem); padding: 0; }
+.ag-soil.on { background: #a3d977; animation: pop 0.25s; }
+.ag-info { font-size: 1.3rem; font-weight: 600; min-height: 1.5em; }
+.ag-pair { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.ag-pair .arr.icons .arr-dot { font-size: clamp(1.1rem, 2.6vw, 1.6rem); }
+.ag-turn { font-size: 2.4rem; font-weight: 700; color: var(--muted); }
+.ag-eq { font-size: clamp(1.6rem, 4vw, 2.6rem); display: flex; align-items: center; gap: 0.2em; flex-wrap: wrap; justify-content: center; }
+.ag-eq .pa-line { font-size: 1em; }
+.ag-area { display: grid; grid-template-columns: repeat(var(--cols), clamp(26px, 4.4vw, 42px)); gap: 0; border: 4px solid #16a34a; background: #dcfce7; }
+.ag-area span { aspect-ratio: 1; border: 1px solid #86efac; }
+
+/* ---------- Fair Share ---------- */
+.fs-jar { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: min(520px, 100%); padding: 12px 18px; border: 0; border-radius: 26px; background: #fdf4ff; box-shadow: inset 0 0 0 4px #f0abfc, 0 6px 0 #e879f9; }
+.fs-jar:active { transform: translateY(3px); }
+.fs-pile { font-size: clamp(1.5rem, 3.6vw, 2.2rem); line-height: 1.15; word-break: break-all; }
+.fs-jar small { font-weight: 600; color: #a21caf; }
+.fs-plates { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.fs-plate { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 110px; padding: 8px 10px; border-radius: 50% / 30%; background: #fff; box-shadow: var(--shadow); }
+.fs-who { font-size: 2.2rem; }
+.fs-on { display: flex; flex-wrap: wrap; justify-content: center; max-width: 110px; min-height: 30px; font-size: 1.4rem; }
+.fs-treat { animation: pop 0.25s; }
+.fs-plates.small .fs-who { font-size: 2.6rem; }
+.fs-bag { display: flex; align-items: center; gap: 10px; font-size: 2.6rem; background: #fff; border-radius: 20px; padding: 6px 18px; box-shadow: var(--shadow); }
+.fs-bag b { font-size: 1.3rem; }
+.fs-words .choice { font-size: clamp(1.2rem, 2.8vw, 1.7rem); }
+.fs-tri {
+  position: relative; width: 220px; height: 190px; background: #fae8ff; clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  font-size: 2rem; font-weight: 700;
+}
+.fs-tri .top { position: absolute; top: 46px; left: 0; right: 0; text-align: center; color: #a21caf; }
+.fs-tri span { position: absolute; bottom: 16px; }
+.fs-tri span:nth-of-type(1) { left: 52px; }
+.fs-tri span:nth-of-type(2) { right: 52px; }
+
+/* ---------- The Practice screen ---------- */
+.tt-book { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.tt-page {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; border: 0; border-radius: 20px;
+  background: #fffdf8; box-shadow: 0 6px 0 #d9cdee, var(--shadow); border-left: 8px solid #0d9488;
+}
+.tt-x { font-size: 1.9rem; font-weight: 700; color: #0d9488; }
+.tt-page .stars { font-size: 1.2rem; }
+.tt-page small, .pr-card small, .pr-level small { color: var(--muted); font-size: 0.9rem; }
+.pr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.pr-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 10px; border: 0; border-radius: 20px; background: #fff; box-shadow: var(--shadow); border-bottom: 6px solid #3b82f6; }
+.pr-icon { font-size: 2rem; }
+.pr-card b { font-size: 1.1rem; }
+.pr-levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.pr-level { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 0; border-radius: 16px; background: #fff; box-shadow: var(--shadow); text-align: left; }
+.pr-level .stars { font-size: 1rem; }
+.pr-weak { margin-bottom: 12px; }
+.tt-card { max-width: 460px; }
+.tt-card h2 { color: #0d9488; }
+.tt-trick { background: #fef9c3; border-radius: 14px; padding: 8px 12px; margin: 8px 0; font-size: 1.05rem; }
+.tt-list { columns: 2; list-style: none; padding: 0; margin: 8px 0 14px; font-size: 1.3rem; line-height: 1.6; text-align: left; }
+.tt-list b { color: #0d9488; }
+
+/* ---------- Speed run ---------- */
+.run-timer { flex: 1; height: 16px; border-radius: 10px; background: rgba(255, 255, 255, 0.25); overflow: hidden; }
+.run-timer i { display: block; height: 100%; width: 100%; background: var(--sun); border-radius: 10px; }
+.run-secs { font-weight: 700; font-size: 1.3rem; min-width: 2ch; text-align: right; color: #fff; }
+.run-scorebox { background: #fff; color: var(--good); font-weight: 700; font-size: 1.3rem; padding: 4px 14px; border-radius: 999px; }
+.qf-box.shown { color: var(--bad); }
+.run-final { font-size: 1.6rem; }
+.sprint-screen .game-name { flex: none; }
+
+@media (max-width: 560px) {
+  .ag-plot { grid-template-columns: repeat(var(--cols), 36px); gap: 4px; padding: 8px; }
+  .tt-car { min-width: 54px; height: 54px; font-size: 1.4rem; }
+  .fs-plate { min-width: 80px; }
+  .game-bar .run-timer { order: 5; flex-basis: 100%; }
+}
