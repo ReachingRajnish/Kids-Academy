@@ -221,7 +221,7 @@
     if (!MA.store.current()) return MA.ui.go('profiles');
     const p = MA.store.current();
     const owned = c => p.creatures.includes(c.id);
-    const eggsLeft = A.CREATURES.slice(A.WORLDS.length).filter(c => !owned(c)).length;
+    const eggsLeft = A.CREATURES.filter(c => !A.WORLDS.some(w => w.creature === c.id) && !owned(c)).length;
     const canHatch = p.gems >= A.GEMS.egg && eggsLeft > 0;
     const egg = h('div', { class: 'egg-panel' },
       h('span', { class: 'egg', 'aria-hidden': 'true' }, '🥚'),

@@ -24,9 +24,10 @@
       .replace(/−| - /g, ' minus ')
       .replace(/×/g, ' times ')
       .replace(/÷/g, ' divided by ')
-      .replace(/\?/g, ' what number ')
+      .replace(/(^|\s)\?(?=\s|$)/g, ' what number ') // a blank in a sum, not the end of a question
       .replace(/=/g, ' equals ')
-      .replace(/₹/g, ' rupees ')
+      .replace(/₹\s?(\d+)/g, '$1 rupees ')
+      .replace(/(\d+):00\b/g, "$1 o'clock")
       .replace(/\s+/g, ' ')
       .trim();
   }

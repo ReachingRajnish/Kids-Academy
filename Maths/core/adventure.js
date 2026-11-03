@@ -20,27 +20,37 @@
       text: 'Numbers to 100', deco: ['🌴', '🐚', '🦀', '⛵', '🐠'],
       stops: [s('rocket-launch', 2), s('hundred-puzzle', 1), s('number-line', 4), s('rocket-launch', 3), s('hundred-puzzle', 2),
         s('number-line', 5), s('compare', 2), s('hundred-puzzle', 3), s('equation-maker', 2), s('froggy-hop', 7)] },
+    { id: 'market', name: 'Market Town', icon: '🏪', color: '#ea580c', creature: 'penny',
+      text: 'Time, money and the calendar', deco: ['🛒', '🍉', '🪙', '🕰️', '🎪'],
+      stops: [s('clock', 1), s('shop', 1), s('calendar', 1), s('clock', 2), s('shop', 2),
+        s('calendar', 2), s('clock', 3), s('shop', 3), s('calendar', 3), s('shop', 4)] },
     { id: 'volcano', name: 'Carry Volcano', icon: '🌋', color: '#ef6c2f', creature: 'blaze',
       text: 'Adding and taking away to 100', deco: ['🪨', '🔥', '🌵', '🦎', '💎'],
       stops: [s('quick-facts', 8), s('stacked-add', 1), s('stacked-add', 2), s('stacked-sub', 1), s('stacked-sub', 2),
         s('bubble-pairs', 3), s('stacked-add', 3), s('stacked-sub', 3), s('bubble-pairs', 4), s('compare', 4), s('froggy-hop', 10)] },
+    { id: 'garden', name: 'Shape Garden', icon: '🌻', color: '#7c3aed', creature: 'prism',
+      text: 'Shapes, fractions, measuring and graphs', deco: ['🦋', '🌈', '📐', '🍕', '🌷'],
+      stops: [s('shapes', 1), s('ruler', 1), s('pizza', 1), s('graphs', 1), s('shapes', 2), s('ruler', 2),
+        s('pizza', 2), s('graphs', 2), s('shapes', 3), s('pizza', 3), s('graphs', 3)] },
     { id: 'mountain', name: 'Thousand Peaks', icon: '🏔️', color: '#7c6cf2', creature: 'summit',
       text: 'Numbers to 1000', deco: ['🌲', '❄️', '🦌', '⛺', '🦅'],
       stops: [s('rocket-launch', 4), s('rocket-launch', 5), s('hundred-puzzle', 6), s('number-line', 6), s('compare', 3),
-        s('rocket-launch', 6), s('stacked-add', 4), s('stacked-sub', 4), s('number-line', 7), s('rocket-launch', 7), s('compare', 6)] },
+        s('rocket-launch', 6), s('stacked-add', 4), s('stacked-sub', 4), s('number-line', 7), s('rocket-launch', 7), s('compare', 6), s('clock', 4), s('shop', 5)] },
     { id: 'space', name: 'Star Station', icon: '🚀', color: '#3b3a8f', creature: 'bolt',
       text: 'Big sums and times tables', deco: ['⭐', '🪐', '🌙', '☄️', '🛸'],
       stops: [s('stacked-add', 5), s('stacked-sub', 5), s('quick-facts', 12), s('equation-maker', 6), s('stacked-add', 6),
         s('stacked-sub', 6), s('froggy-hop', 13), s('quick-facts', 14), s('number-line', 8), s('stacked-add', 7), s('stacked-sub', 7), s('froggy-hop', 15)] },
   ];
 
-  // The first five come from treasure chests; the rest hatch from eggs bought with gems.
+  // The world creatures come from treasure chests; the rest hatch from eggs bought with gems.
   const CREATURES = [
     { id: 'hopper', icon: '🐸', name: 'Hopper', color: '#4caf50', line: 'Hops along number lines' },
     { id: 'shelly', icon: '🐢', name: 'Shelly', color: '#0ea5e9', line: 'Slow and steady, counts in tens' },
     { id: 'blaze', icon: '🐲', name: 'Blaze', color: '#ef6c2f', line: 'Breathes fire when it carries a ten' },
     { id: 'summit', icon: '🦅', name: 'Summit', color: '#7c6cf2', line: 'Flies high over the hundreds' },
     { id: 'bolt', icon: '🤖', name: 'Bolt', color: '#3b3a8f', line: 'Knows every times table' },
+    { id: 'penny', icon: '🐷', name: 'Penny', color: '#ea580c', line: 'Saves every rupee' },
+    { id: 'prism', icon: '🦚', name: 'Prism', color: '#7c3aed', line: 'Shows off a fan of shapes' },
     { id: 'foxy', icon: '🦊', name: 'Foxy', color: '#f97316', line: 'Spots number patterns' },
     { id: 'inky', icon: '🐙', name: 'Inky', color: '#a855f7', line: 'Counts in eights with eight arms' },
     { id: 'hoot', icon: '🦉', name: 'Hoot', color: '#92400e', line: 'Always checks the answer' },
@@ -174,7 +184,7 @@
 
   function hatch() {
     const p = player();
-    const left = CREATURES.slice(WORLDS.length).filter(c => !p.creatures.includes(c.id));
+    const left = CREATURES.filter(c => !WORLDS.some(w => w.creature === c.id) && !p.creatures.includes(c.id));
     if (!left.length || p.gems < GEMS.egg) return null;
     const c = pick(left);
     p.gems -= GEMS.egg;

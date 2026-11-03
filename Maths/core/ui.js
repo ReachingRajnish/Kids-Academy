@@ -110,6 +110,32 @@
     };
   }
 
+  // An answer box with the keypad. Typing fills the box and ✓ sends the number to api.answer.
+  // opts: { before, after } words either side of the box (like '₹' or 'cm'), maxLen, delay.
+  function padAnswer(api, opts) {
+    opts = opts || {};
+    const box = h('span', { class: 'pa-box', 'aria-label': 'Your answer' });
+    const pad = keypad({
+      maxLen: opts.maxLen || 4,
+      onChange: v => { box.textContent = v; box.classList.remove('wrong'); },
+      onSubmit: v => {
+        const ok = api.answer(v, { delay: opts.delay || 1000 });
+        if (ok === null) return;
+        if (ok) {
+          box.classList.add('right');
+          pad.disable(true);
+        } else {
+          pad.clear();
+          box.classList.add('wrong');
+          if (api.busy()) pad.disable(true);
+        }
+      },
+    });
+    const line = h('div', { class: 'pa-line' },
+      opts.before ? h('span', { text: opts.before }) : null, box, opts.after ? h('span', { text: opts.after }) : null);
+    return { line, pad: pad.el, destroy: pad.destroy };
+  }
+
   // Pip, our mascot: a round orange friend with a star on top.
   function mascot(mood, size) {
     const mouth = mood === 'wow'
@@ -211,5 +237,5 @@
     setTimeout(() => box.remove(), 3200);
   }
 
-  MA.ui = { screen, go, modal, confirm, toast, keypad, mascot, stars, dots, confetti, choices, blocks };
+  MA.ui = { screen, go, modal, confirm, toast, keypad, padAnswer, mascot, stars, dots, confetti, choices, blocks };
 })(window.MA);
