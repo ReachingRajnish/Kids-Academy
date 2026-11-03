@@ -7,15 +7,19 @@
   const COLORS = ['#ff8a3d', '#4f9cf9', '#2bb673', '#8e5bd8', '#ef5b8b', '#f5b700'];
 
   const AREAS = [
+    { id: 'adventure', icon: '🗺️', name: 'Adventure', text: 'Follow the map and find treasure', color: '#f29a1f' },
     { id: 'play', icon: '🎮', name: 'Play', text: 'Pick any game', color: '#22a95b' },
-    { id: 'adventure', icon: '🗺️', name: 'Adventure', text: 'Follow the map', color: '#f29a1f', soon: true },
     { id: 'practice', icon: '⚡', name: 'Practice', text: 'Drills and times tables', color: '#3b82f6', soon: true },
     { id: 'brain', icon: '🧩', name: 'Brain Games', text: 'Puzzles and memory', color: '#a855f7', soon: true },
-    { id: 'collection', icon: '🏆', name: 'Collection', text: 'Cards and medals', color: '#e5484d', soon: true },
+    { id: 'collection', icon: '🏆', name: 'Collection', text: 'Your creatures', color: '#e5484d' },
   ];
 
   function starCount(p) {
     return h('span', { class: 'star-count', 'aria-label': `${p.stars} stars` }, '⭐ ', String(p.stars));
+  }
+
+  function gemCount(p) {
+    return h('span', { class: 'star-count gem-count', 'aria-label': `${p.gems} gems` }, '💎 ', String(p.gems));
   }
 
   // ---------- Who's playing? ----------
@@ -133,14 +137,35 @@
       h('button', { class: 'player-chip', type: 'button', style: { '--c': p.color }, 'aria-label': 'Change player',
         onclick: () => MA.ui.go('profiles') }, h('span', { class: 'avatar small' }, p.avatar), h('span', { text: p.name })),
       title ? h('h1', { class: 'bar-title', text: title }) : h('span', { class: 'spacer' }),
-      starCount(p));
+      h('span', { class: 'counts' }, starCount(p), gemCount(p)));
+  }
+  MA.ui.topBar = topBar;
+
+  // Today's three goals, each worth a few gems once done.
+  function goalsCard() {
+    const A = MA.adventure;
+    const t = A.day();
+    const card = h('section', { class: 'goals-card', 'aria-label': "Today's goals" }, h('h2', { text: "⭐ Today's goals" }));
+    A.GOALS.forEach(g => {
+      const n = Math.min(t[g.id], g.need);
+      const done = n >= g.need;
+      card.append(h('div', { class: 'goal' + (t.claimed[g.id] ? ' claimed' : done ? ' ready' : ''), 'data-goal': g.id },
+        h('span', { class: 'goal-text', text: g.text }),
+        h('span', { class: 'goal-bar' }, h('i', { style: { width: (100 * n / g.need) + '%' } })),
+        h('span', { class: 'goal-n', text: `${n}/${g.need}` }),
+        t.claimed[g.id] ? h('span', { class: 'goal-done', text: '✓' })
+          : done ? h('button', { class: 'btn btn-main goal-claim', type: 'button', onclick: () => {
+            if (A.claimGoal(g.id)) { MA.sound.play('star'); MA.ui.toast(`+${A.GEMS.goal} 💎`); MA.ui.go('hub'); }
+          } }, `Claim +${A.GEMS.goal} 💎`) : null));
+    });
+    return card;
   }
 
   MA.ui.screen('hub', root => {
     const p = MA.store.current();
     if (!p) return MA.ui.go('profiles');
     const tiles = h('div', { class: 'area-grid' }, AREAS.map(a =>
-      h('button', { class: 'area-tile' + (a.soon ? ' soon' : '') + (a.id === 'play' ? ' hero' : ''), type: 'button',
+      h('button', { class: 'area-tile' + (a.soon ? ' soon' : '') + (a.id === 'adventure' ? ' hero' : ''), type: 'button',
         style: { '--c': a.color }, 'data-area': a.id,
         onclick: () => { if (a.soon) MA.ui.toast(`${a.name} is coming soon!`); else MA.ui.go(a.id); } },
         h('span', { class: 'area-icon' }, a.icon),
@@ -150,6 +175,7 @@
     root.append(h('div', { class: 'screen hub-screen' },
       topBar(null),
       h('div', { class: 'hello' }, MA.ui.mascot('happy', 74), h('p', {}, `Hi ${p.name}! `, h('span', { text: 'What shall we play?' }))),
+      goalsCard(),
       tiles,
       h('div', { class: 'settings-row' },
         MA.voice.available ? toggle('voice', '🔊', '🔈', 'Read aloud') : null,

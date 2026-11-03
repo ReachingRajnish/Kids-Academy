@@ -34,6 +34,10 @@
       p.facts = p.facts || {};
       Object.values(p.facts).forEach(skill => Object.entries(skill).forEach(([k, f]) => { f.key = f.key || k; }));
       p.stars = p.stars || 0;
+      p.gems = p.gems || 0;
+      p.creatures = p.creatures || [];
+      p.chests = p.chests || {};
+      p.streak = p.streak || { last: null, count: 0 };
     });
     return d;
   }
