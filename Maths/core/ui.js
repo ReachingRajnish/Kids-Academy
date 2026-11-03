@@ -156,6 +156,45 @@
     return frames;
   }
 
+  // A row of answer buttons. onPick(value, button) returns true (right), false (wrong) or null (ignored).
+  // Keys 1, 2, 3... pick a button on a laptop.
+  function choices(values, onPick, opts) {
+    opts = opts || {};
+    const row = h('div', { class: 'choices' + (opts.className ? ' ' + opts.className : '') });
+    const btns = values.map((v, i) => {
+      const b = h('button', { class: 'choice', type: 'button', 'data-value': String(v),
+        'aria-label': opts.aria ? opts.aria(v) : String(v) }, opts.label ? opts.label(v) : String(v));
+      b.addEventListener('click', () => choose(i));
+      row.append(b);
+      return b;
+    });
+    function choose(i) {
+      const b = btns[i];
+      if (!b || b.disabled) return;
+      const ok = onPick(values[i], b);
+      if (ok === true) b.classList.add('yes');
+      else if (ok === false) { b.disabled = true; b.classList.add('no'); }
+    }
+    function onKey(e) {
+      const n = Number(e.key);
+      if (n >= 1 && n <= btns.length) choose(n - 1);
+    }
+    document.addEventListener('keydown', onKey);
+    return { el: row, buttons: btns, destroy: () => document.removeEventListener('keydown', onKey) };
+  }
+
+  // Place value blocks: hundreds flats, tens rods and ones cubes.
+  function blocks(hundreds, tens, ones) {
+    const wrap = h('div', { class: 'blocks', 'aria-label': `${hundreds} hundreds, ${tens} tens, ${ones} ones` });
+    [['flat', hundreds], ['rod', tens], ['cube', ones]].forEach(([kind, n]) => {
+      if (!n) return;
+      const g = h('div', { class: 'bgroup g-' + kind });
+      for (let i = 0; i < n; i++) g.append(h('span', { class: 'b-' + kind }));
+      wrap.append(g);
+    });
+    return wrap;
+  }
+
   function confetti() {
     const box = h('div', { class: 'confetti', 'aria-hidden': 'true' });
     const colors = ['#ff8a3d', '#ffd23f', '#4fc3f7', '#66bb6a', '#ab47bc', '#ef5350'];
@@ -172,5 +211,5 @@
     setTimeout(() => box.remove(), 3200);
   }
 
-  MA.ui = { screen, go, modal, confirm, toast, keypad, mascot, stars, dots, confetti };
+  MA.ui = { screen, go, modal, confirm, toast, keypad, mascot, stars, dots, confetti, choices, blocks };
 })(window.MA);

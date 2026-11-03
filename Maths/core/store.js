@@ -32,6 +32,7 @@
       p.games = p.games || {};
       p.skills = p.skills || {};
       p.facts = p.facts || {};
+      Object.values(p.facts).forEach(skill => Object.entries(skill).forEach(([k, f]) => { f.key = f.key || k; }));
       p.stars = p.stars || 0;
     });
     return d;
@@ -99,12 +100,12 @@
     recordFact(skill, problem, firstTry) {
       if (!problem.key) return;
       const p = current();
-      const facts = p.facts[skill] || (p.facts[skill] = {});
-      const f = facts[problem.key];
+      const f = p.facts[skill] && p.facts[skill][problem.key];
       if (firstTry) {
-        if (f && --f.m <= 0) delete facts[problem.key];
+        if (f && --f.m <= 0) delete p.facts[skill][problem.key];
       } else {
-        facts[problem.key] = { m: Math.min((f ? f.m : 0) + 2, 6), p: problem.params };
+        const facts = p.facts[skill] || (p.facts[skill] = {});
+        facts[problem.key] = { m: Math.min((f ? f.m : 0) + 2, 6), p: problem.params, key: problem.key };
       }
     },
 

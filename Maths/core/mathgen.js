@@ -241,5 +241,42 @@
     return shuffle([ans, ...picked]);
   }
 
-  MA.math = { LEVELS, problem, make, tokens, text, explain, choices, SYM };
+  const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+  // 406 -> "four hundred and six"
+  function words(n) {
+    if (n < 20) return ONES[n];
+    if (n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '');
+    if (n === 1000) return 'one thousand';
+    const r = n % 100;
+    return ONES[Math.floor(n / 100)] + ' hundred' + (r ? ' and ' + words(r) : '');
+  }
+
+  // 352 -> {h: 3, t: 5, o: 2}
+  function digits(n) {
+    return { h: Math.floor(n / 100), t: Math.floor(n % 100 / 10), o: n % 10 };
+  }
+
+  // Wrong answers for any number: a digit swap (352 -> 325), and near misses by one, ten or a hundred.
+  function nearby(ans, count, opts) {
+    opts = opts || {};
+    const max = opts.max == null ? 1000 : opts.max;
+    const step = opts.step || 1;
+    const ok = v => Number.isInteger(v) && v >= 0 && v <= max && v !== ans;
+    const s = String(ans);
+    const swaps = [];
+    if (s.length === 2) swaps.push(Number(s[1] + s[0]));
+    if (s.length === 3) swaps.push(Number(s[0] + s[2] + s[1]), Number(s[1] + s[0] + s[2]), Number(s[2] + s[1] + s[0]));
+    const near = [ans + step, ans - step, ans + 1, ans - 1, ans + 10, ans - 10];
+    if (ans >= 100) near.push(ans + 100, ans - 100);
+    const picked = new Set();
+    shuffle(swaps.filter(v => ok(v) && String(v).length === s.length)).slice(0, 1).forEach(v => picked.add(v));
+    for (const v of shuffle(near).filter(ok)) if (picked.size < count - 1) picked.add(v);
+    for (let d = 2; picked.size < count - 1; d++) { if (ok(ans + d)) picked.add(ans + d); else if (ok(ans - d)) picked.add(ans - d); }
+    return shuffle([ans, ...picked]);
+  }
+
+  MA.math = { LEVELS, problem, make, tokens, text, explain, choices, SYM, words, digits, nearby };
 })(window.MA);

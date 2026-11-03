@@ -5,7 +5,9 @@
 // A game registers itself with:
 //   { id, title, icon, color, shelf, blurb, intro, levels,
 //     make(level, ctx) -> problem, render(problem, stage, api) -> cleanup?, say(problem) -> text,
-//     check?(problem, value), explain?(problem) -> {hint, steps}, visual?(problem) -> element }
+//     check?(problem, value), explain?(problem) -> {hint, steps}, visual?(problem) -> element,
+//     fromParams?(params, level) -> problem }
+// A problem has { key, answer } and, for review and the results screen, { params, memo }.
 // and calls api.answer(value) when the player answers (see api below).
 (function (MA) {
   'use strict';
@@ -17,6 +19,7 @@
 
   MA.games = {
     ROUND,
+    speed: 1, // the automated tests turn this down to play rounds quickly
     register(game) { list.push(game); },
     list: () => list,
     get: id => list.find(g => g.id === id),
@@ -46,7 +49,7 @@
       card.addEventListener('click', finish);
       root.append(card);
       MA.voice.auto(game.intro);
-      setTimeout(finish, 1900);
+      setTimeout(finish, 1900 * MA.games.speed);
     });
   }
 
@@ -59,7 +62,7 @@
       problem: null, gameCleanup: null, timers: [],
     };
 
-    const after = (ms, fn) => { s.timers.push(setTimeout(() => { if (!s.stopped) fn(); }, ms)); };
+    const after = (ms, fn) => { s.timers.push(setTimeout(() => { if (!s.stopped) fn(); }, ms * MA.games.speed)); };
 
     const dotsEl = h('div', { class: 'progress', 'aria-label': 'Progress' });
     for (let i = 0; i < ROUND; i++) dotsEl.append(h('span', { class: 'pdot' }));
@@ -95,10 +98,15 @@
       const level = s.easier && s.level > 1 ? s.level - 1 : s.level;
       s.easier = false;
       const skill = game.levels[level - 1].id;
-      const p = game.make(level, { review: MA.store.missedFacts(skill), avoid: s.avoid });
+      const review = MA.store.missedFacts(skill).filter(f => !s.avoid.includes(f.key));
+      // Games that can rebuild a problem from saved params get missed ones back here.
+      const p = game.fromParams && review.length && Math.random() < 0.3
+        ? Object.assign(game.fromParams(pick(review).p, level), { review: true })
+        : game.make(level, { review, avoid: s.avoid });
       p.level = level;
       p.skill = skill;
       s.problem = p;
+      MA.games.current = p; // read by the automated tests
       s.avoid.push(p.key);
       s.tries = 0;
       s.busy = false;
@@ -132,28 +140,45 @@
       msg.append(...kids);
     }
 
-    // Games call api.answer(value). It returns true when right, false when wrong,
+    // Games call api.answer(value), or api.right() / api.wrong(hint) when they check answers themselves
+    // (games with several steps). Each returns true when right, false when wrong,
     // and null when the tap is ignored (between problems or during "Show me").
     const api = {
       after,
       busy: () => s.busy,
+      tries: () => s.tries,
       results: () => s.results.map(r => r.kind),
+      // A short message that is not a miss, such as "Borrow from the hundreds first".
+      tip(text) {
+        if (s.busy) return;
+        showMessage('try', h('span', { class: 'hint', text: '💡 ' + text }));
+        MA.voice.auto(text);
+      },
+      clearTip() {
+        if (!s.busy) { msg.innerHTML = ''; msg.className = 'game-msg'; }
+      },
       answer(value, opts) {
         if (s.busy || s.stopped) return null;
         const p = s.problem;
         const correct = game.check ? game.check(p, value) : value === p.answer;
-        if (correct) {
-          s.busy = true;
-          record(s.tries === 0 ? 'first' : 'second');
-          MA.sound.play('correct');
-          showMessage('good', h('span', { class: 'praise', text: s.tries === 0 ? pick(PRAISE) : 'You got it!' }));
-          after((opts && opts.delay) || 1000, () => { s.i++; next(); });
-          return true;
-        }
+        return correct ? api.right(opts) : api.wrong();
+      },
+      right(opts) {
+        if (s.busy || s.stopped) return null;
+        s.busy = true;
+        record(s.tries === 0 ? 'first' : 'second');
+        MA.sound.play('correct');
+        showMessage('good', h('span', { class: 'praise', text: s.tries === 0 ? pick(PRAISE) : 'You got it!' }));
+        after((opts && opts.delay) || 1000, () => { s.i++; next(); });
+        return true;
+      },
+      wrong(hint) {
+        if (s.busy || s.stopped) return null;
+        const p = s.problem;
         s.tries++;
         MA.sound.play('wrong');
         if (s.tries < 2) {
-          const hint = (game.explain ? game.explain(p) : MA.math.explain(p)).hint;
+          hint = hint || (game.explain ? game.explain(p) : MA.math.explain(p)).hint;
           showMessage('try', h('strong', { text: 'Not quite. Try again!' }), h('span', { class: 'hint', text: '💡 ' + hint }));
           MA.voice.auto('Not quite. ' + hint);
           return false;
@@ -222,7 +247,7 @@
         opened ? h('div', { class: 'unlocked' }, `🎉 New level open: Level ${opened} · ${game.levels[opened - 1].name}`) : null,
         starsN < 3 && progress.unlocked <= s.level ? h('p', { class: 'result-tip', text: 'Get 3 stars to open the next level.' }) : null,
         toRemember.length ? h('div', { class: 'remember' }, h('span', { text: "Let's remember:" }),
-          toRemember.map(p => h('span', { class: 'fact', text: game.answerText ? game.answerText(p) : `${p.a} ${MA.math.SYM[p.op]} ${p.b} = ${p.c}` }))) : null,
+          toRemember.map(p => h('span', { class: 'fact', text: p.memo || `${p.a} ${MA.math.SYM[p.op]} ${p.b} = ${p.c}` }))) : null,
         starsN === 1 && s.level > 1
           ? h('button', { class: 'btn btn-link', type: 'button', onclick: () => MA.ui.go('game', { gameId: game.id, level: s.level - 1 }) }, `Warm up on Level ${s.level - 1}`)
           : null,
