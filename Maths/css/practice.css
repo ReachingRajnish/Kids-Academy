@@ -98,3 +98,16 @@
   .fs-plate { min-width: 80px; }
   .game-bar .run-timer { order: 5; flex-basis: 100%; }
 }
+
+/* Phones: arrays scale with the screen height so tall gardens still fit. */
+@media (max-width: 560px) {
+  .arr.icons .arr-dot { font-size: var(--size, clamp(0.95rem, 2.6vh, 1.7rem)); }
+  .ag-bed { padding: 8px 10px; }
+  .ag-eq, .tt-eq { font-size: clamp(1.5rem, 7vw, 2.4rem); }
+}
+@media (max-width: 560px) {
+  .ag-pair { flex-wrap: nowrap; gap: 6px; }
+  .ag-pair .arr.icons .arr-dot { font-size: clamp(0.7rem, min(3.4vw, 1.9vh), 1.2rem); }
+  .ag-pair .ag-bed { padding: 6px; }
+  .ag-turn { font-size: 1.6rem; }
+}

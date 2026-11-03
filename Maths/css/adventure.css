@@ -36,12 +36,16 @@
 
 .world-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 .world-card {
-  display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 24px; color: #fff; cursor: pointer;
+  position: relative; display: flex; flex-direction: column; gap: 6px; padding: 18px; border-radius: 24px; color: #fff; cursor: pointer;
   background: linear-gradient(160deg, color-mix(in srgb, var(--c) 75%, white), var(--c));
   box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 65%, black); transition: transform 0.12s;
 }
 .world-card:hover { transform: translateY(-3px); }
-.world-card.locked { cursor: default; filter: saturate(0.4); }
+.world-card.locked { cursor: default; }
+.world-badge {
+  position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; display: grid; place-items: center;
+  border-radius: 50%; background: rgba(255, 255, 255, 0.92); font-size: 1.1rem;
+}
 .world-card.locked:hover { transform: none; }
 .world-icon { font-size: 3rem; line-height: 1; }
 .world-card h3 { font-size: 1.45rem; }
@@ -150,4 +154,18 @@
   .daily-head h2 { font-size: 1.35rem; }
   .creature-grid { grid-template-columns: repeat(2, 1fr); }
   .stop-num { width: 24px; height: 24px; font-size: 0.8rem; }
+}
+
+/* Phones: two cards per row, and the header keeps room for its title. */
+@media (max-width: 560px) {
+  .world-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .world-card { padding: 12px; }
+  .world-card h3 { font-size: 1.15rem; }
+  .world-icon { font-size: 2.4rem; }
+  .world-card .btn { font-size: 0.9rem; padding: 8px 10px; }
+  .world-badge { width: 32px; height: 32px; font-size: 0.95rem; top: 8px; right: 8px; }
+  .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .top-bar .icon-btn ~ .player-chip { display: none; }
+  .area-tile.hero .area-text { display: none; }
+  .bar-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }

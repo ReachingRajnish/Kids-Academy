@@ -152,9 +152,10 @@ button.coin:active, button.note:active { transform: translateY(3px); }
 .sp-thing { font-size: clamp(5rem, 16vw, 8rem); }
 
 /* ---------- Pizza Party ---------- */
-.pz-pic { width: clamp(180px, 30vh, 280px); max-width: 100%; aspect-ratio: 1; }
+.pz-pic { width: clamp(180px, 30vh, 280px); max-width: min(100%, calc(100vw - 40px)); aspect-ratio: 1; }
 .pz-pic svg { width: 100%; height: 100%; display: block; }
 .pz-pic.bar { aspect-ratio: 1.6; width: clamp(240px, 42vh, 380px); }
+.pz-holder { max-width: 100%; display: flex; justify-content: center; }
 .pz-holder .pz-piece { cursor: pointer; }
 .pz-holder .pz-pic { width: clamp(220px, 40vh, 340px); }
 .pz-holder .pz-pic.bar { width: clamp(280px, 56vh, 480px); }
@@ -199,4 +200,21 @@ button.coin:active, button.note:active { transform: translateY(3px); }
   .sp-field { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .pz-choices.pics .choice { flex: 1 1 28%; min-width: 0; }
   .pz-choices.pics .pz-pic, .pz-choices.pics .pz-pic.bar { width: 100%; }
+}
+
+/* ---------- Phones held upright: keep every level on one screen ---------- */
+@media (max-width: 560px) {
+  .ev { gap: 10px; padding: 10px 12px; }
+  .ev-pad .keypad { --key: clamp(46px, 6.6vh, 60px); gap: 7px; padding: 10px; }
+  .ev-pad .key { font-size: 1.6rem; }
+  .ck-set { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; justify-items: center; }
+  .ck-set .ck-tower { grid-column: 1 / -1; grid-row: 1; }
+  .ck-set .ck-ctl { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px; }
+  .ck-set .ck-lbl { flex-basis: 100%; text-align: center; }
+  .ck-face { width: min(62vw, 34vh); }
+  .gr-two { gap: 8px; }
+  .gr-tallies { padding: 6px 10px; }
+  .gr-tallies .gr-title { margin-bottom: 2px; }
+  .gr-trow { padding: 3px 0; }
+  .gr-holder .gr-plot { height: clamp(150px, 24vh, 220px); }
 }

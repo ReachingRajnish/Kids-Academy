@@ -12,7 +12,7 @@
     return h('div', { class: 'creature' + (owned ? ' owned' : ''), style: { '--c': c.color }, 'data-creature': c.id },
       h('span', { class: 'creature-icon' }, owned ? c.icon : '❓'),
       h('b', { text: owned ? c.name : '???' }),
-      h('small', { text: owned ? c.line : hintText }));
+      owned ? h('small', { text: c.line }) : null);
   }
 
   function playStop(stop, from) {
@@ -29,7 +29,7 @@
       h('div', { class: 'daily-head' },
         h('span', { class: 'daily-sun', 'aria-hidden': 'true' }, '☀️'),
         h('div', {}, h('h2', { text: "Today's Adventure" }),
-          h('p', { text: d.gift ? 'All done today. See you tomorrow!' : `${done} of ${d.items.length} done · 5 quick rounds` })),
+          h('p', { text: d.gift ? 'All done! See you tomorrow' : `${done} of ${d.items.length} done` })),
         p.streak.count ? h('span', { class: 'streak', text: `🔥 ${p.streak.count} day${p.streak.count > 1 ? 's' : ''}` }) : null),
       h('div', { class: 'daily-mini' }, d.items.map(it => h('span', { class: 'mini' + (it.done ? ' done' : ''), text: gameOf(it).icon })),
         h('span', { class: 'mini gift' + (d.gift ? ' done' : ''), text: '🎁' })));
@@ -40,17 +40,19 @@
       const card = h('div', { class: 'world-card' + (open ? '' : ' locked'), style: { '--c': w.color }, 'data-world': w.id },
         h('span', { class: 'world-icon' }, w.icon),
         h('h3', { text: w.name }),
-        h('p', { text: w.text }),
         h('span', { class: 'level-bar' }, h('i', { style: { width: (100 * n / w.stops.length) + '%' } })),
-        h('span', { class: 'world-n', text: `${n} of ${w.stops.length} stops${p.chests[w.id] ? ' · 🎁 opened' : ''}` }));
+        h('span', { class: 'world-n', text: `⭐ ${n} / ${w.stops.length}${p.chests[w.id] ? '  🎁' : ''}` }));
+      card.title = w.text;
       if (open) {
         card.setAttribute('role', 'button');
         card.tabIndex = 0;
         card.addEventListener('click', () => MA.ui.go('world', { id: w.id }));
       } else {
-        card.append(h('p', { class: 'world-lock', text: `🔒 Finish ${A.WORLDS[i - 1].name} first, or jump ahead: get 3 stars on its first stop.` }),
+        // Locked: a lock badge and one short button. Tapping the card explains how to open it.
+        card.addEventListener('click', e => { if (!e.target.closest('button')) MA.ui.toast(`🔒 Finish ${A.WORLDS[i - 1].name}, or jump ahead with 3 stars!`, 2600); });
+        card.append(h('span', { class: 'world-badge', 'aria-label': 'Locked' }, '🔒'),
           h('button', { class: 'btn btn-main', type: 'button', 'data-jump': w.id,
-            onclick: () => playStop(w.stops[0], { screen: 'adventure', label: '🗺️ Back to Adventure' }) }, '🚀 Jump-ahead challenge'));
+            onclick: () => playStop(w.stops[0], { screen: 'adventure', label: '🗺️ Back to Adventure' }) }, '🚀 Jump ahead'));
       }
       return card;
     }));
@@ -188,7 +190,7 @@
       const stone = h('div', { class: `stone ${state}`, style: { '--c': g.color }, 'data-item': String(k) },
         h('span', { class: 'stone-icon' }, g.icon),
         h('b', { text: g.title }),
-        h('small', { text: `Level ${it.level} · ${g.levels[it.level - 1].name}` }),
+        h('small', { text: `Level ${it.level}` }),
         it.done ? MA.ui.stars(it.stars) : null,
         state === 'current' ? h('button', { class: 'btn btn-main', type: 'button', 'data-play': '1', onclick: () => MA.ui.go('game', {
           gameId: it.game, level: it.level, round: A.DAILY_ROUND, mode: 'daily', item: k,
@@ -212,7 +214,7 @@
 
     root.append(h('div', { class: 'screen daily-screen' },
       MA.ui.topBar("Today's Adventure", () => MA.ui.go('adventure')),
-      h('p', { class: 'lead daily-lead', text: allDone ? (d.gift ? 'Brilliant! You finished today.' : 'All done! Open your gift.') : 'Five quick rounds. Do them in order!' }),
+      h('p', { class: 'lead daily-lead', text: allDone ? (d.gift ? 'Brilliant! You finished today.' : 'All done! Open your gift.') : '5 quick rounds' }),
       path));
   });
 

@@ -6,7 +6,7 @@
 //   { id, title, icon, color, shelf, blurb, intro, levels,
 //     make(level, ctx) -> problem, render(problem, stage, api) -> cleanup?, say(problem) -> text,
 //     check?(problem, value), explain?(problem) -> {hint, steps}, visual?(problem) -> element,
-//     fromParams?(params, level) -> problem }
+//     fromParams?(params, level) -> problem, round? (problems in a full round, default 10) }
 // A problem has { key, answer } and, for review and the results screen, { params, memo }.
 // and calls api.answer(value) when the player answers (see api below).
 (function (MA) {
@@ -23,7 +23,7 @@
     register(game) { list.push(game); },
     list: () => list,
     get: id => list.find(g => g.id === id),
-    // Called at the end of every round with {game, level, stars, firstTry, round, before, params}.
+    // Called at the end of every round with {game, level, stars, firstTry, round, full, before, params}.
     // A listener may return lines to show on the results screen, such as "+2 💎".
     listeners: [],
   };
@@ -63,7 +63,7 @@
     const progress = MA.store.game(game.id);
     const from = params.from || { screen: 'play', label: '← Games' };
     const s = {
-      level: params.level, round: params.round || ROUND, i: 0, tries: 0, results: [], avoid: [],
+      level: params.level, round: Math.min(params.round || ROUND, game.round || ROUND), i: 0, tries: 0, results: [], avoid: [],
       missStreak: 0, easier: false, busy: true, stopped: false, finished: false,
       problem: null, gameCleanup: null, timers: [],
     };
@@ -174,10 +174,11 @@
         const correct = game.check ? game.check(p, value) : value === p.answer;
         return correct ? api.right(opts) : api.wrong();
       },
+      // right({ helped: true }) counts as right on the second try, for puzzles finished after a few slips.
       right(opts) {
         if (s.busy || s.stopped) return null;
         s.busy = true;
-        record(s.tries === 0 ? 'first' : 'second');
+        record(s.tries === 0 && !(opts && opts.helped) ? 'first' : 'second');
         MA.sound.play('correct');
         showMessage('good', h('span', { class: 'praise', text: s.tries === 0 ? pick(PRAISE) : 'You got it!' }));
         after((opts && opts.delay) || 1000, () => { s.i++; next(); });
@@ -233,7 +234,7 @@
       progress.last = s.level;
       const before = progress.best[s.level] || 0;
       // Short daily rounds count for stars and practice, but only full rounds open levels.
-      const full = s.round === ROUND;
+      const full = s.round === (game.round || ROUND) && params.mode !== 'daily';
       let opened = 0;
       if (full) {
         progress.best[s.level] = Math.max(before, starsN);
@@ -244,7 +245,7 @@
       }
       const notes = [];
       MA.games.listeners.forEach(fn => {
-        const out = fn({ game, level: s.level, stars: starsN, firstTry, round: s.round, before, params });
+        const out = fn({ game, level: s.level, stars: starsN, firstTry, round: s.round, full, before, params });
         if (out) notes.push(...[].concat(out));
       });
       MA.store.save();
@@ -263,7 +264,7 @@
           h('button', { class: 'btn btn-soft', type: 'button', onclick: back }, from.label),
           h('button', { class: 'btn btn-soft', type: 'button', onclick: replay }, '↻ Play again'),
           progress.unlocked > s.level
-            ? h('button', { class: 'btn btn-main', type: 'button', onclick: () => MA.ui.go('game', { gameId: game.id, level: s.level + 1 }) }, `Level ${s.level + 1} ▶`)
+            ? h('button', { class: 'btn btn-main', type: 'button', onclick: () => MA.ui.go('game', { gameId: game.id, level: s.level + 1, from: params.from }) }, `Level ${s.level + 1} ▶`)
             : null);
 
       stage.innerHTML = '';
@@ -278,7 +279,7 @@
         toRemember.length ? h('div', { class: 'remember' }, h('span', { text: "Let's remember:" }),
           toRemember.map(p => h('span', { class: 'fact', text: p.memo || `${p.a} ${MA.math.SYM[p.op]} ${p.b} = ${p.c}` }))) : null,
         starsN === 1 && s.level > 1 && !params.mode
-          ? h('button', { class: 'btn btn-link', type: 'button', onclick: () => MA.ui.go('game', { gameId: game.id, level: s.level - 1 }) }, `Warm up on Level ${s.level - 1}`)
+          ? h('button', { class: 'btn btn-link', type: 'button', onclick: () => MA.ui.go('game', { gameId: game.id, level: s.level - 1, from: params.from }) }, `Warm up on Level ${s.level - 1}`)
           : null,
         actions));
       [...starRow.children].forEach((st, i) => {

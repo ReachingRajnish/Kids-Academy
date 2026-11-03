@@ -1,0 +1,110 @@
+/* Maths Adventure: the shared theme, loaded last. Flat, bright area colours; soft cream cards with gentle shadows;
+   a header that sits on the page (dark back button, white title, dark counter pills); dark-framed game tiles. */
+:root[data-theme="todo"] {
+  --ink: #2b2d42;
+  --muted: #6b6d80;
+  --cream: #fbf7ef;
+  --cream-edge: #e6dcc8;
+  --plate: #262a3f;      /* dark frames, pills and the back button */
+  --sun: #ffcc2e;
+  --good: #3cb44a;
+  --go: #ff7a33;          /* the main "Start" colour */
+  --go-edge: #d9571b;
+  --soft-shadow: 0 5px 0 rgba(0, 0, 0, 0.12), 0 10px 22px rgba(0, 0, 0, 0.14);
+  --shadow: var(--soft-shadow);
+  --font: 'Fredoka', 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+}
+:root[data-theme="todo"] body, :root[data-theme="todo"] button, :root[data-theme="todo"] input { font-family: var(--font); }
+:root[data-theme="todo"] body { --bg: #2f7be6; background: var(--bg); color: var(--ink); }
+:root[data-theme="todo"] body[data-screen="profiles"], :root[data-theme="todo"] body[data-screen="hub"] { --bg: #18a7c9; }
+:root[data-theme="todo"] body[data-screen="play"] { --bg: #7cc22c; }
+:root[data-theme="todo"] body[data-screen="practice"] { --bg: #7a4fe0; }
+:root[data-theme="todo"] body[data-screen="brain"] { --bg: #2f7be6; }
+:root[data-theme="todo"] body[data-screen="adventure"], :root[data-theme="todo"] body[data-screen="daily"] { --bg: #f5a623; }
+:root[data-theme="todo"] body[data-screen="collection"] { --bg: #9a4fe0; }
+/* ---------- Words on the coloured background ---------- */
+:root[data-theme="todo"] .lead, :root[data-theme="todo"] .section-title, :root[data-theme="todo"] .shelf h2, :root[data-theme="todo"] .brand h1 { color: #fff; text-shadow: none; }
+:root[data-theme="todo"] .lead { font-weight: 600; opacity: 0.95; }
+:root[data-theme="todo"] .section-title, :root[data-theme="todo"] .shelf h2 { font-size: 1.7rem; font-weight: 700; }
+:root[data-theme="todo"] .btn-link { color: #fff; }
+/* ---------- Header: part of the page ---------- */
+:root[data-theme="todo"] .top-bar { background: none; padding: 4px 0; margin-bottom: 16px; }
+:root[data-theme="todo"] .top-bar .icon-btn {
+  width: 52px; height: 46px; border-radius: 0 999px 999px 0; margin-left: -16px; padding-left: 10px;
+  background: var(--plate); color: var(--sun); font-size: 1.6rem; box-shadow: none;
+}
+:root[data-theme="todo"] .bar-title { color: #fff; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-theme="todo"] .top-bar .player-chip, :root[data-theme="todo"] .top-bar .star-count { background: var(--plate); color: #fff; box-shadow: none; }
+:root[data-theme="todo"] .top-bar .gem-count { color: #8fd3ff; }
+/* ---------- Cards and buttons ---------- */
+:root[data-theme="todo"] .btn { box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18); font-weight: 700; }
+:root[data-theme="todo"] .btn-main { background: var(--go); color: #fff; box-shadow: 0 5px 0 var(--go-edge); }
+:root[data-theme="todo"] .btn-main:active { box-shadow: 0 1px 0 var(--go-edge); }
+:root[data-theme="todo"] .btn-soft { background: var(--cream); color: var(--ink); box-shadow: 0 5px 0 var(--cream-edge); }
+:root[data-theme="todo"] .btn-link { box-shadow: none; }
+:root[data-theme="todo"] .modal-card { background: var(--cream); box-shadow: 0 8px 0 var(--cream-edge), 0 24px 60px rgba(0, 0, 0, 0.3); }
+:root[data-theme="todo"] .toggle { background: var(--plate); color: #fff; box-shadow: none; }
+:root[data-theme="todo"] .toggle[aria-pressed="false"] { background: rgba(38, 42, 63, 0.55); color: rgba(255, 255, 255, 0.75); }
+:root[data-theme="todo"] .profile-card, :root[data-theme="todo"] .goals-card, :root[data-theme="todo"] .hello, :root[data-theme="todo"] .pr-card, :root[data-theme="todo"] .pr-level, :root[data-theme="todo"] .tt-page, :root[data-theme="todo"] .egg-panel, :root[data-theme="todo"] .creature, :root[data-theme="todo"] .stone, :root[data-theme="todo"] .daily-card { background: var(--cream); box-shadow: 0 6px 0 var(--cream-edge), 0 12px 24px rgba(0, 0, 0, 0.12); border: 0; }
+:root[data-theme="todo"] .profile-card.add { background: rgba(255, 255, 255, 0.16); border: 3px dashed rgba(255, 255, 255, 0.8); box-shadow: none; color: #fff; }
+:root[data-theme="todo"] .profile-card.add .avatar, :root[data-theme="todo"] .profile-card.add .pname { color: #fff; border-color: #fff; }
+/* ---------- Main menu ---------- */
+:root[data-theme="todo"] .hello { border-radius: 20px; padding: 6px 16px 6px 8px; width: fit-content; }
+:root[data-theme="todo"] .hello p { color: var(--ink); font-weight: 600; }
+:root[data-theme="todo"] .area-tile { background: var(--c); box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 70%, black), 0 12px 24px rgba(0, 0, 0, 0.15); border: 0; }
+:root[data-theme="todo"] .area-tile .area-text { display: none; }
+:root[data-theme="todo"] .area-tile.hero .area-text { display: block; font-weight: 600; }
+:root[data-theme="todo"] .goal-bar { background: #ebe3d3; }
+/* ---------- Game shelves: dark-framed tiles with the name above ---------- */
+:root[data-theme="todo"] .game-grid { gap: 22px 18px; }
+:root[data-theme="todo"] .game-card { background: none; box-shadow: none; border: 0; padding: 0; gap: 6px; color: #fff; }
+:root[data-theme="todo"] .game-card:hover { transform: translateY(-3px); }
+:root[data-theme="todo"] .game-card .game-title { order: -1; color: #fff; font-size: 1.25rem; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.15); }
+:root[data-theme="todo"] .game-card .game-icon {
+  width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 22px; font-size: clamp(3.4rem, 6vw, 5.4rem);
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--c) 55%, white), var(--c));
+  border: 9px solid var(--plate); box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+}
+:root[data-theme="todo"] .game-card .game-level { align-self: center; margin-top: 2px; padding: 1px 12px; border-radius: 999px; background: #8bd450; color: #1f4d12; font-size: 0.95rem; }
+:root[data-theme="todo"] .game-card .level-bar { display: none; }
+:root[data-theme="todo"] .game-blurb { display: none; }
+:root[data-theme="todo"] .picker-head .game-icon { background: var(--c); }
+:root[data-theme="todo"] .level-bubble.selected { color: #fff; }
+/* ---------- Adventure ---------- */
+:root[data-theme="todo"] .daily-card { background: var(--cream); color: var(--ink); }
+:root[data-theme="todo"] .mini { filter: none; opacity: 0.6; background: #efe7d6; }
+:root[data-theme="todo"] .mini.done { opacity: 1; }
+:root[data-theme="todo"] .world-card { background: var(--c); box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 70%, black), 0 12px 24px rgba(0, 0, 0, 0.15); border: 0; position: relative; }
+:root[data-theme="todo"] .world-card.locked { filter: none; }
+:root[data-theme="todo"] .world-card .level-bar { background: rgba(0, 0, 0, 0.2); }
+:root[data-theme="todo"] .world-card .level-bar i { background: #fff; }
+:root[data-theme="todo"] .world-card .btn { filter: none; background: var(--plate); color: #fff; box-shadow: none; }
+:root[data-theme="todo"] .world-badge {
+  position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; display: grid; place-items: center;
+  border-radius: 50%; background: var(--plate); font-size: 1.1rem;
+}
+:root[data-theme="todo"] .world-top { background: rgba(0, 0, 0, 0.18); }
+:root[data-theme="todo"] .world-top .icon-btn { background: var(--plate); color: var(--sun); }
+:root[data-theme="todo"] .stone.later { opacity: 1; filter: none; }
+:root[data-theme="todo"] .stone.later .stone-icon { opacity: 0.55; }
+:root[data-theme="todo"] .creature:not(.owned) { background: #e9e1d1; }
+/* ---------- Game screens: dark bar, a bright flat background, cream panels ---------- */
+:root[data-theme="todo"] .game-bar { background: var(--plate); }
+:root[data-theme="todo"] .game-screen { background: color-mix(in srgb, var(--game) 42%, white); }
+:root[data-theme="todo"] .title-icon { border-color: var(--plate); }
+:root[data-theme="todo"] .show-me { background: var(--cream); }
+@media (max-width: 560px) {
+  :root[data-theme="todo"] .area-tile.hero .area-text { display: none; }
+  :root[data-theme="todo"] .top-bar .icon-btn ~ .player-chip { display: none; }
+  :root[data-theme="todo"] .top-bar .icon-btn { margin-left: -12px; }
+  :root[data-theme="todo"] .section-title, :root[data-theme="todo"] .shelf h2 { font-size: 1.35rem; }
+  :root[data-theme="todo"] .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+  :root[data-theme="todo"] .game-card .game-title { font-size: 1.02rem; }
+  :root[data-theme="todo"] .game-card .game-icon { font-size: 2.8rem; border-width: 7px; border-radius: 18px; }
+  :root[data-theme="todo"] .world-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  :root[data-theme="todo"] .world-card { padding: 12px; }
+  :root[data-theme="todo"] .world-card h3 { font-size: 1.15rem; }
+  :root[data-theme="todo"] .world-icon { font-size: 2.4rem; }
+  :root[data-theme="todo"] .world-card .btn { font-size: 0.9rem; padding: 8px 10px; }
+  :root[data-theme="todo"] .world-badge { width: 32px; height: 32px; font-size: 0.95rem; top: 8px; right: 8px; }
+}

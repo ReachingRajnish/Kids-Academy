@@ -46,12 +46,12 @@
       h('button', { class: 'tt-page', type: 'button', 'data-table': String(t), onclick: () => tablePage(t) },
         h('span', { class: 'tt-x', text: `× ${t}` }),
         MA.ui.stars(times.best[timesLevel(t)] || 0),
-        h('small', { text: best['x' + t] ? `⏱️ ${best['x' + t]}` : 'Not tried yet' }))));
+        best['x' + t] ? h('small', { text: `⏱️ ${best['x' + t]}` }) : null)));
 
     const sprints = h('div', { class: 'pr-grid' }, SETS.map(s =>
       h('button', { class: 'pr-card', type: 'button', 'data-sprint': s.id, onclick: () => MA.ui.go('sprint', { set: s.id }) },
         h('span', { class: 'pr-icon', text: s.icon }), h('b', { text: s.name }),
-        h('small', { text: best[s.id] ? `Best: ${best[s.id]} in a minute` : 'Tap to try' }))));
+        best[s.id] ? h('small', { text: `Best: ${best[s.id]} in a minute` }) : null)));
 
     const skills = MA.store.current().skills;
     const accuracy = l => { const r = skills[l.id] || []; return r.length >= 3 ? r.reduce((a, b) => a + b, 0) / r.length : null; };
@@ -66,9 +66,9 @@
       MA.ui.topBar('Practice', () => MA.ui.go('hub')),
       h('h2', { class: 'section-title', text: '📒 Times tables notebook' }),
       notebook,
-      h('h2', { class: 'section-title', text: '⏱️ Speed run: how many in one minute?' }),
+      h('h2', { class: 'section-title', text: '⏱️ One-minute speed run' }),
       sprints,
-      h('h2', { class: 'section-title', text: '📝 Practice at your own speed' }),
+      h('h2', { class: 'section-title', text: '📝 Take your time' }),
       weak ? h('button', { class: 'btn btn-main pr-weak', type: 'button', 'data-weak': '1',
         onclick: () => MA.ui.go('game', { gameId: 'quick-facts', level: weak.i + 1, from: FROM }) }, `💪 Practise a weak spot: ${weak.l.name}`) : null,
       basic));

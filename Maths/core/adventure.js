@@ -40,6 +40,10 @@
       text: 'Times tables and sharing', deco: ['🐒', '🦜', '🍌', '🌿', '🐍'],
       stops: [s('arrays', 1), s('times', 1), s('times', 2), s('arrays', 2), s('times', 3), s('share', 1),
         s('arrays', 3), s('times', 4), s('share', 2), s('times', 5), s('arrays', 4), s('share', 3)] },
+    { id: 'castle', name: 'Puzzle Castle', icon: '🏰', color: '#a855f7', creature: 'riddle',
+      text: 'Brain games', deco: ['🗝️', '🕯️', '🛡️', '👑', '🦇'],
+      stops: [s('sudoku', 1), s('memory', 1), s('cubes', 1), s('mirror', 1), s('tangram', 1), s('sudoku', 2),
+        s('memory', 2), s('cubes', 2), s('mirror', 2), s('tangram', 2), s('sudoku', 3)] },
     { id: 'space', name: 'Star Station', icon: '🚀', color: '#3b3a8f', creature: 'bolt',
       text: 'Big sums and times tables', deco: ['⭐', '🪐', '🌙', '☄️', '🛸'],
       stops: [s('stacked-add', 5), s('stacked-sub', 5), s('quick-facts', 12), s('equation-maker', 6), s('stacked-add', 6),
@@ -54,6 +58,7 @@
     { id: 'summit', icon: '🦅', name: 'Summit', color: '#7c6cf2', line: 'Flies high over the hundreds' },
     { id: 'bolt', icon: '🤖', name: 'Bolt', color: '#3b3a8f', line: 'Knows every times table' },
     { id: 'cheeky', icon: '🐒', name: 'Cheeky', color: '#0d9488', line: 'Swings through the times tables' },
+    { id: 'riddle', icon: '🦝', name: 'Riddle', color: '#a855f7', line: 'Loves a tricky puzzle' },
     { id: 'penny', icon: '🐷', name: 'Penny', color: '#ea580c', line: 'Saves every rupee' },
     { id: 'prism', icon: '🦚', name: 'Prism', color: '#7c3aed', line: 'Shows off a fan of shapes' },
     { id: 'foxy', icon: '🦊', name: 'Foxy', color: '#f97316', line: 'Spots number patterns' },
@@ -217,7 +222,7 @@
       t.free++;
     }
     // Clearing a map stop for the first time, from the map or from Play.
-    if (info.round === MA.games.ROUND && info.before < PASS && info.stars >= PASS) {
+    if (info.full && info.before < PASS && info.stars >= PASS) {
       const onMap = WORLDS.some(w => w.stops.some(st => st.game === info.game.id && st.level === info.level));
       if (onMap) {
         t.stops++;

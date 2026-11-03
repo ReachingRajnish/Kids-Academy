@@ -7,11 +7,11 @@
   const COLORS = ['#ff8a3d', '#4f9cf9', '#2bb673', '#8e5bd8', '#ef5b8b', '#f5b700'];
 
   const AREAS = [
-    { id: 'adventure', icon: '🗺️', name: 'Adventure', text: 'Follow the map and find treasure', color: '#f29a1f' },
-    { id: 'play', icon: '🎮', name: 'Play', text: 'Pick any game', color: '#22a95b' },
-    { id: 'practice', icon: '⚡', name: 'Practice', text: 'Times tables and speed runs', color: '#3b82f6' },
-    { id: 'brain', icon: '🧩', name: 'Brain Games', text: 'Puzzles and memory', color: '#a855f7', soon: true },
-    { id: 'collection', icon: '🏆', name: 'Collection', text: 'Your creatures', color: '#e5484d' },
+    { id: 'adventure', icon: '🗺️', name: 'Adventure', text: 'Follow the map and find treasure', color: '#ff8a1f' },
+    { id: 'play', icon: '🎮', name: 'Play', text: 'Pick any game', color: '#6cc417' },
+    { id: 'practice', icon: '⚡', name: 'Practice', text: 'Times tables and speed runs', color: '#12b8a6' },
+    { id: 'brain', icon: '🧩', name: 'Brain Games', text: 'Puzzles and memory', color: '#7c4dff' },
+    { id: 'collection', icon: '🏆', name: 'Collection', text: 'Your creatures', color: '#f2408a' },
   ];
 
   function starCount(p) {
@@ -179,34 +179,45 @@
       tiles,
       h('div', { class: 'settings-row' },
         MA.voice.available ? toggle('voice', '🔊', '🔈', 'Read aloud') : null,
-        toggle('sound', '🎵', '🔇', 'Sounds'))));
+        toggle('sound', '🎵', '🔇', 'Sounds'),
+        h('button', { class: 'toggle', type: 'button', 'data-themes': '1', onclick: () => MA.themes.picker() }, '🎨 Theme'))));
   });
 
   // ---------- Games shelf ----------
   MA.ui.screen('play', root => {
     if (!MA.store.current()) return MA.ui.go('profiles');
     const shelves = {};
-    MA.games.list().forEach(g => (shelves[g.shelf] = shelves[g.shelf] || []).push(g));
+    MA.games.list().filter(g => g.shelf !== BRAIN).forEach(g => (shelves[g.shelf] = shelves[g.shelf] || []).push(g));
     root.append(h('div', { class: 'screen play-screen' },
       topBar('Play', () => MA.ui.go('hub')),
       Object.entries(shelves).map(([shelf, games]) => h('section', { class: 'shelf' },
         h('h2', { text: shelf }),
-        h('div', { class: 'game-grid' }, games.map(gameCard))))));
+        h('div', { class: 'game-grid' }, games.map(g => gameCard(g)))))));
   });
 
-  function gameCard(g) {
+  // ---------- Brain games: puzzles that build thinking skills ----------
+  const BRAIN = 'Brain games';
+  MA.ui.screen('brain', root => {
+    if (!MA.store.current()) return MA.ui.go('profiles');
+    const from = { screen: 'brain', label: '← Brain Games' };
+    root.append(h('div', { class: 'screen play-screen brain-screen' },
+      topBar('Brain Games', () => MA.ui.go('hub')),
+      h('div', { class: 'game-grid' }, MA.games.list().filter(g => g.shelf === BRAIN).map(g => gameCard(g, from)))));
+  });
+
+  function gameCard(g, from) {
     const prog = MA.store.game(g.id);
     const n = g.levels.length;
     const open = Math.min(prog.unlocked, n);
-    return h('button', { class: 'game-card', type: 'button', style: { '--c': g.color }, 'data-game': g.id, onclick: () => levelPicker(g) },
+    return h('button', { class: 'game-card', type: 'button', style: { '--c': g.color }, 'data-game': g.id, onclick: () => levelPicker(g, from) },
       h('span', { class: 'game-icon' }, g.icon),
       h('span', { class: 'game-title', text: g.title }),
       h('span', { class: 'game-blurb', text: g.blurb }),
-      h('span', { class: 'game-level', text: `Level ${open} of ${n}` }),
+      h('span', { class: 'game-level', text: `Lv.${open}` }),
       h('span', { class: 'level-bar' }, h('i', { style: { width: (100 * open / n) + '%' } })));
   }
 
-  function levelPicker(g) {
+  function levelPicker(g, from) {
     const prog = MA.store.game(g.id);
     let sel = Math.min(prog.unlocked, g.levels.length);
     const bubbles = h('div', { class: 'level-grid', role: 'listbox', 'aria-label': 'Levels' });
@@ -242,7 +253,7 @@
         h('div', {}, h('h2', { text: g.title }), h('p', { text: g.intro }))),
       bubbles, detail,
       h('button', { class: 'btn btn-main btn-big', type: 'button', 'data-start': '1',
-        onclick: () => { close(); MA.ui.go('game', { gameId: g.id, level: sel }); } }, 'Start ▶'));
+        onclick: () => { close(); MA.ui.go('game', { gameId: g.id, level: sel, from }); } }, 'Start ▶'));
     paint();
     const close = MA.ui.modal(card, { dismiss: true });
     const chosen = bubbles.children[sel - 1];

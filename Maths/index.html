@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#ffd23f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Maths Adventure</title>
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('maths_adventure_theme') || 'todo'; } catch (e) { document.documentElement.dataset.theme = 'todo'; }</script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +16,13 @@
   <link rel="stylesheet" href="css/games.css">
   <link rel="stylesheet" href="css/everyday.css">
   <link rel="stylesheet" href="css/practice.css">
+  <link rel="stylesheet" href="css/brain.css">
   <link rel="stylesheet" href="css/adventure.css">
+  <link rel="stylesheet" href="css/themes/todo.css">
+  <link rel="stylesheet" href="css/themes/comic.css">
+  <link rel="stylesheet" href="css/themes/candy.css">
+  <link rel="stylesheet" href="css/themes/night.css">
+  <link rel="stylesheet" href="css/themes/picker.css">
 </head>
 <body>
   <div id="app"></div>
@@ -30,6 +37,7 @@
   <script src="core/voice.js"></script>
   <script src="core/mathgen.js"></script>
   <script src="core/ui.js"></script>
+  <script src="core/themes.js"></script>
   <script src="core/engine.js"></script>
   <!-- Games appear on the Play screen in this order, grouped by shelf. -->
   <script src="games/froggy-hop.js"></script>
@@ -51,6 +59,11 @@
   <script src="games/times.js"></script>
   <script src="games/arrays.js"></script>
   <script src="games/share.js"></script>
+  <script src="games/sudoku.js"></script>
+  <script src="games/memory.js"></script>
+  <script src="games/tangram.js"></script>
+  <script src="games/mirror.js"></script>
+  <script src="games/cubes.js"></script>
   <script src="core/practice.js"></script>
   <script src="core/adventure.js"></script>
   <script src="core/screens.js"></script>

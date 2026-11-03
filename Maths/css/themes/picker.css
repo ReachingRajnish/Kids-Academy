@@ -1,0 +1,12 @@
+/* The theme picker pop-up (the same in every theme). */
+.theme-picker { max-width: 620px; }
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+.theme-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border: 3px solid transparent;
+  border-radius: 20px; background: #f4f1fa; color: #2b2d42; font-family: 'Fredoka', 'Trebuchet MS', sans-serif;
+}
+.theme-card[aria-pressed="true"] { border-color: #22a95b; background: #e8f8ee; }
+.theme-card b { font-size: 1.15rem; }
+.theme-card small { color: #6b6d80; }
+.theme-swatch { display: flex; gap: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); }
+.theme-swatch i { width: 26px; height: 40px; }

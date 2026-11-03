@@ -1,0 +1,53 @@
+/* Night theme: deep navy menus with glowing colour tiles. Game screens stay light so questions are easy to read. */
+:root[data-theme="night"] {
+  --sun: #ffd166;
+  --good: #2ec27e;
+  --deep: #141a3c;
+  --panel: #232b5e;
+  --panel-edge: #1a2150;
+  --glow-c: 0 0 0 2px color-mix(in srgb, var(--c) 70%, white), 0 10px 30px color-mix(in srgb, var(--c) 45%, transparent);
+}
+:root[data-theme="night"] body { background: radial-gradient(circle at 50% -10%, #34408c, var(--deep) 60%) fixed; }
+:root[data-theme="night"] .screen { --ink: #f4f3ff; --muted: #b9b7e0; color: var(--ink); }
+:root[data-theme="night"] .lead, :root[data-theme="night"] .section-title, :root[data-theme="night"] .shelf h2, :root[data-theme="night"] .brand h1 { color: #fff; }
+:root[data-theme="night"] .btn-link { color: #c8c6f0; }
+:root[data-theme="night"] .top-bar { background: rgba(255, 255, 255, 0.06); border-radius: 20px; padding: 6px 10px; }
+:root[data-theme="night"] .bar-title { color: #fff; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root[data-theme="night"] .top-bar .icon-btn, :root[data-theme="night"] .top-bar .player-chip, :root[data-theme="night"] .top-bar .star-count { background: var(--panel); color: #fff; box-shadow: none; }
+:root[data-theme="night"] .top-bar .gem-count { color: #8fd3ff; }
+:root[data-theme="night"] .btn { font-weight: 700; }
+:root[data-theme="night"] .btn-main { background: linear-gradient(135deg, #ffb347, #ff6b6b); color: #fff; box-shadow: 0 5px 0 #b8433f; }
+:root[data-theme="night"] .screen .btn-soft { background: var(--panel); color: #fff; box-shadow: 0 5px 0 var(--panel-edge); }
+:root[data-theme="night"] .toggle { background: var(--panel); color: #fff; box-shadow: none; }
+:root[data-theme="night"] .toggle[aria-pressed="false"] { opacity: 0.6; }
+:root[data-theme="night"] .profile-card, :root[data-theme="night"] .goals-card, :root[data-theme="night"] .hello, :root[data-theme="night"] .game-card, :root[data-theme="night"] .pr-card, :root[data-theme="night"] .pr-level, :root[data-theme="night"] .tt-page, :root[data-theme="night"] .egg-panel, :root[data-theme="night"] .creature, :root[data-theme="night"] .stone, :root[data-theme="night"] .daily-card { background: var(--panel); color: var(--ink); box-shadow: 0 6px 0 var(--panel-edge), 0 12px 28px rgba(0, 0, 0, 0.35); border: 0; }
+:root[data-theme="night"] .profile-card.add { background: transparent; border: 3px dashed #6b74c9; box-shadow: none; }
+:root[data-theme="night"] .hello { width: fit-content; padding: 6px 16px 6px 8px; }
+:root[data-theme="night"] .hello p span { color: var(--muted); }
+:root[data-theme="night"] .area-tile, :root[data-theme="night"] .world-card { background: linear-gradient(150deg, color-mix(in srgb, var(--c) 80%, white), var(--c)); box-shadow: var(--glow-c); border: 0; }
+:root[data-theme="night"] .area-tile .area-text { display: none; }
+:root[data-theme="night"] .area-tile.hero .area-text { display: block; font-weight: 600; }
+:root[data-theme="night"] .goal-bar { background: #151b45; }
+:root[data-theme="night"] .game-card { border-top: 0; }
+:root[data-theme="night"] .game-icon { background: var(--c, var(--game)); box-shadow: 0 0 22px color-mix(in srgb, var(--c, var(--game)) 60%, transparent); }
+:root[data-theme="night"] .game-blurb { display: none; }
+:root[data-theme="night"] .game-title { color: #fff; }
+:root[data-theme="night"] .level-bar { background: #151b45; }
+:root[data-theme="night"] .tt-x { color: #5eead4; }
+:root[data-theme="night"] .pr-icon, :root[data-theme="night"] .tt-page small, :root[data-theme="night"] .pr-card small, :root[data-theme="night"] .pr-level small { color: var(--muted); }
+:root[data-theme="night"] .mini { background: #151b45; opacity: 0.6; filter: none; }
+:root[data-theme="night"] .mini.done { opacity: 1; }
+:root[data-theme="night"] .daily-card .streak { background: #151b45; }
+:root[data-theme="night"] .world-card .level-bar { background: rgba(0, 0, 0, 0.25); }
+:root[data-theme="night"] .world-card .level-bar i { background: #fff; }
+:root[data-theme="night"] .world-card .btn { background: var(--deep); color: #fff; }
+:root[data-theme="night"] .world-badge { background: var(--deep); }
+:root[data-theme="night"] .world-top { background: var(--deep); }
+:root[data-theme="night"] .world-top .icon-btn { background: var(--panel); color: #fff; }
+:root[data-theme="night"] .stone.later { opacity: 1; }
+:root[data-theme="night"] .creature:not(.owned) { background: #1a2150; }
+:root[data-theme="night"] .game-bar { background: var(--deep); }
+:root[data-theme="night"] .game-screen { background: color-mix(in srgb, var(--game) 30%, #eef0ff); }
+:root[data-theme="night"] .keypad { background: var(--deep); }
+:root[data-theme="night"] .stone.done { background: #1f4d3e; }
+:root[data-theme="night"] .creature.owned { background: linear-gradient(160deg, color-mix(in srgb, var(--c) 55%, var(--panel)), var(--panel)); }

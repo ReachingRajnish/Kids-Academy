@@ -110,6 +110,7 @@
     if (p.mode === 'read') {
       const d = M.digits(p.target);
       tube.append(MA.ui.blocks(d.h, d.t, d.o));
+      tube.classList.toggle('many', d.h >= 5);
       const choices = MA.ui.choices(M.nearby(p.target, 4), v => {
         const ok = api.answer(v, { delay: 1500 });
         if (ok) rocket.classList.add('launch');
@@ -127,6 +128,7 @@
     function paint() {
       tube.innerHTML = '';
       tube.append(MA.ui.blocks(c.h, c.t, c.o));
+      tube.classList.toggle('many', c.h >= 5); // smaller blocks so 9 hundreds still fit in the window
       counts.h.textContent = c.h;
       counts.t.textContent = c.t;
       counts.o.textContent = c.o;

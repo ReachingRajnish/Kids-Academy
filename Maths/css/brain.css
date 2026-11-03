@@ -1,0 +1,98 @@
+/* Maths Adventure: Phase 5 styles. Picture Sudoku, Memory Tap, Shape Puzzle, Mirror Match and Cube Count. */
+
+/* ---------- Picture Sudoku ---------- */
+.sd-grid {
+  display: grid; grid-template-columns: repeat(var(--n), 1fr); width: min(calc(var(--n) * 86px), 92vw, 52vh);
+  border: 5px solid #3b3355; border-radius: 14px; overflow: hidden; background: #3b3355; gap: 2px;
+}
+.sd-cell {
+  aspect-ratio: 1; display: grid; place-items: center; border: 0; padding: 0; background: #fff;
+  font-size: clamp(1.4rem, 4.6vh, 2.6rem); font-weight: 700;
+}
+.sd-cell.given { background: #f3eefb; }
+.sd-cell.empty { background: #fff; }
+.sd-cell.sel { background: #fff4c2; box-shadow: inset 0 0 0 4px var(--sun); }
+.sd-cell.filled { background: #e8f8ee; color: #15803d; animation: pop 0.3s; }
+.sd-cell.nope { background: #fde2e2; animation: shake 0.4s; }
+.sd-cell.bx { box-shadow: inset -4px 0 0 #3b3355; }
+.sd-cell.by { box-shadow: inset 0 -4px 0 #3b3355; }
+.sd-cell.bx.by { box-shadow: inset -4px -4px 0 #3b3355; }
+.sd-cell.sel { box-shadow: inset 0 0 0 4px var(--sun); }
+.sd-palette { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.sd-sym {
+  width: clamp(56px, 8vh, 76px); height: clamp(56px, 8vh, 76px); border: 0; border-radius: 18px; background: #fff;
+  font-size: clamp(1.6rem, 4vh, 2.4rem); font-weight: 700; box-shadow: 0 6px 0 #d4cbe6;
+}
+.sd-sym:active { transform: translateY(4px); box-shadow: 0 2px 0 #d4cbe6; }
+
+/* ---------- Memory Tap ---------- */
+.mt-pads { display: grid; grid-template-columns: repeat(var(--cols), clamp(90px, 16vh, 150px)); gap: 14px; }
+.mt-pad {
+  aspect-ratio: 1; border: 0; border-radius: 26px; background: var(--c); opacity: 0.45; font-size: clamp(2rem, 6vh, 3.4rem);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2); transition: opacity 0.15s, transform 0.15s;
+}
+.mt-pad.on { opacity: 1; transform: scale(1.08); box-shadow: 0 0 0 6px #fff, 0 0 30px var(--c); }
+.mt[data-ready="1"] .mt-pad { opacity: 0.85; }
+.mt[data-ready="1"] .mt-pad.on { opacity: 1; }
+.mt-status { min-height: 1.4em; }
+.mt-digit {
+  width: clamp(140px, 24vh, 200px); aspect-ratio: 1; display: grid; place-items: center; border-radius: 30px;
+  background: #fff; box-shadow: var(--shadow); font-size: clamp(4rem, 14vh, 7rem); font-weight: 700; color: #7c3aed;
+}
+.mt-digit.on { animation: pop 0.25s; }
+
+/* ---------- Shape Puzzle ---------- */
+.tg-wrap { width: min(520px, 92vw); max-height: 46vh; display: flex; justify-content: center; }
+.tg-board { width: 100%; max-height: 46vh; overflow: visible; }
+.tg-slot { fill: #3b3355; stroke: #3b3355; stroke-width: 2; stroke-linejoin: round; cursor: pointer; }
+.tg-slot.lines { stroke: #8f86b3; stroke-dasharray: 6 5; }
+.tg-slot.done { stroke: #2d2a3e; stroke-width: 3; stroke-dasharray: none; }
+.tg-tools { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.tg-tray { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.tg-piece { display: grid; place-items: center; min-width: 70px; min-height: 70px; padding: 8px; border: 0; border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
+.tg-piece svg { max-width: 110px; max-height: 110px; }
+.tg-piece.sel { box-shadow: 0 0 0 5px var(--sun), var(--shadow); transform: translateY(-4px); }
+.tg-rot { font-size: 1.3rem; }
+.tg-rot:disabled { opacity: 0.4; }
+
+/* ---------- Mirror Match ---------- */
+.mm-grid { display: grid; grid-template-columns: repeat(var(--cols), clamp(40px, min(9vw, 9vh), 68px)); gap: 4px; padding: 8px; border-radius: 16px; background: #e0f2fe; }
+.mm-cell { aspect-ratio: 1; border: 0; padding: 0; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 2px #bae6fd; }
+.mm-cell.free { cursor: pointer; }
+.mm-grid { position: relative; }
+.mm-grid::after { content: ''; position: absolute; top: 2px; bottom: 2px; left: calc(50% - 2px); width: 4px; background: #0891b2; border-radius: 2px; }
+.mm-grid.across::after { top: calc(50% - 2px); bottom: auto; left: 2px; right: 2px; width: auto; height: 4px; }
+.mm-grid.small { grid-template-columns: repeat(var(--cols), 24px); margin: 6px auto; width: max-content; }
+
+/* ---------- Cube Count ---------- */
+.cb-row { display: flex; align-items: flex-end; justify-content: center; gap: 24px; flex-wrap: wrap; }
+.cb-pic { width: clamp(180px, 34vh, 300px); max-height: 46vh; }
+.cb-pic svg { max-height: 46vh; }
+.cb-pic svg { width: 100%; height: auto; display: block; }
+.cb-pic.small { width: 120px; margin: 0 auto; }
+.cb-goal { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
+.cb-goal small { font-weight: 600; color: var(--muted); }
+
+.brain-screen .game-grid { margin-top: 4px; }
+
+@media (max-width: 560px) {
+  .mt-pads { grid-template-columns: repeat(var(--cols), clamp(80px, 26vw, 110px)); gap: 10px; }
+  .mm-grid { grid-template-columns: repeat(var(--cols), clamp(30px, 9vw, 44px)); gap: 3px; }
+  .tg-piece { min-width: 56px; min-height: 56px; }
+  .tg-piece svg { max-width: 80px; max-height: 80px; }
+}
+
+/* Phones held upright. */
+@media (max-width: 560px) {
+  .mt-digit { width: clamp(100px, 16vh, 150px); font-size: clamp(3rem, 10vh, 5rem); border-radius: 22px; }
+  .cb-row { flex-wrap: nowrap; gap: 10px; align-items: center; }
+  .cb-row .cb-pic { width: min(58vw, 34vh); }
+  .cb-goal .cb-pic.small { width: 80px; }
+  .cb-goal { padding: 6px; }
+}
+
+@media (max-width: 560px) and (max-height: 800px) {
+  .tg-wrap, .tg-board { max-height: 38vh; }
+  .tg-piece { min-width: 48px; min-height: 48px; padding: 5px; }
+  .tg-piece svg { max-width: 62px; max-height: 62px; }
+}
