@@ -170,6 +170,98 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 @keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}}
 @keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+/* ---------- One screen on every device: laptop, iPad and phone ---------- */
+html,body{height:100%}
+body{overflow:hidden}
+.screen{
+  height:100%;height:100dvh;max-width:1400px;display:flex;flex-direction:column;
+  padding:clamp(6px,1.4vmin,14px) max(clamp(10px,2vmin,20px),env(safe-area-inset-right,0px)) max(clamp(6px,1.4vmin,14px),env(safe-area-inset-bottom,0px)) max(clamp(10px,2vmin,20px),env(safe-area-inset-left,0px));
+}
+.topbar{flex:none;min-height:46px}
+.home{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 3px 0 rgba(0,0,0,.16)}
+.topbar .brand{flex:1;justify-content:center}
+
+/* Menu: picture board and title beside the level cards when wide, above them when tall */
+.home-body{flex:1;min-height:0;display:grid;gap:clamp(8px,2vmin,28px);align-items:center}
+@media (min-aspect-ratio:23/20){ .home-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+@media (max-aspect-ratio:23/20){ .home-body{grid-template-rows:auto minmax(0,1fr);align-items:start} }
+.hero{padding:0 4px}
+.hero-board{grid-template-columns:repeat(2,var(--hb));gap:calc(var(--hb) * .16);margin-bottom:clamp(6px,1.6vh,16px);--hb:clamp(30px,6.4vh,64px)}
+.hero-board span{height:var(--hb);font-size:calc(var(--hb) * .56)}
+.hero h1{font-size:clamp(26px,min(5.4vh,6vw),56px);margin:0 0 clamp(4px,1vh,10px)}
+.lede{font-size:clamp(14px,1.9vh,18px)}
+.count{margin-top:clamp(4px,1vh,12px)}
+.menu-col{min-height:0;width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(6px,1.4vh,14px)}
+.tracks{margin:0;gap:clamp(6px,1.4vh,14px)}
+.track{padding:2px 14px clamp(4px,1vh,10px)}
+.track-main{padding:clamp(4px,1vh,10px) 0 clamp(2px,.8vh,8px)}
+.badge{width:clamp(38px,6vh,54px);height:clamp(38px,6vh,54px);font-size:clamp(22px,3.6vh,32px)}
+.track-name{font-size:clamp(19px,3vh,25px)}
+.link{padding:4px 2px}
+.settings{margin:0}
+.foot-note{margin:0 auto}
+
+/* Puzzle: pictures beside the letters when wide, above them when tall */
+.play-body{flex:1;min-height:0;display:grid;gap:clamp(8px,2vmin,28px)}
+@media (min-aspect-ratio:23/20){ .play-body{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:center} }
+@media (max-aspect-ratio:23/20){ .play-body{grid-template-rows:minmax(0,1fr) auto} }
+.board-area{container-type:size;min-height:0;height:100%;display:grid;place-items:center}
+.board{--w:min(calc(100cqw - 16px),calc(100cqh - 16px),560px);margin:0;gap:calc(var(--w) * .03)}
+.pic{min-height:0}
+.play-col{container-type:inline-size;min-width:0;width:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(6px,1.4vh,16px)}
+.clue{margin:0;min-height:22px}
+.slots{--s:min(56px,calc((100cqw - (var(--n) - 1) * 6px) / var(--n)));margin:0 auto}
+.bank{margin:0 auto;width:100%}
+.tile{max-height:min(58px,7vh);min-height:32px;aspect-ratio:auto;height:calc((100cqw - (var(--cols) - 1) * 7px) / var(--cols))}
+.tools{margin:0 auto;width:100%}
+.tool{min-height:clamp(48px,7.4vh,64px)}
+
+/* Pop-ups fit the screen; the puzzle numbers come in pages instead of a scrolling list */
+.sheet{max-height:100%;overflow:hidden;display:flex;flex-direction:column}
+.sheet > *{flex:none}
+#gridOverlay .sheet{height:min(100%,640px);width:min(100%,560px)}
+.levels{flex:1 1 auto;min-height:0;max-height:none;overflow:hidden;align-content:start;grid-auto-rows:46px}
+.levels > .off{display:none}
+.lv-pager{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.lv-pager[hidden]{display:none}
+.lv-pager button{width:52px;height:40px;border:0;border-radius:12px;background:var(--bg);font-size:22px;font-weight:800;cursor:pointer}
+.lv-pager button:disabled{opacity:.35;cursor:default}
+.lv-pager span{font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* Short screens (phones held sideways, small phones): fewer extra words, every control stays */
+@media (max-height:760px){ .foot-note{display:none} }
+@media (max-height:760px) and (max-aspect-ratio:23/20){ .lede{display:none} }
+@media (max-width:400px){ .track-sub{font-size:13px} .pill{padding:7px 11px;font-size:13px} }
+/* Wide screens: the title side grows with the screen instead of leaving empty space */
+@media (min-aspect-ratio:23/20){
+  .hero-board{--hb:clamp(30px,10vh,96px)}
+  .hero h1{font-size:clamp(26px,min(7.4vh,4.6vw),76px)}
+  .lede{font-size:clamp(14px,2.4vh,22px)}
+  .count{font-size:clamp(15px,2.4vh,22px)}
+  .play-col{max-width:560px}
+}
+@media (max-height:560px){
+  .lede,.count,.foot-note{display:none}
+  .hero-board{--hb:clamp(26px,9vh,48px)}
+  .track-sub{display:none}
+  .pill{padding:6px 12px;font-size:14px}
+  .topbar{min-height:40px}
+  .icon-btn{width:40px;height:40px}
+  .tool{min-height:44px;padding:4px 2px}
+  .tool .c{display:none}
+  .big-emo{display:none}
+  .win-word{font-size:34px;margin:2px 0}
+  .win-q{margin:0 0 6px}
+  .chips{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .chip{min-height:40px;padding:6px;min-width:0;font-size:13px}
+  .chip .emo{font-size:22px}
+  .chip span:last-child{min-width:0;overflow-wrap:anywhere}
+  .gain{margin:8px 0}
+  .sheet{padding:12px 16px}
+  .btn{padding:10px 16px}
+}
+@media (max-width:420px){ .home{padding:8px 10px} .home .lbl{display:none} }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -177,9 +269,11 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
 <section id="home" class="screen">
   <header class="topbar">
+    <a class="home" href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home">&#127968;<span class="lbl"> Home</span></a>
     <div class="brand display"><span class="emo">🔍</span>Word Detective</div>
     <div class="stars" title="Stars"><span class="emo">⭐</span><b id="starsHome">100</b></div>
   </header>
+  <div class="home-body">
   <div class="hero">
     <div class="hero-board" aria-hidden="true">
       <span class="emo" style="--t:-4deg">🍎</span><span class="emo" style="--t:3deg">🚒</span>
@@ -189,6 +283,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     <p class="lede">Look closely, work out what all four share, then spell it.</p>
     <p class="count" id="countLine"></p>
   </div>
+  <div class="menu-col">
   <div class="tracks" id="tracks"></div>
   <div class="settings">
     <button class="pill" id="soundBtn" type="button"></button>
@@ -196,6 +291,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     <button class="pill warn" id="resetBtn" type="button">Reset progress</button>
   </div>
   <p class="foot-note">Progress saves on this device. Each solved puzzle earns stars to spend on hints.</p>
+  </div>
+  </div>
 </section>
 
 <section id="play" class="screen" hidden>
@@ -204,7 +301,9 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     <div class="level" id="levelLabel"></div>
     <div class="stars" title="Stars"><span class="emo">⭐</span><b id="starsPlay">100</b></div>
   </header>
-  <div class="board" id="board"></div>
+  <div class="play-body">
+  <div class="board-area"><div class="board" id="board"></div></div>
+  <div class="play-col">
   <div class="clue" id="clue" aria-live="polite"></div>
   <div class="slots display" id="slots"></div>
   <div class="bank display" id="bank"></div>
@@ -214,6 +313,8 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     <button class="tool" id="clueBtn" type="button"><span class="emo">🗂️</span><span class="t">Clue</span><span class="c">free</span></button>
     <button class="tool" id="shuffleBtn" type="button"><span class="emo">🔀</span><span class="t">Shuffle</span><span class="c">free</span></button>
     <button class="tool" id="skipBtn" type="button"><span class="emo">⏭️</span><span class="t">Skip</span><span class="c">free</span></button>
+  </div>
+  </div>
   </div>
 </section>
 
@@ -245,6 +346,11 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
       <span><i style="background:var(--accent)"></i>Up next</span>
     </div>
     <div class="levels" id="levels"></div>
+    <div class="lv-pager" id="lvPager" hidden>
+      <button type="button" id="lvPrev" aria-label="Previous page">‹</button>
+      <span id="lvPage"></span>
+      <button type="button" id="lvNext" aria-label="Next page">›</button>
+    </div>
   </div>
 </div>
 
@@ -630,8 +736,48 @@ function openGrid(id){
   });
   g.appendChild(frag);
   $("gridOverlay").hidden = false;
-  setTimeout(function(){ var c = g.querySelector(".current"); if (c) g.scrollTop = c.offsetTop - g.clientHeight / 2; }, 0);
+  lvStart = f;
+  layoutLevels();
 }
+
+/* The numbers come in pages: as many as fit, with arrows (and swipe) for the rest. */
+var lvPage = 0, lvPer = 1, lvStart = 0;
+function layoutLevels(){
+  var g = $("levels"), kids = g.children, n = kids.length;
+  if (!n || $("gridOverlay").hidden) return;
+  for (var i=0;i<n;i++) kids[i].classList.remove("off");
+  $("lvPager").hidden = false;
+  var gap = parseFloat(getComputedStyle(g).rowGap) || 0;
+  var cols = getComputedStyle(g).gridTemplateColumns.split(" ").length;
+  var rows = Math.max(1, Math.floor((g.clientHeight - 6 + gap) / (46 + gap)));
+  lvPer = cols * rows;
+  var pages = Math.ceil(n / lvPer);
+  $("lvPager").hidden = pages <= 1;
+  if (pages <= 1){ lvPer = n; }
+  showLevelPage(lvStart >= 0 ? Math.floor(lvStart / lvPer) : lvPage);
+  lvStart = -1;
+}
+function showLevelPage(k){
+  var kids = $("levels").children, n = kids.length, pages = Math.max(1, Math.ceil(n / lvPer));
+  lvPage = Math.max(0, Math.min(k, pages - 1));
+  for (var i=0;i<n;i++) kids[i].classList.toggle("off", Math.floor(i / lvPer) !== lvPage);
+  $("lvPage").textContent = "Page " + (lvPage + 1) + " of " + pages;
+  $("lvPrev").disabled = lvPage === 0;
+  $("lvNext").disabled = lvPage === pages - 1;
+}
+$("lvPrev").onclick = function(){ showLevelPage(lvPage - 1); };
+$("lvNext").onclick = function(){ showLevelPage(lvPage + 1); };
+(function(){
+  var x0 = null, g = $("levels");
+  g.addEventListener("pointerdown", function(e){ x0 = e.clientX; });
+  g.addEventListener("pointerup", function(e){
+    if (x0 === null) return;
+    var dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) showLevelPage(lvPage + (dx < 0 ? 1 : -1));
+  });
+})();
+var fitTimer = null;
+window.addEventListener("resize", function(){ clearTimeout(fitTimer); fitTimer = setTimeout(function(){ lvStart = lvPage * lvPer; layoutLevels(); }, 120); });
 function closeGrid(){ $("gridOverlay").hidden = true; }
 
 /* Little extras */
@@ -712,7 +858,5 @@ document.addEventListener("keydown", function(e){
 renderHome();
 })();
 </script>
-<!-- Kids Academy: back to home button -->
-<a href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home" style="position:fixed;left:14px;bottom:14px;z-index:2147483647;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#127968; Home</a>
 </body>
 </html>

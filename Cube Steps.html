@@ -75,6 +75,13 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .path button[aria-current="step"]{border-color:var(--ink)}
 .path .tick{color:#23B05A; font-size:.9em}
 
+.home{
+  flex:none; display:inline-flex; align-items:center; gap:6px; min-height:38px; padding:0 14px; border-radius:999px;
+  background:#ff8a3d; color:#fff; font:bold 15px/1 "Trebuchet MS","Segoe UI",system-ui,sans-serif; text-decoration:none;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);
+}
+@media (max-width: 760px), (max-height: 520px){ .home{padding:0 10px} .home .lbl{display:none} }
+
 /* Main area */
 .layout{flex:1; min-height:0; display:grid; gap:var(--gap)}
 /* Landscape: laptop, iPad sideways, phone sideways */
@@ -274,7 +281,8 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
   .foot .hint{display:none}
 }
 @media (max-width: 380px){ .path .num{width:24px; height:24px} }
-@media (max-width: 440px) and (max-aspect-ratio: 23/20){ .brand{display:none} .path{flex-basis:100%; justify-content:space-between} }
+@media (max-width: 440px) and (max-aspect-ratio: 23/20){ .brand{display:none} .top{flex-wrap:nowrap; column-gap:6px} .path{flex:1 1 0; justify-content:space-between; gap:2px} .home{min-height:34px; padding:0 8px} .path button, .path button[aria-current="step"]{padding:1px} .path .num{width:24px; height:24px; font-size:14px} }
+@media (max-width: 380px) and (max-aspect-ratio: 23/20){ .path .num{width:21px; font-size:13px} .home{padding:0 6px} }
 @media (max-aspect-ratio: 23/20) and (max-height: 700px){
   .stepno{display:none}
 }
@@ -297,6 +305,7 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 <div class="app">
 
   <header class="top">
+    <a class="home" href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home">&#127968;<span class="lbl"> Home</span></a>
     <div class="brand">
       <svg class="logo" viewBox="0 0 44 44" aria-hidden="true">
         <rect x="1" y="1" width="42" height="42" rx="9" fill="#1D2748"/>

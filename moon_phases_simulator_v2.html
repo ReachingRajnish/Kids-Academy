@@ -14,89 +14,104 @@
     --text-muted: #94a3b8;
   }
   * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  html, body { height: 100%; }
   body {
     margin: 0;
-    padding: 16px;
+    overflow: hidden;
     background-color: var(--bg-dark);
-    background-image: 
+    background-image:
       radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
       radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
       radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
     background-size: 550px 550px, 350px 350px, 250px 250px;
     background-position: 0 0, 40px 60px, 130px 270px;
     color: var(--text-main);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+    --gap: clamp(6px, 1.4vmin, 16px);
   }
+  /* The whole app is exactly one screen tall */
+  .app {
+    height: 100%; height: 100dvh;
+    display: flex; flex-direction: column; gap: var(--gap);
+    padding: var(--gap) max(var(--gap), env(safe-area-inset-right)) max(var(--gap), env(safe-area-inset-bottom)) max(var(--gap), env(safe-area-inset-left));
+    max-width: 1500px; margin: 0 auto;
+  }
+  .top { flex: none; display: flex; align-items: center; gap: 12px; }
+  .home {
+    flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px;
+    background: #ff8a3d; color: #fff; font: bold 15px/1 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  }
+  .titles { flex: 1; min-width: 0; text-align: center; }
   h1 {
-    margin: 0 0 4px 0;
-    font-size: 1.75rem;
+    margin: 0;
+    font-size: clamp(1.15rem, 1.2vw + 1.1vh, 1.75rem);
     color: var(--accent);
-    text-align: center;
+    line-height: 1.15;
   }
   p.subtitle {
-    margin: 0 0 14px 0;
+    margin: 2px 0 0;
     color: var(--text-muted);
-    font-size: 0.98rem;
-    text-align: center;
+    font-size: clamp(0.8rem, 0.5vw + 0.5vh, 0.98rem);
   }
-  .dashboard {
-    display: grid;
-    grid-template-columns: 1.45fr 1fr;
-    gap: 18px;
-    max-width: 1180px;
-    width: 100%;
-    align-items: stretch;
+  .top::after { content: ''; flex: none; width: 92px; } /* balances the Home button so the title stays centred */
+
+  .dashboard { flex: 1; min-height: 0; display: grid; gap: var(--gap); }
+  /* Landscape: laptop, iPad sideways, phone sideways */
+  @media (min-aspect-ratio: 23/20) {
+    .dashboard { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
   }
-  @media (max-width: 900px) {
-    .dashboard { grid-template-columns: 1fr; }
+  /* Portrait: phone, iPad upright */
+  @media (max-aspect-ratio: 23/20) {
+    .dashboard { grid-template-rows: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); }
   }
   .panel {
+    container-type: inline-size;
+    min-height: 0; min-width: 0;
     background: var(--card-bg);
     border: 2px solid #263452;
-    border-radius: 20px;
-    padding: 16px 18px;
+    border-radius: clamp(14px, 2vmin, 20px);
+    padding: clamp(8px, 1.6vmin, 16px) clamp(8px, 1.8vmin, 18px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    gap: clamp(6px, 1.2vmin, 12px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
   .panel-title {
-    font-size: 1.15rem;
+    flex: none;
+    font-size: clamp(0.95rem, 0.6vw + 0.7vh, 1.15rem);
     font-weight: 700;
-    margin-bottom: 10px;
     color: var(--accent-blue);
     display: flex;
     align-items: center;
     gap: 8px;
+    text-align: center;
   }
+  /* A canvas box takes the room that is left; the canvas keeps its shape inside it */
+  .canvas-box { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; }
+  .canvas-box canvas { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
   canvas {
     border-radius: 14px;
     background: #070a12;
-    max-width: 100%;
-    height: auto;
   }
   #orbitCanvas {
     cursor: grab;
     border: 1px solid #1e293b;
-    width: 100%;
+    touch-action: none;
   }
   #orbitCanvas:active { cursor: grabbing; }
-  
+
   /* Integrated Controls inside the Space View Frame */
   .integrated-controls {
+    flex: none;
     width: 100%;
     background: #0f1626;
     border: 1px solid #263452;
     border-radius: 14px;
-    padding: 12px 14px;
-    margin-top: 12px;
+    padding: clamp(8px, 1.2vmin, 12px) clamp(8px, 1.4vmin, 14px);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: clamp(6px, 1vmin, 12px);
   }
   .slider-row {
     display: flex;
@@ -104,20 +119,19 @@
     gap: 12px;
     width: 100%;
   }
+  #dayLabel { font-weight: 700; min-width: 96px; color: var(--accent-blue); font-size: 0.95rem; white-space: nowrap; }
   input[type="range"] {
     flex: 1;
+    min-width: 0;
     accent-color: var(--accent);
     height: 10px;
     cursor: pointer;
   }
   .btn-group {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
     width: 100%;
-  }
-  @media (max-width: 600px) {
-    .btn-group { grid-template-columns: repeat(2, 1fr); }
   }
   button {
     background: #1e293b;
@@ -132,6 +146,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .btn-group button { min-height: 36px; }
+  .btn-group .nm { margin-left: 4px; }
+  /* Narrow panels: emoji on top, the name underneath, so all 8 fit in two rows */
+  @container (max-width: 560px) {
+    .btn-group button { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 2px; white-space: normal; line-height: 1.1; font-size: 0.7rem; }
+    .btn-group .em { font-size: 1.05rem; }
+    .btn-group .nm { margin: 0; }
+    #dayLabel { min-width: 0; font-size: 0.85rem; }
+    button.play-btn { min-width: 0; padding: 8px 12px; }
   }
   button:hover {
     background: #33466e;
@@ -155,101 +179,149 @@
   button.play-btn:hover {
     background: #34d399;
   }
+
+  /* Earth view: the Moon on top and the words under it when there is height; side by side on tall screens */
+  .moonrow { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: clamp(4px, 1vmin, 10px); }
+  .moonrow .canvas-box { flex: 1 1 140px; min-height: 90px; max-height: 300px; }
+  .words { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; gap: clamp(4px, 1vmin, 10px); }
+  @media (max-aspect-ratio: 23/20) {
+    .moonrow { flex-direction: row; align-items: stretch; }
+    .moonrow .canvas-box { flex: 0 0 38%; max-height: none; min-height: 0; }
+    .moonrow .canvas-box canvas { top: 0; transform: translateX(-50%); }
+  }
   .phase-badge {
-    font-size: 1.5rem;
+    flex: none;
+    font-size: clamp(1.05rem, 0.9vw + 1vh, 1.5rem);
     font-weight: 800;
     color: var(--accent);
-    margin: 8px 0 4px 0;
     text-align: center;
   }
+  .learn { flex: 1 1 auto; min-height: 0; width: 100%; overflow: hidden; display: flex; flex-direction: column; gap: clamp(6px, 1vmin, 10px); }
+  .learn > * { flex: none; }
+  .learn.paged > :not(.on) { display: none; }
   .phase-desc {
     color: #e2e8f0;
     text-align: center;
     line-height: 1.45;
-    font-size: 0.96rem;
-    min-height: 4.4em;
+    font-size: clamp(0.85rem, 0.5vw + 0.6vh, 0.96rem);
     background: #0f1626;
     padding: 10px 14px;
     border-radius: 12px;
     width: 100%;
     border-left: 4px solid var(--accent);
   }
-  .vocab-cards {
+  .vocab-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     width: 100%;
-    margin-top: 10px;
   }
   .vocab-card {
     background: #0f1626;
     padding: 9px 12px;
     border-radius: 10px;
     border: 1px solid #263452;
-    font-size: 0.85rem;
+    font-size: clamp(0.78rem, 0.4vw + 0.5vh, 0.85rem);
     line-height: 1.35;
   }
-  .vocab-card strong { color: var(--accent-blue); display: block; margin-bottom: 2px; font-size: 0.9rem; }
+  .vocab-card strong { color: var(--accent-blue); display: block; margin-bottom: 2px; font-size: 1.05em; }
+  /* Page arrows for the words when they don't all fit */
+  .pager { flex: none; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .pager[hidden] { display: none; }
+  .pager button { width: 40px; height: 32px; padding: 0; font-size: 18px; font-weight: 800; border-radius: 10px; }
+  .pager button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 6px; }
+  .dots span { width: 9px; height: 9px; border-radius: 50%; background: #334155; }
+  .dots span.on { background: var(--accent); }
+
+  /* Short screens (phones held sideways): drop the extra words, keep every control */
+  @media (max-height: 560px) {
+    p.subtitle, .panel-title { display: none; }
+    .home { padding: 6px 10px; font-size: 13px; }
+  }
+  @media (max-width: 520px) {
+    p.subtitle { display: none; }
+    .top::after { width: 0; }
+    .titles { text-align: left; }
+  }
 </style>
 </head>
 <body>
+<div class="app">
+  <header class="top">
+    <a class="home" href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home">&#127968; Home</a>
+    <div class="titles">
+      <h1>🌙 Moon Phases Space Explorer</h1>
+      <p class="subtitle">Drag the Moon around the Earth or use the 30-day slider right below the orbit!</p>
+    </div>
+  </header>
 
-  <h1>🌙 Moon Phases Space Explorer</h1>
-  <p class="subtitle">Drag the Moon around the Earth or use the 30-day slider right below the orbit!</p>
-
-  <div class="dashboard">
+  <main class="dashboard">
     <!-- Left Panel: Space View + Integrated 30-Day Slider Controls -->
-    <div class="panel">
+    <section class="panel">
       <div class="panel-title">🚀 View from Outer Space (Sun, Earth & Moon)</div>
-      <canvas id="orbitCanvas" width="600" height="390"></canvas>
-      
+      <div class="canvas-box" id="orbitBox"><canvas id="orbitCanvas" width="600" height="390"></canvas></div>
+
       <!-- Integrated 30-Day Slider & Preset Buttons inside the SAME frame -->
       <div class="integrated-controls">
         <div class="slider-row">
           <button id="playBtn" class="play-btn">▶ Auto-Orbit</button>
-          <span id="dayLabel" style="font-weight:700; min-width:105px; color:var(--accent-blue); font-size:0.95rem;">Day 3.7 / 29.5</span>
-          <input type="range" id="angleSlider" min="0" max="360" value="45" step="0.5">
+          <span id="dayLabel">Day 3.7 / 29.5</span>
+          <input type="range" id="angleSlider" min="0" max="360" value="45" step="0.5" aria-label="Day of the Moon's orbit">
         </div>
         <div class="btn-group" id="presetButtons">
-          <button data-angle="0" onclick="setAngle(0)">🌑 New Moon</button>
-          <button data-angle="45" onclick="setAngle(45)">🌒 Waxing Crescent</button>
-          <button data-angle="90" onclick="setAngle(90)">🌓 First Quarter</button>
-          <button data-angle="135" onclick="setAngle(135)">🌔 Waxing Gibbous</button>
-          <button data-angle="180" onclick="setAngle(180)">🌕 Full Moon</button>
-          <button data-angle="225" onclick="setAngle(225)">🌖 Waning Gibbous</button>
-          <button data-angle="270" onclick="setAngle(270)">🌗 Third Quarter</button>
-          <button data-angle="315" onclick="setAngle(315)">🌘 Waning Crescent</button>
+          <button data-angle="0" onclick="setAngle(0)"><span class="em">🌑</span><span class="nm">New Moon</span></button>
+          <button data-angle="45" onclick="setAngle(45)"><span class="em">🌒</span><span class="nm">Waxing Crescent</span></button>
+          <button data-angle="90" onclick="setAngle(90)"><span class="em">🌓</span><span class="nm">First Quarter</span></button>
+          <button data-angle="135" onclick="setAngle(135)"><span class="em">🌔</span><span class="nm">Waxing Gibbous</span></button>
+          <button data-angle="180" onclick="setAngle(180)"><span class="em">🌕</span><span class="nm">Full Moon</span></button>
+          <button data-angle="225" onclick="setAngle(225)"><span class="em">🌖</span><span class="nm">Waning Gibbous</span></button>
+          <button data-angle="270" onclick="setAngle(270)"><span class="em">🌗</span><span class="nm">Third Quarter</span></button>
+          <button data-angle="315" onclick="setAngle(315)"><span class="em">🌘</span><span class="nm">Waning Crescent</span></button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Right Panel: Earth View -->
-    <div class="panel">
+    <section class="panel">
       <div class="panel-title">🔭 What We See from Earth Tonight</div>
-      <canvas id="earthViewCanvas" width="235" height="235"></canvas>
-      <div id="phaseName" class="phase-badge">Waxing Crescent</div>
-      <div id="phaseDesc" class="phase-desc"></div>
-
-      <div class="vocab-cards">
-        <div class="vocab-card">
-          <strong>🥐 Crescent (Less than half)</strong>
-          Shaped like a banana! Only a sliver of the sunlit side peeks at us.
-        </div>
-        <div class="vocab-card">
-          <strong>🥚 Gibbous (More than half)</strong>
-          Means "humped" or swollen! Almost full, missing a small shadow bite.
-        </div>
-        <div class="vocab-card">
-          <strong>📈 Waxing (Growing)</strong>
-          Bright part gets bigger every night (lit on the RIGHT side).
-        </div>
-        <div class="vocab-card">
-          <strong>📉 Waning (Shrinking)</strong>
-          Bright part gets smaller every night (lit on the LEFT side).
+      <div class="moonrow">
+        <div class="canvas-box" id="earthBox"><canvas id="earthViewCanvas" width="235" height="235"></canvas></div>
+        <div class="words">
+          <div id="phaseName" class="phase-badge">Waxing Crescent</div>
+          <div class="learn" id="learn">
+            <div id="phaseDesc" class="phase-desc"></div>
+            <div class="vocab-row">
+              <div class="vocab-card">
+                <strong>🥐 Crescent (Less than half)</strong>
+                Shaped like a banana! Only a sliver of the sunlit side peeks at us.
+              </div>
+              <div class="vocab-card">
+                <strong>🥚 Gibbous (More than half)</strong>
+                Means "humped" or swollen! Almost full, missing a small shadow bite.
+              </div>
+            </div>
+            <div class="vocab-row">
+              <div class="vocab-card">
+                <strong>📈 Waxing (Growing)</strong>
+                Bright part gets bigger every night (lit on the RIGHT side).
+              </div>
+              <div class="vocab-card">
+                <strong>📉 Waning (Shrinking)</strong>
+                Bright part gets smaller every night (lit on the LEFT side).
+              </div>
+            </div>
+          </div>
+          <div class="pager" id="pager" hidden>
+            <button id="prevPage" aria-label="Previous">‹</button>
+            <div class="dots" id="dots"></div>
+            <button id="nextPage" aria-label="Next">›</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
+</div>
 
 <script>
 const orbitCanvas = document.getElementById('orbitCanvas');
@@ -535,7 +607,7 @@ function updateSimulation() {
 
   const info = getPhaseDetails(norm);
   phaseNameEl.textContent = info.name;
-  phaseDescEl.innerHTML = info.desc;
+  if (phaseDescEl.innerHTML !== info.desc) { phaseDescEl.innerHTML = info.desc; if (window.fitReady) paginate(); }
 
   presetBtns.forEach((btn, idx) => {
     btn.classList.toggle('active-phase', idx === info.index);
@@ -593,8 +665,72 @@ function animate() {
 
 updateSimulation();
 animate();
+
+// ---------- Fit to the screen ----------
+// Each canvas keeps its drawing size and shape; it is shown as big as its box allows.
+function fitCanvas(canvas, box) {
+  const w = box.clientWidth, h = box.clientHeight;
+  if (!w || !h) return;
+  const k = Math.min(w / canvas.width, h / canvas.height);
+  canvas.style.width = Math.floor(canvas.width * k) + 'px';
+  canvas.style.height = Math.floor(canvas.height * k) + 'px';
+}
+const orbitBox = document.getElementById('orbitBox');
+const earthBox = document.getElementById('earthBox');
+
+// The words under the Moon: all at once when they fit, otherwise as pages with arrows.
+const learn = document.getElementById('learn');
+const pagerEl = document.getElementById('pager');
+const dotsEl = document.getElementById('dots');
+const prevBtn = document.getElementById('prevPage');
+const nextBtn = document.getElementById('nextPage');
+let pages = [], pageIdx = 0;
+function paginate() {
+  const kids = [...learn.children];
+  learn.classList.remove('paged');
+  pagerEl.hidden = true;
+  kids.forEach(k => k.classList.add('on'));
+  if (learn.scrollHeight <= learn.clientHeight + 2) { pages = [kids]; return; }
+  pagerEl.hidden = false;
+  const room = learn.clientHeight;
+  const gap = parseFloat(getComputedStyle(learn).rowGap) || 0;
+  pages = []; let page = [], used = 0;
+  kids.forEach(k => {
+    const h = k.offsetHeight;
+    if (page.length && used + gap + h > room) { pages.push(page); page = []; used = 0; }
+    used += (page.length ? gap : 0) + h;
+    page.push(k);
+  });
+  pages.push(page);
+  learn.classList.add('paged');
+  showPage(Math.min(pageIdx, pages.length - 1));
+}
+function showPage(i) {
+  pageIdx = Math.max(0, Math.min(i, pages.length - 1));
+  [...learn.children].forEach(k => k.classList.toggle('on', pages[pageIdx].includes(k)));
+  dotsEl.innerHTML = pages.map((_, j) => '<span class="' + (j === pageIdx ? 'on' : '') + '"></span>').join('');
+  prevBtn.disabled = pageIdx === 0;
+  nextBtn.disabled = pageIdx === pages.length - 1;
+}
+prevBtn.addEventListener('click', () => showPage(pageIdx - 1));
+nextBtn.addEventListener('click', () => showPage(pageIdx + 1));
+let swipeX = null;
+learn.addEventListener('pointerdown', e => { swipeX = e.clientX; });
+learn.addEventListener('pointerup', e => {
+  if (swipeX === null || pagerEl.hidden) return;
+  const dx = e.clientX - swipeX; swipeX = null;
+  if (Math.abs(dx) > 40) showPage(pageIdx + (dx < 0 ? 1 : -1));
+});
+
+let fitTimer = 0;
+function fitAll() {
+  fitCanvas(orbitCanvas, orbitBox);
+  fitCanvas(earthViewCanvas, earthBox);
+  paginate();
+}
+new ResizeObserver(() => { clearTimeout(fitTimer); fitTimer = setTimeout(fitAll, 60); }).observe(document.querySelector('.dashboard'));
+window.fitReady = true;
+fitAll();
 </script>
-<!-- Kids Academy: back to home button -->
-<a href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home" style="position:fixed;left:14px;bottom:14px;z-index:2147483647;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#127968; Home</a>
 </body>
 </html>

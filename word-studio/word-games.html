@@ -574,12 +574,126 @@
     .round-card h2 { color: var(--primary); font-size: 1.6rem; }
     .round-card p { color: var(--text-muted); font-weight: 700; }
     .round-card .btn { justify-content: center; }
+
+    /* ---------- One screen on every device: laptop, iPad and phone ---------- */
+    html, body { height: 100%; }
+    body { height: 100dvh; min-height: 0; overflow: hidden; }
+    .topbar { position: static; flex: none; padding: clamp(6px, 1.2vmin, 12px) clamp(10px, 2vw, 24px); gap: clamp(6px, 1.2vmin, 14px); }
+    .home {
+      flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px;
+      background: #ff8a3d; color: #fff; font: bold 15px/1 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; text-decoration: none;
+      box-shadow: 0 3px 0 rgba(0,0,0,.16);
+    }
+    .workspace { flex: 1; min-height: 0; margin: 0 auto; padding: clamp(6px, 1.6vmin, 20px) clamp(8px, 2vw, 20px); gap: 0; max-width: 1100px; }
+    .game-card { flex: 1; min-height: 0; overflow: hidden; padding: clamp(10px, 2vmin, 26px); gap: clamp(6px, 1.6vmin, 22px); justify-content: space-between; }
+    .game-card > * { flex: none; }
+    .clue-box { padding: clamp(8px, 1.4vmin, 16px) clamp(10px, 1.8vmin, 20px); }
+    .clue-text { font-size: clamp(0.98rem, 0.7vw + 0.9vh, 1.18rem); }
+    .clue-emoji { font-size: clamp(2rem, 5vmin, 3.2rem); }
+    .feedback-banner { font-size: clamp(0.95rem, 0.5vw + 0.8vh, 1.12rem); min-height: 0; }
+    .board-section { flex: 1 1 auto; min-height: 0; justify-content: center; gap: clamp(8px, 2vmin, 22px); padding: 0; }
+
+    /* Letter tiles share the width instead of wrapping onto more rows */
+    .slot-row, .rack-row { width: 100%; gap: clamp(4px, 1vmin, 12px); min-height: 0; }
+    .slot-row:not(:has(.affix-slot)), .rack-row:not(:has(.affix-tile)) { flex-wrap: nowrap; }
+    .slot:not(.affix-slot), .tile:not(.affix-tile) {
+      flex: 0 1 clamp(60px, 9vmin, 96px); min-width: 0; padding: 0;
+      height: clamp(44px, min(8.4vh, 14vw), 96px); font-size: clamp(1.2rem, min(3.6vh, 5vw), 2.4rem);
+    }
+    .affix-slot, .affix-tile { height: clamp(44px, 8.4vh, 68px); }
+
+    .controls-row { gap: clamp(6px, 1vmin, 12px); padding-top: clamp(6px, 1vmin, 8px); }
+    .btn { padding: clamp(7px, 1.2vmin, 11px) clamp(10px, 1.6vmin, 18px); }
+
+    /* Typing tips are only for keyboards */
+    @media (hover: none), (max-height: 700px) { .kbd-hint { display: none; } }
+
+    /* The found-words lists in Anagram Builder come in pages when they don't fit */
+    .anagram-panel.active { flex: 1 1 auto; min-height: 0; overflow: hidden; padding: clamp(8px, 1.4vmin, 18px); gap: clamp(6px, 1vmin, 14px); }
+    .anagram-panel > * { flex: none; }
+    .anagram-groups { flex: 1 1 auto; min-height: 0; overflow: hidden; align-content: start; }
+    .anagram-groups > .off { display: none; }
+    .ana-pager { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .ana-pager[hidden] { display: none; }
+    .ana-pager button { width: 44px; height: 34px; border-radius: 10px; border: 2px solid var(--border-soft); background: var(--bg-card); color: var(--text-main); font-size: 1.2rem; font-weight: 800; cursor: pointer; }
+    .ana-pager button:disabled { opacity: .35; cursor: default; }
+    .ana-pager span { font-weight: 800; color: var(--text-muted); font-size: 0.85rem; }
+    .round-card { max-height: 100%; overflow: hidden; padding: clamp(14px, 3vmin, 30px) clamp(14px, 3vmin, 26px); }
+
+    /* Phones and narrow screens */
+    @media (max-width: 760px) {
+      .topbar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; }
+      .brand-group { min-width: 0; }
+      .app-title { font-size: 1.05rem; white-space: nowrap; }
+      .stats-bar { justify-content: flex-end; gap: 6px; flex-wrap: nowrap; }
+      .stat-pill { padding: 5px 9px; font-size: 0.8rem; }
+      .select-pill { padding: 5px 6px; font-size: 0.8rem; }
+      .mode-tabs { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 3px; gap: 3px; }
+      .mode-tab { padding: 6px 2px; font-size: 0.72rem; line-height: 1.15; }
+      .home { padding: 7px 10px; }
+      .home .lbl { display: none; }
+      .clue-header { gap: 6px; }
+      .badge { font-size: 0.66rem; padding: 4px 8px; }
+      .round-dot { width: 10px; height: 10px; }
+      #speakBtn { padding: 5px 10px; }
+      .controls-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .controls-row .btn { justify-content: center; font-size: 0.74rem; padding: 8px 2px; text-align: center; white-space: nowrap; gap: 4px; }
+    }
+    @media (max-width: 420px) {
+      .round-dots { display: none; }
+      .app-title { font-size: 0; }
+      .app-title::first-letter { font-size: 1.2rem; }
+      .clue-header { flex-wrap: nowrap; }
+      .clue-header .badge-group { display: none; }
+    }
+    /* Anagram Builder on wide screens: the word lists sit beside the letters */
+    @media (min-aspect-ratio: 23/20) {
+      .game-card:has(.anagram-panel.active) { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto; column-gap: clamp(10px, 2vmin, 22px); }
+      .game-card:has(.anagram-panel.active) > .clue-header { grid-area: 1 / 1; }
+      .game-card:has(.anagram-panel.active) > .clue-box { grid-area: 2 / 1; }
+      .game-card:has(.anagram-panel.active) > .feedback-banner { grid-area: 3 / 1; }
+      .game-card:has(.anagram-panel.active) > .offer { grid-area: 4 / 1; }
+      .game-card:has(.anagram-panel.active) > .board-section { grid-area: 5 / 1; }
+      .game-card:has(.anagram-panel.active) > .controls-row { grid-area: 6 / 1; }
+      .game-card:has(.anagram-panel.active) > .kbd-hint { grid-area: 7 / 1; }
+      .game-card:has(.anagram-panel.active) > .anagram-panel { grid-area: 1 / 2 / 8 / 3; }
+    }
+    /* Phones upright: smaller word chips and tiles in Anagram Builder, one badge */
+    @media (max-width: 760px) {
+      #wordCountBadge { display: none; }
+      .word-chip { min-width: 40px; padding: 3px 6px; font-size: 0.74rem; }
+      .anagram-col { padding: 8px; }
+      .anagram-col h4 { margin-bottom: 4px; font-size: 0.74rem; }
+      .anagram-panel strong { font-size: 0.82rem; }
+      #revealAnagramBtn { padding: 4px 8px !important; font-size: 0.74rem !important; }
+      .game-card:has(.anagram-panel.active) .slot:not(.affix-slot), .game-card:has(.anagram-panel.active) .tile:not(.affix-tile) { height: clamp(38px, 6vh, 56px); }
+      .game-card:has(.anagram-panel.active) .board-section { flex: none; }
+    }
+    /* Short screens (phones held sideways) */
+    @media (max-height: 520px) {
+      .topbar { flex-wrap: nowrap; display: flex; }
+      .app-title { display: none; }
+      .home .lbl { display: none; }
+      .mode-tabs { flex-wrap: nowrap; display: flex; }
+      .mode-tab { padding: 5px 8px; font-size: 0.74rem; white-space: nowrap; }
+      .stats-bar { flex-wrap: nowrap; gap: 6px; }
+      .stat-pill, .select-pill { padding: 4px 8px; font-size: 0.78rem; }
+      .topbar { padding: 4px 12px; }
+      .slot:not(.affix-slot), .tile:not(.affix-tile), .game-card:has(.anagram-panel.active) .slot:not(.affix-slot), .game-card:has(.anagram-panel.active) .tile:not(.affix-tile) { height: 40px; font-size: 1.2rem; }
+      .affix-slot, .affix-tile { height: 40px; }
+      .board-section { gap: 8px; }
+      .badge-group { display: none; }
+      .clue-emoji { font-size: 1.8rem; }
+      .controls-row { display: flex; flex-wrap: nowrap; }
+      .controls-row .btn { flex: 1 1 0; min-width: 0; justify-content: center; font-size: 0.72rem; padding: 4px 2px; white-space: normal; line-height: 1.1; text-align: center; gap: 3px; }
+    }
   </style>
 </head>
 <body>
 
   <header class="topbar">
     <div class="brand-group">
+      <a class="home" href="../index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home">&#127968;<span class="lbl"> Home</span></a>
       <div class="app-title">🔤 Word Studio</div>
     </div>
 
@@ -644,6 +758,11 @@
           <button class="btn" id="revealAnagramBtn" style="padding:6px 12px; font-size:0.84rem;">Reveal All</button>
         </div>
         <div class="anagram-groups" id="anagramGroups"></div>
+        <div class="ana-pager" id="anaPager" hidden>
+          <button type="button" id="anaPrev" aria-label="Previous words">‹</button>
+          <span id="anaPage"></span>
+          <button type="button" id="anaNext" aria-label="More words">›</button>
+        </div>
       </div>
 
       <div class="controls-row">
@@ -1028,7 +1147,45 @@
       document.getElementById('anaGoal').textContent = state.anagramGoal;
       document.getElementById('anaTotalCount').textContent = total;
       document.getElementById('anaBonusCount').textContent = state.bonusFound.size;
+      pageAnagramGroups();
     }
+
+    // The word lists show as many columns as fit; the rest are on the next page.
+    let anaPages = [], anaPageIdx = 0;
+    function pageAnagramGroups() {
+      const box = document.getElementById('anagramGroups');
+      const pager = document.getElementById('anaPager');
+      const cols = [...box.children];
+      cols.forEach(c => c.classList.remove('off'));
+      pager.hidden = true;
+      if (!cols.length || !box.offsetParent || box.scrollHeight <= box.clientHeight + 2) { anaPages = [cols]; return; }
+      pager.hidden = false;
+      anaPages = [];
+      let page = [];
+      cols.forEach(c => c.classList.add('off'));
+      cols.forEach(c => {
+        c.classList.remove('off');
+        if (page.length && box.scrollHeight > box.clientHeight + 2) {
+          page.forEach(x => x.classList.add('off'));
+          anaPages.push(page);
+          page = [];
+        }
+        page.push(c);
+      });
+      anaPages.push(page);
+      showAnagramPage(Math.min(anaPageIdx, anaPages.length - 1));
+    }
+    function showAnagramPage(i) {
+      anaPageIdx = Math.max(0, Math.min(i, anaPages.length - 1));
+      [...document.getElementById('anagramGroups').children].forEach(c => c.classList.toggle('off', !anaPages[anaPageIdx].includes(c)));
+      document.getElementById('anaPage').textContent = `${anaPageIdx + 1} of ${anaPages.length}`;
+      document.getElementById('anaPrev').disabled = anaPageIdx === 0;
+      document.getElementById('anaNext').disabled = anaPageIdx === anaPages.length - 1;
+    }
+    document.getElementById('anaPrev').addEventListener('click', () => showAnagramPage(anaPageIdx - 1));
+    document.getElementById('anaNext').addEventListener('click', () => showAnagramPage(anaPageIdx + 1));
+    let anaFitTimer = 0;
+    window.addEventListener('resize', () => { clearTimeout(anaFitTimer); anaFitTimer = setTimeout(pageAnagramGroups, 120); });
 
     function renderBoard() {
       const slotRow = document.getElementById('slotRow');
@@ -1547,7 +1704,5 @@
 
     loadWordBanks();
   </script>
-<!-- Kids Academy: back to home button -->
-<a href="../index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home" style="position:fixed;left:14px;bottom:14px;z-index:2147483647;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#127968; Home</a>
 </body>
 </html>
