@@ -418,6 +418,67 @@
     .top-actions .btn-pill span + span { display: none; }
     .quiz-banner { max-width: calc(100vw - 180px); }
   }
+
+  /* ---------- One screen on every device: laptop, iPad and phone ---------- */
+  html, body { height: 100dvh; }
+  .home-pill { background: #ff8a3d; border-color: #ff8a3d; color: #fff; text-decoration: none; }
+  .home-pill:hover, .home-pill:active { border-color: #fff; }
+  .top-actions { right: max(12px, env(safe-area-inset-right)); }
+  .left-rail { left: max(12px, env(safe-area-inset-left)); }
+  .filter-tabs { flex-wrap: wrap; overflow: visible; }
+  .place-item.pg-off { display: none !important; }
+  .place-pager { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px 10px; border-top: 1px solid var(--panel-border); }
+  .place-pager[hidden] { display: none; }
+  .place-pager button { width: 46px; height: 38px; border-radius: 12px; border: 1px solid var(--panel-border); background: rgba(255,255,255,0.06); color: #fff; font-size: 1.3rem; font-weight: 800; cursor: pointer; }
+  .place-pager button:disabled { opacity: .35; cursor: default; }
+  .place-dots { display: flex; gap: 7px; align-items: center; font-size: .8rem; font-weight: 700; color: var(--text-muted); }
+  .place-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--panel-border); }
+  .place-dots span.on { background: var(--accent); }
+  .place-dots span.count { width: auto; height: auto; border-radius: 0; background: none; white-space: nowrap; }
+
+  /* Small or short screens: the quiz tools become one bar along the bottom, off the globe */
+  @media (max-width: 600px), (max-height: 720px) {
+    .quiz-panel {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: max(12px, env(safe-area-inset-bottom));
+      flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center;
+      width: max-content; max-width: calc(100vw - 24px); padding: 7px 8px; z-index: 22;
+    }
+    .quiz-hud { gap: 10px; align-items: center; }
+    #quizLevelSelect { padding: 6px 8px; }
+    .quiz-btn { min-height: 40px; }
+    .quiz-labels {
+      position: absolute; left: 0; bottom: calc(100% + 8px); min-width: 190px;
+      background: linear-gradient(160deg, rgba(88, 28, 135, 0.97), rgba(30, 58, 138, 0.97));
+      border: 1.5px solid #f472b6; border-radius: 14px; box-shadow: 0 8px 25px rgba(0,0,0,0.55);
+    }
+  }
+  /* Phones: icons only for the side buttons, so the globe stays clear */
+  @media (max-width: 600px), (max-height: 500px) {
+    .left-rail { width: auto; top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); gap: 8px; }
+    .top-actions { top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); gap: 6px; }
+    .btn-pill { padding: 6px 11px; min-height: 42px; }
+    .rail-search { padding-left: 11px; }
+    .rail-search span + span, .lod-step span + span, .top-actions .btn-pill span + span, .quiz-btn .qt { display: none; }
+    .lod-step { justify-content: center; padding: 6px; min-height: 40px; font-size: 1rem; }
+    .quiz-btn { min-width: 44px; text-align: center; font-size: 1rem; padding: 6px 8px; }
+    .quiz-banner { top: 62px; max-width: calc(100vw - 150px); padding: 9px 14px 8px; }
+    .quiz-prompt { font-size: 1.1rem; }
+  }
+  @media (max-height: 500px) {
+    .zoom-controls { gap: 5px; padding: 6px; right: max(10px, env(safe-area-inset-right)); top: calc(50% + 24px); }
+    .zoom-btn { width: 38px; height: 38px; }
+    .zoom-readout { font-size: .7rem; padding: 0; }
+    .ql-row { min-height: 30px; padding: 4px 6px; }
+    .sidebar { top: 8px; bottom: 8px; }
+    .sidebar-header { padding: 10px 10px 8px; }
+    .filter-tabs { margin-top: 6px; flex-wrap: nowrap; }
+    .sidebar { width: min(390px, calc(100vw - 24px)); }
+    .search-box, .close-search { min-height: 36px; height: 36px; padding-top: 6px; padding-bottom: 6px; }
+    .place-item { padding: 5px 10px; }
+    .place-pager { padding: 5px 10px 6px; }
+    .place-pager button { height: 34px; }
+  }
 </style>
 </head>
 <body>
@@ -452,10 +513,10 @@
       <option value="state">States</option>
       <option value="city">Cities</option>
     </select>
-    <button class="quiz-btn" id="quizPeekBtn">👀 Show question</button>
-    <button class="quiz-btn" id="quizHintBtn">💡 Hint</button>
-    <button class="quiz-btn" id="quizSkipBtn">⏭️ Show me</button>
-    <button class="quiz-btn" id="quizLabelsBtn">🏷️ Names on map ▾</button>
+    <button class="quiz-btn" id="quizPeekBtn" title="Show question" aria-label="Show question"><span>👀</span><span class="qt"> Show question</span></button>
+    <button class="quiz-btn" id="quizHintBtn" title="Hint" aria-label="Hint"><span>💡</span><span class="qt"> Hint</span></button>
+    <button class="quiz-btn" id="quizSkipBtn" title="Show me" aria-label="Show me"><span>⏭️</span><span class="qt"> Show me</span></button>
+    <button class="quiz-btn" id="quizLabelsBtn" title="Names on map" aria-label="Names on map"><span>🏷️</span><span class="qt"> Names on map ▾</span></button>
     <div class="quiz-labels hidden" id="quizLabelsBox">
       <label class="ql-row"><input type="checkbox" data-ql="continents"><span>Continents</span></label>
       <label class="ql-row"><input type="checkbox" data-ql="oceans"><span>Oceans &amp; seas</span></label>
@@ -468,6 +529,7 @@
 
 <!-- Top right actions -->
 <div class="top-actions">
+  <a class="btn-pill home-pill" href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home"><span>&#127968;</span> <span>Home</span></a>
   <button class="btn-pill active-toggle" id="pinsToggleBtn" title="Show or hide names"><span>🏷️</span> <span>Labels</span></button>
   <button class="btn-pill active-toggle" id="bordersToggleBtn" title="Show or hide borders"><span>〰️</span> <span>Borders</span></button>
   <button class="btn-pill" id="quizModeBtn"><span>🎯</span> <span>Quiz</span></button>
@@ -497,6 +559,11 @@
     </div>
   </div>
   <div class="place-list" id="placeList"></div>
+  <nav class="place-pager" id="placePager" hidden aria-label="More places">
+    <button type="button" id="placePrev" aria-label="Previous places">‹</button>
+    <div class="place-dots" id="placeDots"></div>
+    <button type="button" id="placeNext" aria-label="More places">›</button>
+  </nav>
 </aside>
 
 <!-- Right Floating Zoom Controls -->
@@ -2232,6 +2299,7 @@ function renderSidebarList() {
     empty.className = 'search-empty';
     empty.textContent = 'No place called "' + searchInput.value.trim() + '". Check the spelling, or try a country, state or city name.';
     listEl.appendChild(empty);
+    pagePlaces();
     return;
   }
   for (const item of lastResults) {
@@ -2245,7 +2313,60 @@ function renderSidebarList() {
     row.addEventListener('click', () => goToPlace(item));
     listEl.appendChild(row);
   }
+  pagePlaces();
 }
+
+/* Search results: pages with arrows when they don't all fit */
+var placePager = document.getElementById('placePager');
+var placeDots = document.getElementById('placeDots');
+var placePages = [], placeIdx = 0;
+function pagePlaces(keep) {
+  placePager = document.getElementById('placePager'); placeDots = document.getElementById('placeDots');
+  const list = document.getElementById('placeList');
+  const rows = [...list.querySelectorAll('.place-item')];
+  rows.forEach(r => r.classList.remove('pg-off'));
+  placePager.hidden = true;
+  placePages = [rows];
+  if (rows.length && list.scrollHeight > list.clientHeight + 2) {
+    placePager.hidden = false;
+    rows.forEach(r => r.classList.add('pg-off'));
+    placePages = []; let cur = [];
+    for (const r of rows) {
+      r.classList.remove('pg-off'); cur.push(r);
+      if (cur.length > 1 && list.scrollHeight > list.clientHeight + 2) {
+        cur.pop(); cur.forEach(x => x.classList.add('pg-off'));
+        placePages.push(cur); cur = [r];
+      }
+    }
+    placePages.push(cur);
+  }
+  showPlaces(keep ? placeIdx : 0);
+}
+function showPlaces(k) {
+  placeIdx = Math.max(0, Math.min(k, placePages.length - 1));
+  placePages.forEach((pg, j) => pg.forEach(r => r.classList.toggle('pg-off', j !== placeIdx)));
+  const n = placePages.length;
+  placeDots.innerHTML = n > 8 ? `<span class="count">${placeIdx + 1} / ${n}</span>`
+    : placePages.map((_, j) => `<span class="${j === placeIdx ? 'on' : ''}"></span>`).join('');
+  document.getElementById('placePrev').disabled = placeIdx === 0;
+  document.getElementById('placeNext').disabled = placeIdx === n - 1;
+}
+document.getElementById('placePrev').addEventListener('click', () => { playTone('pop'); showPlaces(placeIdx - 1); });
+document.getElementById('placeNext').addEventListener('click', () => { playTone('pop'); showPlaces(placeIdx + 1); });
+(function () {
+  const list = document.getElementById('placeList');
+  let x0 = null, swiped = false;
+  list.addEventListener('pointerdown', e => { x0 = e.clientX; swiped = false; });
+  list.addEventListener('pointerup', e => {
+    if (x0 === null || placePager.hidden) return;
+    const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) { swiped = true; showPlaces(placeIdx + (dx < 0 ? 1 : -1)); }
+  });
+  // a swipe that ends on a place turns the page instead of flying to that place
+  list.addEventListener('click', e => { if (swiped) { e.stopPropagation(); e.preventDefault(); swiped = false; } }, true);
+  let t = 0;
+  new ResizeObserver(() => { clearTimeout(t); t = setTimeout(() => pagePlaces(true), 80); }).observe(list);
+})();
 
 function goToPlace(item) {
   playTone('pop');
@@ -2510,7 +2631,8 @@ const quizLabelsBox = document.getElementById('quizLabelsBox');
 quizLabelsBtn.addEventListener('click', () => {
   playTone('pop');
   const open = quizLabelsBox.classList.toggle('hidden') === false;
-  quizLabelsBtn.textContent = open ? '🏷️ Names on map ▴' : '🏷️ Names on map ▾';
+  quizLabelsBtn.querySelector('.qt').textContent = open ? ' Names on map ▴' : ' Names on map ▾';
+  quizLabelsBtn.setAttribute('aria-expanded', open);
 });
 function spawnConfetti() {
   const colors = ['#fde047', '#38bdf8', '#f472b6', '#4ade80', '#fb923c'];
@@ -2580,7 +2702,5 @@ window.onload = () => {
   }, 30);
 };
 </script>
-<!-- Kids Academy: back to home button -->
-<a href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home" style="position:fixed;left:14px;bottom:14px;z-index:2147483647;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#127968; Home</a>
 </body>
 </html>

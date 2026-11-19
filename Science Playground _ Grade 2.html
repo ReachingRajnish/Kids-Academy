@@ -274,6 +274,108 @@ table.results td.q{color:var(--ink-soft);opacity:.5;font-size:1rem}
 @keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.4);opacity:0}}
 .confetti{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:fall 2.4s linear forwards}
 @keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+/* ---------- One screen on every device: laptop, iPad and phone ---------- */
+html,body{height:100%}
+body{overflow:hidden;background-size:100% 100%}
+#app{height:100%;height:100dvh}
+.home-link{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 3px 0 rgba(0,0,0,.16)}
+
+/* Topic list: the six cards share the screen */
+#home{height:100%;max-width:1400px;display:flex;flex-direction:column;padding:clamp(8px,2vmin,28px) max(clamp(10px,2vmin,20px),env(safe-area-inset-right)) max(clamp(8px,1.6vmin,24px),env(safe-area-inset-bottom)) max(clamp(10px,2vmin,20px),env(safe-area-inset-left))}
+.home-head{flex:none;margin-bottom:clamp(8px,2vh,26px);gap:clamp(8px,1.6vmin,18px);flex-wrap:nowrap}
+.brand{gap:clamp(8px,1.4vmin,16px);min-width:0}
+.brand svg{width:clamp(40px,8vh,74px);height:clamp(40px,8vh,74px)}
+.brand h1{font-size:clamp(1.3rem,min(4.2vw,5.4vh),2.9rem)}
+.brand p{font-size:clamp(.85rem,1.8vh,1.05rem)}
+#home .topic-grid{flex:1;min-height:0;grid-auto-rows:minmax(0,1fr);gap:clamp(8px,1.8vmin,22px)}
+@media (min-aspect-ratio:23/20){#home .topic-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-aspect-ratio:23/20){#home .topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tcard{min-height:0;container-type:size;padding:clamp(5px,1vmin,10px) clamp(5px,1vmin,10px) clamp(6px,1.4vmin,18px);border-radius:clamp(16px,2.4vmin,28px)}
+.tcard .window{aspect-ratio:auto;flex:1 1 auto;min-height:0;border-radius:clamp(12px,1.8vmin,20px)}
+.tcard .window canvas{object-fit:cover}
+.tcard .play-hint{width:clamp(32px,6vmin,52px);height:clamp(32px,6vmin,52px);right:8px;bottom:8px}
+.tcard .meta{flex:none;padding:clamp(6px,1.2vmin,14px) clamp(4px,1vmin,10px) 0;gap:clamp(2px,.6vmin,6px)}
+.tcard h2{font-size:clamp(1rem,min(2.4vw,3vh),1.45rem)}
+.tcard .q{font-size:clamp(.82rem,1.7vh,1rem)}
+.tcard .stars{padding-top:2px;font-size:clamp(.95rem,2vh,1.25rem)}
+.strand{font-size:clamp(.78rem,1.5vh,.92rem)}
+@container (max-height:300px){.tcard .q{display:none}}
+@container (max-height:190px){.tcard .strand{display:none}}
+.home-foot{flex:none;margin-top:clamp(6px,1.6vh,30px)}
+
+/* Topic: the stage keeps its 8:5 shape and takes the room left above its controls */
+#topic{height:100%;display:flex;flex-direction:column}
+.topbar{position:static;flex:none}
+.topbar-in{max-width:1500px;padding:clamp(6px,1.2vmin,10px) clamp(10px,1.8vmin,18px)}
+.back-btn{height:clamp(40px,6vmin,50px)}
+.tb-icon{width:clamp(38px,6vmin,52px);height:clamp(38px,6vmin,52px);font-size:clamp(1.4rem,3.6vmin,2rem)}
+#topicBody{flex:1;min-height:0}
+#topicBody .t-layout{height:100%;max-width:1500px;padding:clamp(8px,1.6vmin,18px) max(clamp(8px,1.6vmin,18px),env(safe-area-inset-right)) max(clamp(8px,1.6vmin,18px),env(safe-area-inset-bottom)) max(clamp(8px,1.6vmin,18px),env(safe-area-inset-left));gap:clamp(8px,1.6vmin,18px);align-items:stretch}
+@media (min-aspect-ratio:23/20){#topicBody .t-layout{grid-template-columns:minmax(0,1.62fr) minmax(260px,1fr);grid-template-rows:minmax(0,1fr)}}
+@media (max-aspect-ratio:23/20){#topicBody .t-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) clamp(150px,30vh,340px)}}
+/* Upright phones with the controls in the side column: the stage keeps its own size, the pages get the rest */
+@media (max-aspect-ratio:23/20){#topicBody .t-layout.ctl-side{grid-template-rows:auto minmax(0,1fr)} .t-layout.ctl-side .stage-box{flex:none;aspect-ratio:8/5;width:100%}}
+.side-pager .dots span.count{width:auto;height:auto;border-radius:0;background:none;white-space:nowrap;font-family:var(--font-head);font-weight:800;color:var(--ink-soft)}
+/* Phones held sideways: the stage takes the full height; the controls are the first page on the right */
+@media (max-height:560px) and (min-aspect-ratio:23/20){#topicBody .t-layout{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.t-main{min-height:0;gap:clamp(8px,1.4vmin,20px);padding-top:0}
+.stage-box{flex:1 1 auto;min-height:0;container-type:size;display:grid;place-items:center}
+.stage{width:min(calc(100cqw - 12px),calc((100cqh - 12px) * 1.6));max-width:none;flex:none}
+.controls{flex:none;padding:clamp(8px,1.4vmin,14px);gap:clamp(6px,1.2vmin,12px);border-radius:clamp(14px,2vmin,22px)}
+.t-side{position:relative;min-height:0;overflow:hidden;gap:clamp(8px,1.4vmin,14px)}
+.t-side.paged{padding-bottom:calc(38px + clamp(8px,1.4vmin,14px))}
+.t-side > .panel,#extra > .panel{flex:none}
+#extra{display:contents!important}
+.t-side .off{display:none!important}
+.panel{padding:clamp(10px,1.6vmin,16px);border-radius:clamp(14px,2vmin,22px)}
+.side-pager{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side-pager[hidden]{display:none}
+.side-pager button{width:46px;height:38px;border-radius:12px;border:2px solid var(--line);background:var(--surface);font-family:var(--font-head);font-size:1.3rem;font-weight:800;cursor:pointer}
+.side-pager button:disabled{opacity:.35;cursor:default}
+.side-pager .dots{display:flex;gap:7px}
+.side-pager .dots span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.side-pager .dots span.on{background:var(--accent)}
+
+/* Short screens: fewer extra words, every control stays */
+@media (max-height:760px), (max-width:640px){.brand p{display:none}}
+@media (max-width:640px){.home-foot span{display:none}}
+@media (max-height:560px){
+  .home-foot span{display:none}
+  .tb-strand{display:none}
+  .btn{min-height:38px;padding:5px 12px}
+  .pick{padding:4px 6px;min-width:72px}
+  .pick .emo{font-size:1.5rem}
+  .pick canvas,.ctray .pick svg{max-width:72px}
+  input[type=range]{height:28px}
+}
+@media (max-width:640px), (max-height:560px){
+  .row:not(.nowrap) > .ctl-label{flex-basis:100%}
+  .row > .seg{flex:1 1 100%}
+  .row.nowrap{flex-wrap:nowrap}
+  .row.nowrap input[type=range]{flex:1 1 auto;order:0;min-width:60px}
+  .ctl-label{font-size:.85rem}
+  .val-chip{min-width:0;font-size:.9rem;padding:4px 8px}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg > *{flex:1 1 auto;min-width:64px}
+  .seg > .pick{flex:1 1 0}
+  .seg .btn{padding:6px 10px;font-size:.88rem}
+  .t-side .readout,.t-side .words{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ro{padding:6px 10px}
+  .ro-l{font-size:.78rem}
+  .ro-v{font-size:.95rem}
+  .word{padding:7px 10px;font-size:.85rem}
+  .explain{font-size:.95rem;padding:10px 12px;margin-top:8px}
+  .missions li{padding:7px 10px;font-size:.92rem}
+  .panel h2{margin-bottom:6px;font-size:1.02rem}
+  .pick{min-width:0;padding:4px 4px 5px;font-size:.78rem}
+  .pick .emo{font-size:1.5rem}
+  .home-link .lbl{display:none}
+  .home-link{padding:8px 10px}
+  .star-total .of{display:none}
+  .topbar-in{flex-wrap:nowrap}
+  .tb-title{order:0;flex-basis:auto}
+  .tb-strand{display:none}
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
@@ -283,6 +385,7 @@ table.results td.q{color:var(--ink-soft);opacity:.5;font-size:1rem}
 <div id="app">
   <section id="home" class="screen" aria-labelledby="homeTitle">
     <header class="home-head">
+      <a class="home-link" href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home">&#127968;<span class="lbl"> Home</span></a>
       <div class="brand">
         <svg viewBox="0 0 80 80" aria-hidden="true">
           <defs>
@@ -305,7 +408,7 @@ table.results td.q{color:var(--ink-soft);opacity:.5;font-size:1rem}
           <p>Grade 2. Pick a topic, then touch, drag and test things to find out how they work.</p>
         </div>
       </div>
-      <div class="head-tools">
+      <div class="head-tools" style="margin-left:auto">
         <div class="star-total" aria-live="polite"><span aria-hidden="true">⭐</span><span id="starTotal">0</span><span class="of">of 18 stars</span></div>
         <button class="icon-btn sound-toggle" type="button" aria-pressed="true" aria-label="Turn sound off">🔊</button>
       </div>
@@ -517,7 +620,7 @@ const elHome = $('#home'), elTopic = $('#topic'), elBody = $('#topicBody');
 function topicShell(t) {
   return `<div class="t-layout">
     <div class="t-main">
-      <div class="stage" id="stage"><div class="toast" id="toast" role="status"></div></div>
+      <div class="stage-box"><div class="stage" id="stage"><div class="toast" id="toast" role="status"></div></div></div>
       <div class="controls" id="controls"></div>
     </div>
     <aside class="t-side">
@@ -532,6 +635,11 @@ function topicShell(t) {
         <ul class="missions" id="missions"></ul>
       </section>
       <div id="extra" style="display:flex;flex-direction:column;gap:14px"></div>
+      <nav class="side-pager" id="sidePager" hidden aria-label="More panels">
+        <button type="button" id="sidePrev" aria-label="Previous panel">‹</button>
+        <div class="dots" id="sideDots"></div>
+        <button type="button" id="sideNext" aria-label="Next panel">›</button>
+      </nav>
     </aside>
   </div>`;
 }
@@ -592,6 +700,7 @@ function openTopic(t) {
   const api = makeApi(t); App.api = api; App.current = t;
   renderMissions(t);
   t.mount(api);
+  watchSide();
   const rb = $('#readBtn'); if (rb) rb.addEventListener('click', () => { Sound.init(); Speech.speak(api.explainHTML); });
   window.scrollTo(0, 0);
   App.last = performance.now(); App.time = 0;
@@ -611,6 +720,103 @@ function nav(id) {
   const target = id ? '#/' + id : '#/';
   if (location.hash !== target) { try { location.hash = target; return; } catch (e) { } }
   route();
+}
+
+/* ================= Side panels: pages when they don't all fit ================= */
+const Side = { pages: [], idx: 0, anchor: null, timer: 0, ro: null, mo: null, parts: null };
+// A page holds as many pieces as fit. A piece is one part of a panel (a readout box, the explanation,
+// one mission, one word); a panel's heading shows whenever any of its pieces is on the page.
+const SPLIT = '.readout, .missions, .words, .sort, .legend';
+const SHORT_WIDE = matchMedia('(max-height: 560px) and (min-aspect-ratio: 23/20)');
+// The controls sit under the stage. When that would squeeze the stage to under about half its size
+// (phones held sideways, small phones), they become the first page of the side column instead.
+function placeControls() {
+  const c = $('#controls'), side = $('.t-side'), main = $('.t-main'), box = $('.stage-box'); if (!c || !side || !main || !box) return;
+  const layout = $('.t-layout');
+  if (c.parentElement !== main) main.appendChild(c);
+  layout.classList.remove('ctl-side');
+  const squeezed = box.clientHeight < (box.clientWidth / 1.6) * 0.55;
+  if (SHORT_WIDE.matches || squeezed) { side.insertBefore(c, side.firstChild); layout.classList.add('ctl-side'); }
+}
+function sideParts() {
+  const side = $('.t-side'); if (!side) return { panels: [], pieces: [], groups: [] };
+  const panels = [...side.querySelectorAll(':scope > .panel, :scope > #extra > .panel')];
+  const pieces = [], groups = [];
+  const ctl = $('#controls'); if (ctl && ctl.parentElement === side) { groups.push(ctl); pieces.push(...ctl.children); }
+  panels.forEach(p => [...p.children].forEach(c => {
+    if (c.tagName === 'H2') return;
+    if (c.matches(SPLIT) && c.children.length) { groups.push(c); pieces.push(...c.children); }
+    else pieces.push(c);
+  }));
+  return { panels, pieces, groups };
+}
+function setSideVisible(parts, on) {
+  const set = new Set(on);
+  parts.pieces.forEach(x => x.classList.toggle('off', !set.has(x)));
+  parts.groups.forEach(g => g.classList.toggle('off', ![...g.children].some(c => set.has(c))));
+  parts.panels.forEach(p => p.classList.toggle('off', !parts.pieces.some(x => set.has(x) && p.contains(x))));
+}
+function paginateSide() {
+  const side = $('.t-side'), pager = $('#sidePager'); if (!side || !pager) return;
+  placeControls();
+  const parts = sideParts();
+  const fits = () => side.scrollHeight <= side.clientHeight + 2;
+  setSideVisible(parts, parts.pieces);
+  pager.hidden = true; side.classList.remove('paged');
+  if (fits()) { Side.pages = [parts.pieces]; return; }
+  pager.hidden = false; side.classList.add('paged');
+  Side.pages = []; let page = [];
+  parts.pieces.forEach(x => {
+    page.push(x); setSideVisible(parts, page);
+    if (!fits() && page.length > 1) { page.pop(); Side.pages.push(page); page = [x]; }
+  });
+  Side.pages.push(page);
+  Side.parts = parts;
+  const k = Side.anchor ? Side.pages.findIndex(pg => pg.includes(Side.anchor)) : 0;
+  showSide(k < 0 ? 0 : k);
+}
+function showSide(k) {
+  if (!Side.parts) return;
+  Side.idx = Math.max(0, Math.min(k, Side.pages.length - 1));
+  const on = Side.pages[Side.idx] || [];
+  Side.anchor = on[0] || null;
+  setSideVisible(Side.parts, on);
+  $('#sideDots').innerHTML = Side.pages.length > 8 ? `<span class="count">${Side.idx + 1} / ${Side.pages.length}</span>`
+    : Side.pages.map((_, j) => `<span class="${j === Side.idx ? 'on' : ''}"></span>`).join('');
+  $('#sidePrev').disabled = Side.idx === 0;
+  $('#sideNext').disabled = Side.idx === Side.pages.length - 1;
+}
+function watchSide() {
+  const side = $('.t-side'); if (!side) return;
+  Side.anchor = null; Side.idx = 0;
+  $('#sidePrev').addEventListener('click', () => showSide(Side.idx - 1));
+  $('#sideNext').addEventListener('click', () => showSide(Side.idx + 1));
+  let x0 = null;
+  side.addEventListener('pointerdown', e => { if (!e.target.closest('button, input, canvas, svg')) x0 = e.clientX; });
+  side.addEventListener('pointerup', e => {
+    if (x0 === null || $('#sidePager').hidden) return;
+    const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) showSide(Side.idx + (dx < 0 ? 1 : -1));
+  });
+  // At most every 150 ms, and only when the panels' words or pieces really changed (some topics update many times a second)
+  const sig = () => { const t = $('.t-side'); if (!t) return ''; return t.querySelectorAll('*').length + ':' + t.textContent.length; };
+  Side.sig = '';
+  const later = () => {
+    if (Side.timer) return;
+    Side.timer = setTimeout(() => { Side.timer = 0; const k = sig(); if (k !== Side.sig) { Side.sig = k; paginateSide(); } }, 150);
+  };
+  if (Side.ro) Side.ro.disconnect(); if (Side.mo) Side.mo.disconnect();
+  // A new size always means new pages (the words may not have changed, but the room has)
+  Side.ro = new ResizeObserver(() => { clearTimeout(Side.rtimer); Side.rtimer = setTimeout(paginateSide, 120); }); Side.ro.observe(side);
+  // Panels change as the child plays (new results, new words), so the pages are worked out again
+  // (changes to the page dots themselves are ignored, or this would run forever)
+  Side.mo = new MutationObserver(list => {
+    if (list.some(m => { const el = m.target.nodeType === 1 ? m.target : m.target.parentElement; return !el || !el.closest('#sidePager'); })) later();
+  });
+  Side.mo.observe(side, { childList: true, subtree: true, characterData: true });
+  Side.sig = sig();
+  SHORT_WIDE.onchange = () => { Side.anchor = null; paginateSide(); };
+  paginateSide();
 }
 
 /* ================= Home ================= */
@@ -2174,7 +2380,5 @@ window.addEventListener('hashchange', route);
 route();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { TOPICS.forEach(t => t._redrawPreview && t._redrawPreview()); });
 </script>
-<!-- Kids Academy: back to home button -->
-<a href="index.html" title="Back to Kids Academy home" aria-label="Back to Kids Academy home" style="position:fixed;left:14px;bottom:14px;z-index:2147483647;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;background:#ff8a3d;color:#fff;font:bold 15px/1 'Trebuchet MS','Segoe UI',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#127968; Home</a>
 </body>
 </html>

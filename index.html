@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Kids Academy</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
   <style>
@@ -12,6 +12,7 @@
       --muted: #6b6680;
       --card: #ffffff;
       --shadow: 0 6px 18px rgba(45, 42, 62, 0.10);
+      --gap: clamp(8px, 1.8vmin, 22px);
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -23,48 +24,67 @@
       }
     }
     * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       margin: 0;
+      overflow: hidden;
       font-family: "Comic Sans MS", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+    }
+    /* The whole page is exactly one screen tall */
+    .app {
+      height: 100%; height: 100dvh;
+      max-width: 1500px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: var(--gap);
+      padding: max(var(--gap), env(safe-area-inset-top)) max(var(--gap), env(safe-area-inset-right)) max(var(--gap), env(safe-area-inset-bottom)) max(var(--gap), env(safe-area-inset-left));
     }
     header {
+      flex: none;
       text-align: center;
-      padding: 48px 16px 24px;
+      padding-top: clamp(0px, 2vh, 24px);
     }
     header h1 {
       margin: 0;
-      font-size: clamp(2.2rem, 6vw, 3.6rem);
+      font-size: clamp(1.6rem, min(6vw, 6.5vh), 3.6rem);
       letter-spacing: 1px;
+      line-height: 1.1;
     }
     header p {
-      margin: 10px 0 0;
+      margin: clamp(2px, 1vh, 10px) 0 0;
       color: var(--muted);
-      font-size: 1.15rem;
+      font-size: clamp(0.9rem, 2vh, 1.15rem);
     }
+    /* The cards share the rest of the screen; the script picks how many columns fit best */
+    /* (rows wrap and a short last row sits in the middle, not off to one side) */
     main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 16px 16px 48px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 22px;
+      flex: 1; min-height: 0;
+      display: flex; flex-wrap: wrap;
+      justify-content: center; align-content: stretch;
+      gap: var(--gap);
     }
+    main > .card {
+      flex: 0 0 calc((100% - (var(--cols, 5) - 1) * var(--gap)) / var(--cols, 5));
+      height: calc((100% - (var(--rows, 2) - 1) * var(--gap)) / var(--rows, 2));
+    }
+    main > .off { display: none; }
     a.card {
+      container-type: size;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
-      gap: 10px;
-      padding: 28px 20px;
+      gap: clamp(2px, 1vmin, 10px);
+      padding: clamp(6px, 2.4vmin, 28px) clamp(8px, 1.6vmin, 20px);
       background: var(--card);
-      border-radius: 22px;
-      border-top: 8px solid var(--accent);
+      border-radius: clamp(14px, 2vmin, 22px);
+      border-top: clamp(5px, 1vmin, 8px) solid var(--accent);
       box-shadow: var(--shadow);
       color: inherit;
       text-decoration: none;
+      overflow: hidden;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     a.card:hover, a.card:focus-visible {
@@ -72,24 +92,44 @@
       box-shadow: 0 12px 26px rgba(45, 42, 62, 0.18);
       outline: none;
     }
-    .emoji { font-size: 3.4rem; line-height: 1; }
-    .card h2 { margin: 4px 0 0; font-size: 1.4rem; color: var(--accent); }
-    .card p { margin: 0; color: var(--muted); font-size: 1rem; }
+    .emoji { font-size: clamp(1.6rem, min(26cqh, 30cqw), 4.6rem); line-height: 1; }
+    .card h2 { margin: 0; font-size: clamp(0.9rem, min(11cqh, 10cqw), 1.7rem); line-height: 1.15; color: var(--accent); }
+    .card p { margin: 0; color: var(--muted); font-size: clamp(0.75rem, min(8cqh, 7cqw), 1.15rem); line-height: 1.3; }
+    /* Short cards drop the description, never the name */
+    @container (max-height: 118px) { .card p { display: none; } }
+    @container (max-width: 130px) { .card p { display: none; } }
+
+    .pager { flex: none; display: flex; align-items: center; justify-content: center; gap: 14px; }
+    .pager[hidden] { display: none; }
+    .pager button {
+      width: 48px; height: 40px; border: 0; border-radius: 12px; background: var(--card); color: var(--text);
+      box-shadow: var(--shadow); font: inherit; font-size: 1.4rem; font-weight: 700; cursor: pointer;
+    }
+    .pager button:disabled { opacity: .35; cursor: default; }
+    .dots { display: flex; gap: 8px; }
+    .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); opacity: .35; }
+    .dots span.on { opacity: 1; }
+
     footer {
+      flex: none;
       text-align: center;
       color: var(--muted);
-      padding: 0 16px 32px;
       font-size: 0.9rem;
+    }
+    @media (max-height: 560px) {
+      header { padding-top: 0; }
+      header p, footer { display: none; }
     }
   </style>
 </head>
 <body>
+<div class="app">
   <header>
     <h1>🎓 Kids Academy</h1>
     <p>Pick an activity and start learning!</p>
   </header>
 
-  <main>
+  <main id="cards">
     <a class="card" href="Globe.html" style="--accent:#2f80ed">
       <span class="emoji">🌍</span>
       <h2>Satellite Globe</h2>
@@ -142,6 +182,83 @@
     </a>
   </main>
 
+  <nav class="pager" id="pager" hidden aria-label="More activities">
+    <button type="button" id="prev" aria-label="Previous page">‹</button>
+    <div class="dots" id="dots"></div>
+    <button type="button" id="next" aria-label="Next page">›</button>
+  </nav>
+
   <footer>Made with ❤️ for curious kids</footer>
+</div>
+
+<script>
+// Pick the number of columns that gives the biggest, most card-shaped tiles for this screen.
+// If even the best choice makes cards too small, show them in pages with arrows.
+(function () {
+  const main = document.getElementById('cards');
+  const pager = document.getElementById('pager');
+  const dots = document.getElementById('dots');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  const cards = [...main.children];
+  const MIN_W = 120, MIN_H = 96, IDEAL = 1.15; // a card is a little wider than tall
+  let perPage = cards.length, page = 0;
+
+  function best(count, W, H, gap) {
+    let pick = null;
+    for (let cols = 1; cols <= count; cols++) {
+      const rows = Math.ceil(count / cols);
+      const w = (W - gap * (cols - 1)) / cols, h = (H - gap * (rows - 1)) / rows;
+      if (w < MIN_W || h < MIN_H) continue;
+      // Score: as big as possible, and not too far from the ideal shape
+      const shape = Math.min(w / h, IDEAL * IDEAL * h / w) / IDEAL;
+      const score = Math.min(w, h * IDEAL) * shape;
+      if (!pick || score > pick.score) pick = { cols, rows, score };
+    }
+    return pick;
+  }
+
+  function layout() {
+    cards.forEach(c => c.classList.remove('off'));
+    pager.hidden = true;
+    const gap = parseFloat(getComputedStyle(main).columnGap) || 0;
+    let W = main.clientWidth, H = main.clientHeight;
+    let fit = best(cards.length, W, H, gap);
+    perPage = cards.length;
+    if (!fit) {
+      // Too many for one screen: use pages, as many cards per page as fit nicely
+      pager.hidden = false;
+      H = main.clientHeight;
+      for (let n = cards.length - 1; n >= 1 && !fit; n--) { fit = best(n, W, H, gap); if (fit) perPage = n; }
+      if (!fit) { fit = { cols: 1, rows: 1 }; perPage = 1; }
+    }
+    main.style.setProperty('--cols', fit.cols);
+    main.style.setProperty('--rows', Math.min(fit.rows, Math.ceil(perPage / fit.cols)));
+    show(Math.min(page, Math.ceil(cards.length / perPage) - 1));
+  }
+
+  function show(k) {
+    const pages = Math.ceil(cards.length / perPage);
+    page = Math.max(0, Math.min(k, pages - 1));
+    cards.forEach((c, i) => c.classList.toggle('off', Math.floor(i / perPage) !== page));
+    dots.innerHTML = Array.from({ length: pages }, (_, j) => `<span class="${j === page ? 'on' : ''}"></span>`).join('');
+    prev.disabled = page === 0;
+    next.disabled = page === pages - 1;
+  }
+
+  prev.addEventListener('click', () => show(page - 1));
+  next.addEventListener('click', () => show(page + 1));
+  let x0 = null;
+  main.addEventListener('pointerdown', e => { x0 = e.clientX; });
+  main.addEventListener('pointerup', e => {
+    if (x0 === null || pager.hidden) return;
+    const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) show(page + (dx < 0 ? 1 : -1));
+  });
+  let t = 0;
+  new ResizeObserver(() => { clearTimeout(t); t = setTimeout(layout, 60); }).observe(document.querySelector('.app'));
+  layout();
+})();
+</script>
 </body>
 </html>
