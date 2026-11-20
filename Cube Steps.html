@@ -100,6 +100,37 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
   .layout.padopen .body, .layout.padopen .pager{display:none !important}
 }
 
+/* My cube: photo, check and guide screens */
+.view.myon #cv{visibility:hidden}
+.myover{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:0 10px 10px; overflow:hidden}
+.mybig{display:flex; align-items:center; justify-content:center; width:100%; height:100%}
+.mymini{width:min(55%, 240px); height:auto; max-height:90%}
+.stage canvas.mycrop{position:relative; inset:auto; display:block; border-radius:12px; touch-action:none; cursor:move; box-shadow:0 2px 0 var(--line)}
+.mycam{position:relative; overflow:hidden; border-radius:12px; background:#000}
+.mycam video{display:block; width:100%; height:100%; object-fit:cover}
+.mycam video.mirror{transform:scaleX(-1)}
+.myguide{position:absolute; left:50%; top:50%; width:62%; aspect-ratio:1; transform:translate(-50%,-50%);
+  border:3px solid #fff; border-radius:6px; box-shadow:0 0 0 2px rgba(0,0,0,.45), 0 0 0 9999px rgba(0,0,0,.32);
+  background-image:
+    linear-gradient(to right, transparent calc(33.33% - 1px), #fff calc(33.33% - 1px), #fff calc(33.33% + 1px), transparent calc(33.33% + 1px), transparent calc(66.66% - 1px), #fff calc(66.66% - 1px), #fff calc(66.66% + 1px), transparent calc(66.66% + 1px)),
+    linear-gradient(to bottom, transparent calc(33.33% - 1px), #fff calc(33.33% - 1px), #fff calc(33.33% + 1px), transparent calc(33.33% + 1px), transparent calc(66.66% - 1px), #fff calc(66.66% - 1px), #fff calc(66.66% + 1px), transparent calc(66.66% + 1px))}
+@supports not (aspect-ratio: 1){ .myguide{height:0; padding-bottom:62%} }
+.mynet{display:grid; grid-template-columns:repeat(12, var(--cs)); grid-template-rows:repeat(9, var(--cs)); gap:3px}
+.mycell{width:100%; height:100%; padding:0; border:2px solid rgba(0,0,0,.28); border-radius:6px; cursor:pointer}
+.mycell.ctr{cursor:default; border-color:rgba(0,0,0,.5)}
+.mycell.empty{border:2px dashed var(--muted)}
+.mycell.on{outline:3px solid #FF2BD6; outline-offset:1px}
+.mybox{flex:none; display:flex; flex-direction:column; gap:var(--gap)}
+.mybox p{margin:0}
+.mygoal{font-weight:800; font-size:1.06em}
+.mystep{color:var(--muted); font-weight:800; font-size:.85em}
+.mybtns{display:flex; gap:6px; flex-wrap:wrap}
+.mybtns .key{flex:1 1 0; min-width:120px}
+.mybox .key .lbl{display:inline}
+.mybtns.slim .ghost{flex:1 1 0; justify-content:center}
+.mypal{display:flex; gap:6px}
+.mysw{flex:1; height:40px; border-radius:10px; border:2px solid rgba(0,0,0,.28); cursor:pointer}
+
 /* Stage */
 .stage{
   container-type:inline-size; container-name:stage;
@@ -281,8 +312,14 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
   .foot .hint{display:none}
 }
 @media (max-width: 380px){ .path .num{width:24px; height:24px} }
-@media (max-width: 440px) and (max-aspect-ratio: 23/20){ .brand{display:none} .top{flex-wrap:nowrap; column-gap:6px} .path{flex:1 1 0; justify-content:space-between; gap:2px} .home{min-height:34px; padding:0 8px} .path button, .path button[aria-current="step"]{padding:1px} .path .num{width:24px; height:24px; font-size:14px} }
-@media (max-width: 380px) and (max-aspect-ratio: 23/20){ .path .num{width:21px; font-size:13px} .home{padding:0 6px} }
+/* Narrow upright phones: the 10 lesson buttons share the width evenly */
+@media (max-width: 440px){
+  .path{gap:2px}
+  .path button, .path button[aria-current="step"]{flex:1 1 0; min-width:0; padding:2px; justify-content:center}
+  .path .num{width:100%; max-width:26px; height:26px; font-size:14px}
+}
+@media (max-width: 440px) and (max-aspect-ratio: 23/20){ .brand{display:none} .top{flex-wrap:nowrap; column-gap:6px} .path{flex:1 1 0; justify-content:space-between} .home{min-height:34px; padding:0 8px} }
+@media (max-width: 380px) and (max-aspect-ratio: 23/20){ .home{padding:0 6px} }
 @media (max-aspect-ratio: 23/20) and (max-height: 700px){
   .stepno{display:none}
 }
@@ -325,6 +362,7 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
     <section class="stage" id="stage" aria-label="3D cube">
       <div class="view" id="view">
       <canvas id="cv" aria-label="A 3D Rubik’s Cube. Drag to spin it."></canvas>
+      <div class="myover" id="myover" hidden></div>
       <div class="bubble" id="bubble" hidden aria-live="polite">
         <div class="big" id="bubbleBig">R</div>
         <div><div class="arrow" id="bubbleArrow"></div><div class="say" id="bubbleSay"></div></div>
@@ -348,6 +386,7 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
         <p class="stepno" id="stepno"></p>
         <h2 id="title"></h2>
       </div>
+      <div class="mybox" id="mybox" hidden></div>
       <div class="cases" id="cases" hidden>
         <span class="q">Which looks like yours?</span>
         <div class="caserow" id="caserow" role="group" aria-label="Cases"></div>
@@ -378,6 +417,7 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
   </main>
 </div>
 <div class="confetti" id="confetti"></div>
+<input type="file" id="myfile" accept="image/*" capture="environment" hidden>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -429,68 +469,352 @@ const toks = s => s.trim().split(/\s+/).filter(Boolean);
 const invMove = m => m.endsWith("2") ? m : (m.endsWith("'") ? m[0] : m + "'");
 
 /* ---------- Lessons ---------- */
-const rounds = (alg, n, name) => Array.from({length:n}, (_, i) => [alg, name + " " + (i+1) + " of " + n]);
+const rounds = (alg, n, name, why) => Array.from({length:n}, (_, i) => [alg, name + " " + (i+1) + " of " + n, why || ""]);
+const TWIST_WHY = "R′ D′ R D turns the front right corner piece a little. It messes up the bottom for a moment. Keep going until its yellow points up.";
+
+/* ===== MyCube: cube model + beginner-method solver (no DOM, runs in Node for tests) ===== */
+const MC = (() => {
+const MD = {R:[0,1,-1],L:[0,-1,1],U:[1,1,-1],D:[1,-1,1],F:[2,1,-1],B:[2,-1,1],y:[1,null,-1]};
+const N = {R:[1,0,0],L:[-1,0,0],U:[0,1,0],D:[0,-1,0],F:[0,0,1],B:[0,0,-1]};
+const OPP = {U:"D",D:"U",F:"B",B:"F",R:"L",L:"R"};
+function rot(v, ax, q){
+  q = ((q % 4) + 4) % 4; const c=[1,0,-1,0][q], s=[0,1,0,-1][q]; const [x,y,z]=v;
+  if (ax===0) return [x, c*y - s*z, s*y + c*z];
+  if (ax===1) return [c*x + s*z, y, -s*x + c*z];
+  return [c*x - s*y, s*x + c*y, z];
+}
+const k = v => v.join(",");
+function solved(){
+  const st=[];
+  for (let x=-1;x<=1;x++) for (let y=-1;y<=1;y++) for (let z=-1;z<=1;z++)
+    for (const f in N){ const n=N[f]; if (n.every((v,i)=>v===0||v===[x,y,z][i])) st.push({p:[x,y,z], n:n.slice(), c:f}); }
+  return st;
+}
+const clone = st => st.map(s => ({p:s.p.slice(), n:s.n.slice(), c:s.c}));
+function move(st, m){
+  const [ax,layer,d] = MD[m[0]]; let q=d; if (m.endsWith("'")) q=-q; if (m.endsWith("2")) q*=2;
+  for (const s of st) if (layer===null || s.p[ax]===layer){ s.p=rot(s.p,ax,q); s.n=rot(s.n,ax,q); }
+  return st;
+}
+const run = (st, alg) => { alg.trim().split(/\s+/).filter(Boolean).forEach(m => move(st, m)); return st; };
+function colorAt(st, p, n){ const kp=k(p), kn=k(n); const s=st.find(s=>k(s.p)===kp && k(s.n)===kn); return s && s.c; }
+const center = (st, f) => colorAt(st, N[f], N[f]);
+const pieceAt = (st, p) => { const kp=k(p); return st.filter(s=>k(s.p)===kp); };
+function find(st, colors){ // position of the piece with exactly these colors
+  const want = colors.slice().sort().join("");
+  const by = {}; st.forEach(s => { if (s.p.filter(v=>v).length>1){ (by[k(s.p)] = by[k(s.p)] || []).push(s.c); } });
+  for (const kp in by) if (by[kp].slice().sort().join("")===want) return kp.split(",").map(Number);
+  return null;
+}
+// a piece is home when every sticker matches the center piece of its side
+const pieceOK = (st, p) => pieceAt(st,p).every(s => s.c === colorAt(st, s.n, s.n));
+const faceOf = n => Object.keys(N).find(f => k(N[f])===k(n));
+const SIDES = ["F","R","B","L"];
+// try top turns / whole-cube turns until a test passes
+function tryTurns(st, list, test){ for (const t of list){ const c=clone(st); if (t) run(c,t); if (test(c)) return t; } return null; }
+const UT = ["", "U", "U'", "U2"], YT = ["", "y", "y'", "y2"];
+
+function plan(start){
+  const st = clone(start); const chunks = []; let cur = null;
+  const begin = (stage, title, target, about) => { cur = {stage, title, groups:[], target, about}; chunks.push(cur); };
+  const add = (alg, label, why) => { if (!alg) return; run(st, alg); cur.groups.push([alg, label, why || ""]); };
+  const W = center(st,"D"), Y = center(st,"U");
+  const guard = n => { if (n > 40) throw new Error("stuck"); };
+
+  // ---- Step 2: white cross
+  for (let i=0; i<4; i++){
+    const todo = SIDES.map(f => center(st,f)).filter(c => { const p=find(st,[W,c]); return !(p && p[1]===-1 && pieceOK(st,p)); });
+    if (!todo.length) break;
+    const rank = c => { const p=find(st,[W,c]); return p[1]===1 ? 0 : p[1]===0 ? 1 : 2; };
+    todo.sort((a,b)=>rank(a)-rank(b)); const side = todo[0];
+    begin(1, "White cross: the white and " + NAME[side] + " piece", [W,side],
+      "The piece with the pink frame is the white and " + NAME[side] + " edge piece. Its home is on the bottom, under the " + NAME[side] + " center piece, with white facing down.");
+    for (let n=0;;n++){ guard(n);
+      const p = find(st,[W,side]);
+      if (p[1]===-1 && pieceOK(st,p)) break;
+      if (p[1]===1){
+        add(tryTurns(st, YT, c => center(c,"F")===side), "Turn the whole cube: " + NAME[side] + " in front",
+          "Turn the whole cube so the " + NAME[side] + " center piece faces you. Now the piece’s home is at the front, on the bottom.");
+        add(tryTurns(st, UT, c => k(find(c,[W,side]))==="0,1,1"), "Top: " + NAME[side] + " over " + NAME[side],
+          "Turn the top layer until the " + NAME[side] + " part of the piece is right above the " + NAME[side] + " center piece. Now the piece is right above its home.");
+        if (colorAt(st,[0,1,1],N.U)===W) add("F2", "Turn the front 2 times",
+          "The white part of the piece points up. Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down.");
+        else { add("U'", "Turn the top to the right", "The white part of the piece points to the side, not up. If we dropped it now, white would face the wrong way. So first move it to the right side, then tuck it in.");
+               add("R' F R", "Slide it in", "R′ turns the right side so the piece goes down into the middle layer, at the front right. F turns the front, which rolls the piece down into its home. R turns the right side back, so the white piece that was already home on the right comes back too."); }
+      } else if (p[1]===0){
+        add(tryTurns(st, YT, c => k(find(c,[W,side]))==="1,0,1"), "Turn the whole cube: piece at the front right",
+          "The piece is in the middle layer. Turn the whole cube so the piece sits at the front right.");
+        if (colorAt(st,[1,0,1],N.F)===side && center(st,"F")===side) add("F", "Turn the front 1 time",
+          "The " + NAME[side] + " part of the piece already matches the " + NAME[side] + " center piece in front. 1 front turn (F) drops it down into its home.");
+        else add("R U R'", "Lift it to the top", "White points the wrong way, so first we lift the piece up to the top layer. R takes the right side up, so the piece goes up into the top layer. U moves it to the front, out of the way. R′ takes the right side back down, so the white piece already home on the right goes back too.");
+      } else {
+        add(tryTurns(st, YT, c => k(find(c,[W,side]))==="0,-1,1"), "Turn the whole cube: piece at the front",
+          "The piece is on the bottom, but under the wrong center piece or upside down. Turn the whole cube so the piece is at the front.");
+        add("F2", "Lift it to the top", "Turn the front 2 times. The front layer flips upside down, so the piece goes up into the top layer. From there we can bring it home the right way.");
+      }
+    }
+  }
+  // ---- Step 3: white corners
+  const SX = "R U R' U'";
+  for (let i=0; i<4; i++){
+    const pairs = [["F","R"],["R","B"],["B","L"],["L","F"]].map(([a,b]) => [center(st,a), center(st,b)]);
+    const todo = pairs.filter(([a,b]) => { const p=find(st,[W,a,b]); return !(p[1]===-1 && pieceOK(st,p)); });
+    if (!todo.length) break;
+    todo.sort((x,y) => find(st,[W,...y])[1] - find(st,[W,...x])[1]);
+    const [a,b] = todo[0]; const set = [W,a,b];
+    begin(2, "White corners: the white, " + NAME[a] + " and " + NAME[b] + " corner", set,
+      "The piece with the pink frame is the white, " + NAME[a] + " and " + NAME[b] + " corner piece. Its home is the bottom corner between the " + NAME[a] + " and " + NAME[b] + " center pieces, with white facing down.");
+    for (let n=0;;n++){ guard(n);
+      const p = find(st,set);
+      if (p[1]===-1 && pieceOK(st,p)) break;
+      if (p[1]===1){
+        add(tryTurns(st, YT, c => [center(c,"F"),center(c,"R")].sort().join("")===[a,b].sort().join("")), "Turn the whole cube: its home at the front right",
+          "Turn the whole cube so the corner piece’s home is at the front right, on the bottom. That’s the corner where R U R′ U′ works.");
+        add(tryTurns(st, UT, c => k(find(c,set))==="1,1,1"), "Top: over its home", "Turn the top layer until the corner piece is right above its home.");
+        for (let r=1; r<=5 && !pieceOK(st,[1,-1,1]); r++) add(SX, "R U R′ U′, round " + r,
+          "R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more. Keep going until it lands in its home with white facing down.");
+      } else {
+        add(tryTurns(st, YT, c => k(find(c,set))==="1,-1,1"), "Turn the whole cube: corner at the front right",
+          "The corner piece is on the bottom. Turn the whole cube so it sits at the front right.");
+        const home = [center(st,"F"),center(st,"R")].sort().join("")===[a,b].sort().join("");
+        if (home) for (let r=1; r<=5 && !pieceOK(st,[1,-1,1]); r++) add(SX, "R U R′ U′, round " + r,
+          "The corner piece is in its home, but turned the wrong way. R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more. Keep going until its white part faces down.");
+        else add(SX, "Pop it up to the top", "The corner piece is in the wrong corner. R takes it up, U moves it out of the right side, R′ takes the right side back down, and U′ turns the top back. Now the corner piece is in the top layer, where we can move it.");
+      }
+    }
+  }
+  // ---- Step 4: middle layer
+  const RI = [["U R U' R'","Right move, part 1"],["U' F' U F","Right move, part 2"]];
+  const LI = [["U' L' U L","Left move, part 1"],["U F U' F'","Left move, part 2"]];
+  for (let i=0; i<10; i++){
+    const mids = [["F","R"],["R","B"],["B","L"],["L","F"]].map(([a,b]) => [center(st,a), center(st,b)]);
+    const todo = mids.filter(pr => { const p=find(st,pr); return !(p[1]===0 && pieceOK(st,p)); });
+    if (!todo.length) break;
+    const free = todo.find(pr => find(st,pr)[1]===1);
+    if (free){
+      const p = find(st,free);
+      const side = pieceAt(st,p).find(s => s.n[1]===0).c, top = pieceAt(st,p).find(s => s.n[1]===1).c;
+      begin(3, "Middle layer: the " + NAME[free[0]] + " and " + NAME[free[1]] + " piece", free,
+        "The piece with the pink frame is the " + NAME[free[0]] + " and " + NAME[free[1]] + " edge piece. It has no yellow, so its home is in the middle layer, between the " + NAME[free[0]] + " and " + NAME[free[1]] + " center pieces.");
+      add(tryTurns(st, YT, c => center(c,"F")===side), "Turn the whole cube: " + NAME[side] + " in front",
+        "Turn the whole cube so the " + NAME[side] + " center piece faces you. " + cap1(NAME[side]) + " is the color on the side of the piece.");
+      add(tryTurns(st, UT, c => k(find(c,free))==="0,1,1"), "Top: " + NAME[side] + " over " + NAME[side],
+        "Turn the top layer until the " + NAME[side] + " part of the piece is right above the " + NAME[side] + " center piece.");
+      const right = top===center(st,"R"), other = NAME[top];
+      (right ? RI : LI).forEach(([a,l], j) => add(a, l, j === 0
+        ? "Look at the top of the piece: it’s " + other + ". The " + other + " center piece is on the " + (right ? "right" : "left") + " side. So the piece goes to the " + (right ? "right" : "left") + ". " + (right ? "We can’t just push the piece down, because that would break the finished bottom layer. So first U moves the piece out of the way, R lifts the white corner piece up from below, U′ brings our piece back to the front, and R′ brings the white corner piece right next to it. Now they sit side by side on top." : "The same idea on the left side. U′ moves the piece out of the way, L′ lifts the white corner piece up from below, U brings our piece back to the front, and L brings the white corner piece right next to it.")
+        : (right ? "Now we put both back in together. U′ moves them away, F′ opens the front, U brings them back, and F swings them both down: the piece into the middle layer, and the white corner piece back into its home on the bottom." : "U moves them both away, F opens the front, U′ brings them back, and F′ swings them both down: the piece into the middle layer, and the white corner piece back into its home.")));
+    } else {
+      const pr = todo[0];
+      begin(3, "Middle layer: pop out the stuck piece", pr,
+        "Every edge piece in the top layer has yellow, so none of them belongs in the middle. That means a middle edge piece is stuck in the wrong place. We pop it up to the top first.");
+      add(tryTurns(st, YT, c => k(find(c,pr))==="1,0,1"), "Turn the whole cube: stuck piece at the front right",
+        "Turn the whole cube so the stuck edge piece is at the front right.");
+      add(RI[0][0], "Pop it out, part 1", "The right move, part 1. The piece’s home is taken by the wrong piece, so this move will push a top piece in and pop the stuck piece out.");
+      add(RI[1][0], "Pop it out, part 2", "The right move, part 2. The stuck piece pops up into the top layer. Next we put it into its right home.");
+    }
+  }
+  // ---- Step 5: yellow cross
+  const A = "F R U R' U' F'";
+  const UE = {UF:[0,1,1], UR:[1,1,0], UB:[0,1,-1], UL:[-1,1,0]};
+  const ups = c => Object.keys(UE).filter(e => colorAt(c,UE[e],N.U)===Y);
+  if (ups(st).length < 4){
+    begin(4, "Yellow cross", null, "Now we work on the top. Look at the yellow center piece and the 4 edge pieces around it. We want yellow to point up on all 4 edge pieces. That makes a yellow plus sign.");
+    for (let n=0;; n++){ guard(n*8);
+      const u = ups(st); if (u.length===4) break;
+      if (u.length===2){
+        const line = (u.includes("UF")&&u.includes("UB")) || (u.includes("UL")&&u.includes("UR"));
+        if (line) add(tryTurns(st, UT, c => { const v=ups(c); return v.includes("UL")&&v.includes("UR"); }), "Top: line goes left to right",
+          "On top, the yellow center piece and 2 yellow edge pieces make a line. Turn the top layer so the line goes from left to right. The plus sign move works from there.");
+        else add(tryTurns(st, UT, c => { const v=ups(c); return v.includes("UB")&&v.includes("UL"); }), "Top: L to the back left",
+          "On top, the yellow center piece and 2 yellow edge pieces make an L shape. Turn the top layer so the L points to the back and to the left.");
+      }
+      add(A, "The plus sign move", "F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The yellow shape grows: dot, then L, then line, then plus sign.");
+    }
+  }
+  // ---- Step 6: yellow edges
+  const SUNE = "R U R' U R U2 R'";
+  const SIDE_OF = {UF:"F", UR:"R", UB:"B", UL:"L"};
+  const match = c => Object.keys(UE).filter(e => colorAt(c,UE[e],N[SIDE_OF[e]])===center(c,SIDE_OF[e]));
+  const best = () => { let bt="", bm=-1; UT.forEach(t => { const c=clone(st); if (t) run(c,t); const m=match(c).length; if (m>bm){bm=m; bt=t;} }); return bt; };
+  if (Object.keys(UE).some(e => !pieceOK(st,UE[e]))){
+    begin(5, "Yellow edges", null, "Each top edge piece has yellow on top and a second color on its side. We want that side color to match the center piece right under it.");
+    for (let n=0;; n++){ guard(n*8);
+      add(best(), "Turn the top until 2 match", "Turn the top layer until at least 2 edge pieces match the center pieces under them.");
+      const m = match(st); if (m.length===4) break;
+      const opp = (m.includes("UF")&&m.includes("UB")) || (m.includes("UL")&&m.includes("UR"));
+      if (!opp) add(tryTurns(st, YT, c => { const v=match(c); return v.includes("UB")&&v.includes("UR"); }), "Turn the whole cube: matching ones at the back and right",
+        "Turn the whole cube so the 2 matching edge pieces are at the back and on the right. Then the swap move fixes the other 2.");
+      add(SUNE, opp ? "Swap move, any side" : "The swap move", opp
+        ? "The 2 matching edge pieces are across from each other. R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. After it, 2 pieces next to each other match."
+        : "R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. Because the 2 matching pieces are at the back and right, the circle sends the others where they belong.");
+    }
+  }
+  // ---- Step 7: corner places
+  const UC = [[1,1,1],[-1,1,1],[1,1,-1],[-1,1,-1]];
+  const placed = (c,p) => pieceAt(c,p).map(s=>s.c).sort().join("") === pieceAt(c,p).map(s=>colorAt(c,s.n,s.n)).sort().join("");
+  const NIK = "U R U' L' U R' U' L";
+  if (UC.some(p => !placed(st,p))){
+    begin(6, "Corner places", null, "Each yellow corner piece has 3 colors. Its home is the corner where the 3 center pieces with those colors meet. For now it can still be turned the wrong way.");
+    for (let n=0;; n++){ guard(n*8);
+      const ok = UC.filter(p => placed(st,p)); if (ok.length===4) break;
+      if (ok.length===1) add(tryTurns(st, YT, c => placed(c,[1,1,1])), "Turn the whole cube: the home corner at the front right",
+        "1 corner piece is already home. Turn the whole cube so it sits at the front right. It stays put during the next move.");
+      add(NIK, "The corner swap move", ok.length===1
+        ? "U R U′ L′ U R′ U′ L moves the other 3 corner pieces around in a circle. The front right one stays home. Everything else comes back exactly as it was."
+        : "No corner piece is home yet. The corner swap move moves 3 corner pieces, so after it at least 1 will be home.");
+    }
+  }
+  // ---- Step 8: corner twist
+  if (!UC.every(p => pieceOK(st,p))){
+    begin(7, "Corner twist", null, "Last step! Every corner piece is home. Now we turn each one so its yellow part points up.");
+    for (let n=0; n<4; n++){
+      if (UC.every(p => colorAt(st,p,N.U)===Y)) break;
+      add(tryTurns(st, UT, c => colorAt(c,[1,1,1],N.U)!==Y), "Top: next wrong corner to the front right",
+        "Turn only the top layer to bring a corner piece whose yellow does not point up to the front right.");
+      for (let r=1; r<=6 && colorAt(st,[1,1,1],N.U)!==Y; r++) add("R' D' R D", "R′ D′ R D, round " + r,
+        "R′ D′ R D turns the front right corner piece a little. It messes up the bottom for a moment. Keep going until its yellow points up. The bottom fixes itself at the end.");
+    }
+    add(tryTurns(st, UT, c => UC.every(p => pieceOK(c,p))), "Turn the top: all done", "Turn the top layer so every piece lines up with its side. Solved!");
+  }
+  const done = st.every(s => s.c === colorAt(st, s.n, s.n));
+  return {chunks: chunks.filter(c => c.groups.length), solved: done, end: st};
+}
+const cap1 = t => t.charAt(0).toUpperCase() + t.slice(1);
+const NAME = {U:"yellow", D:"white", F:"green", B:"blue", R:"orange", L:"red"};
+
+// which step (lesson index 1-7) the cube is on; 8 = solved
+function stage(st){
+  const W=center(st,"D"), ok = p => pieceOK(st,p);
+  const E = (x,y,z) => ok([x,y,z]);
+  if (!(E(0,-1,1)&&E(1,-1,0)&&E(0,-1,-1)&&E(-1,-1,0))) return 1;
+  if (!(E(1,-1,1)&&E(-1,-1,1)&&E(1,-1,-1)&&E(-1,-1,-1))) return 2;
+  if (!(E(1,0,1)&&E(-1,0,1)&&E(1,0,-1)&&E(-1,0,-1))) return 3;
+  const Y=center(st,"U");
+  if (![[0,1,1],[1,1,0],[0,1,-1],[-1,1,0]].every(p=>colorAt(st,p,N.U)===Y)) return 4;
+  if (!(E(0,1,1)&&E(1,1,0)&&E(0,1,-1)&&E(-1,1,0))) return 5;
+  const placedAll = [[1,1,1],[-1,1,1],[1,1,-1],[-1,1,-1]].every(p => pieceAt(st,p).map(s=>s.c).sort().join("")===pieceAt(st,p).map(s=>colorAt(st,s.n,s.n)).sort().join(""));
+  if (!placedAll) return 6;
+  if (!st.every(s => s.c===colorAt(st,s.n,s.n))) return 7;
+  return 8;
+}
+
+// ---- photos <-> stickers. Each photo: which side faces the camera and how grid row/col map to positions.
+const PHOTOS = [
+  {face:"F", top:"U", pos:(r,c)=>[c-1, 1-r, 1]},
+  {face:"R", top:"U", pos:(r,c)=>[1, 1-r, 1-c]},
+  {face:"B", top:"U", pos:(r,c)=>[1-c, 1-r, -1]},
+  {face:"L", top:"U", pos:(r,c)=>[-1, 1-r, c-1]},
+  {face:"U", top:"B", pos:(r,c)=>[c-1, 1, r-1]},
+  {face:"D", top:"F", pos:(r,c)=>[c-1, -1, 1-r]}
+];
+const rotGrid = (g, t) => { let out=g; for (let i=0;i<t;i++){ const n=[]; for (let r=0;r<3;r++){ n.push([]); for (let c=0;c<3;c++) n[r].push(out[2-c][r]); } out=n; } return out; };
+function fromGrids(grids){ // grids[i][r][c] = color letter
+  const st=[];
+  PHOTOS.forEach((ph,i) => { for (let r=0;r<3;r++) for (let c=0;c<3;c++) st.push({p:ph.pos(r,c), n:N[ph.face].slice(), c:grids[i][r][c]}); });
+  return st;
+}
+function toGrids(st){ return PHOTOS.map(ph => [0,1,2].map(r => [0,1,2].map(c => colorAt(st, ph.pos(r,c), N[ph.face])))); }
+
+// cheap check: 9 of each color, every piece real, each piece once, corners not mirror-image
+function piecesOK(st){
+  const cnt={}; st.forEach(s=>cnt[s.c]=(cnt[s.c]||0)+1);
+  if (Object.keys(N).some(f => cnt[f]!==9)) return false;
+  const home = solved(); const seen = new Set(); const want = new Set();
+  const sig = (s, p) => {
+    const ps = pieceAt(s,p); if (ps.length===3){
+      const ord = [0,1,2].map(ax => ps.find(x => x.n[ax]!==0).c);
+      if (p[0]*p[1]*p[2] < 0) ord.reverse();
+      const i = ord.indexOf([...ord].sort()[0]); return ord.slice(i).concat(ord.slice(0,i)).join("");
+    }
+    return ps.map(x=>x.c).sort().join("");
+  };
+  const posList = []; home.forEach(s => { if (s.p.filter(v=>v).length>1 && !posList.some(q=>k(q)===k(s.p))) posList.push(s.p); });
+  posList.forEach(p => want.add(sig(home,p)));
+  for (const p of posList){ const g=sig(st,p); if (!want.has(g) || seen.has(g)) return false; seen.add(g); }
+  return true;
+}
+function solvable(st){ if (!piecesOK(st)) return false; try { return plan(st).solved; } catch(e){ return false; } }
+// try every way the 6 photos could have been turned; fewest changes first
+function fixTurns(grids){
+  const combos=[];
+  for (let m=0;m<4096;m++){ const t=[0,1,2,3,4,5].map(i => (m>>(2*i))&3); combos.push(t); }
+  combos.sort((a,b) => a.filter(Boolean).length - b.filter(Boolean).length);
+  for (const t of combos){
+    const g = grids.map((gr,i) => rotGrid(gr, t[i]));
+    const st = fromGrids(g);
+    if (piecesOK(st) && solvable(st)) return {turns:t, grids:g};
+  }
+  return null;
+}
+return {solved, clone, run, move, plan, stage, fromGrids, toGrids, piecesOK, solvable, fixTurns, rotGrid, PHOTOS, NAME, colorAt, center, N};
+})();
 
 const LESSONS = [
-  { short:"Meet", stepno:"Before you start", title:"Meet your cube",
+  { short:"Meet", stepno:"Step 1 of 8", title:"Meet your cube",
     goal:"Meet the 3 kinds of pieces. Then learn the turn letters.",
     body:[
-      "The middle square on each side never moves. It shows the color of that side.",
-      "An edge piece has 2 colors. A corner piece has 3 colors. Every piece has a home: the place where it belongs.",
-      "Hold the cube with yellow on top and white on the bottom. Green faces you. Start every step like this.",
+      "The center piece sits in the middle of each side. It has 1 color and never moves. It tells you the color of that whole side.",
+      "An edge piece sits between 2 center pieces. It has 2 colors. A corner piece sits in a corner. It has 3 colors.",
+      "Every piece has a home: the place where it belongs. The cube is solved when every piece is home.",
+      "Hold the cube with the yellow center piece on top and the white center piece on the bottom. The green center piece faces you. Start every step like this.",
       "KEYS"
     ],
     tip:"R means: turn the right side. R′ (say “R prime”) means: turn it the other way. R2 means: turn it 2 times. The arrow on the screen shows which way.",
-    demo:[["R R'","Right side, and back again"],["U U'","Top, and back again"],["F F'","Front, and back again"],["L L'","Left side, and back again"],["D D'","Bottom, and back again"]],
+    demo:[["R R'","Right side, and back again","R turns the right layer up. R′ turns it back down. Only the right layer moves. The center pieces never move."],
+          ["U U'","Top, and back again","U turns the top layer to the left. U′ turns it back to the right. Only the top layer moves."],
+          ["F F'","Front, and back again","F turns the front layer like a clock. F′ turns it back. Only the front layer moves."],
+          ["L L'","Left side, and back again","L turns the left layer down. L′ turns it back up. Only the left layer moves."],
+          ["D D'","Bottom, and back again","D turns the bottom layer to the right. D′ turns it back. Only the bottom layer moves."]],
     focus:"all" },
-  { short:"White cross", stepno:"Step 1 of 7", title:"White cross",
-    goal:"Make a white plus sign on the bottom. Each piece’s other color must match its side.",
+  { short:"White cross", stepno:"Step 2 of 8", title:"White cross",
+    goal:"Make a white plus sign on the bottom. Each white edge piece must also match the side next to it.",
     body:[], demo:[],
-    tip:"Look at the piece with the pink frame. Tap the numbers. Pick the one that looks like your cube.",
+    tip:"The piece with the pink frame is the one to watch. Tap the numbers. Pick the one that looks like your cube.",
     focus:"all" },
-  { short:"White corners", stepno:"Step 2 of 7", title:"White corners",
-    goal:"Put the 4 white corners on the bottom. Then the whole bottom is done.",
+  { short:"White corners", stepno:"Step 3 of 8", title:"White corners",
+    goal:"Put the 4 white corner pieces on the bottom. Then the whole bottom layer is done.",
     body:[], demo:[],
     tip:"Say it while you turn: right up, top left, right down, top right.",
     focus:"all" },
-  { short:"Middle layer", stepno:"Step 3 of 7", title:"Middle layer",
-    goal:"Put the 4 middle edge pieces in place. Then 2 layers are done.",
+  { short:"Middle layer", stepno:"Step 4 of 8", title:"Middle layer",
+    goal:"Put the 4 middle edge pieces in place. Then the bottom 2 layers are done.",
     body:[], demo:[],
-    tip:"Does every edge piece on top have yellow? Then use case 3 to pop one out.",
+    tip:"Does every edge piece in the top layer have yellow on it? Then none of them belongs in the middle. Use case 3 to pop one out.",
     focus:"all" },
-  { short:"Yellow cross", stepno:"Step 4 of 7", title:"Yellow cross",
-    goal:"Make a yellow plus sign on top.",
+  { short:"Yellow cross", stepno:"Step 5 of 8", title:"Yellow cross",
+    goal:"Make a yellow plus sign on top. Only the yellow center piece and the 4 top edge pieces matter now.",
     body:[], demo:[],
-    tip:"Already have a yellow plus sign? Go to step 5.",
+    tip:"Already have a yellow plus sign? Go to step 6.",
     focus:"all" },
-  { short:"Yellow edges", stepno:"Step 5 of 7", title:"Yellow edges",
-    goal:"Make each top edge piece match the side under it.",
+  { short:"Yellow edges", stepno:"Step 6 of 8", title:"Yellow edges",
+    goal:"Each top edge piece has a second color on its side. Make that color match the center piece right under it.",
     body:[], demo:[],
-    tip:"Match means: the piece’s side color is the same as the middle square under it.",
+    tip:"Match means: the side color of the edge piece is the same as the center piece right under it.",
     focus:"all" },
-  { short:"Corner places", stepno:"Step 6 of 7", title:"Corner places",
-    goal:"Put each yellow corner in its home. It can still be turned the wrong way.",
+  { short:"Corner places", stepno:"Step 7 of 8", title:"Corner places",
+    goal:"Put each yellow corner piece in its home. For now it can still be turned the wrong way.",
     body:[
-      "A corner is home when its 3 colors are the same as the 3 sides around it.",
-      "Find a corner that is home. Hold it at the front right, on top.",
-      "Do U R U′ L′ U R′ U′ L. Do it again until all 4 corners are home."
+      "A corner piece is home when its 3 colors are the same as the 3 center pieces around it. Its yellow part can point any way for now.",
+      "Find a corner piece that is home. Hold the cube so it sits at the front right, on top.",
+      "Do U R U′ L′ U R′ U′ L. The other 3 corner pieces move around in a circle. The front right one stays home. Do it again until all 4 corner pieces are home."
     ],
-    tip:"No corner is home yet? Do the move 1 time from any side. Then look again.",
-    demo:[["U R U' L' U R' U' L","The corner swap move"]],
+    tip:"No corner piece is home yet? Do the move 1 time from any side. Then look again.",
+    demo:[["U R U' L' U R' U' L","The corner swap move","U R U′ L′ U R′ U′ L moves 3 corner pieces around in a circle. The front right corner piece stays put. Everything else comes back exactly as it was."]],
     focus:"all" },
-  { short:"Corner twist", stepno:"Step 7 of 7", title:"Corner twist",
-    goal:"Turn each yellow corner so yellow points up. Then your cube is solved!",
+  { short:"Corner twist", stepno:"Step 8 of 8", title:"Corner twist",
+    goal:"Turn each yellow corner piece so yellow points up. Then your cube is solved!",
     body:[
-      "Hold the cube so a wrong corner is at the front right, on top.",
-      "Do R′ D′ R D again and again until yellow points up. The bottom gets messy. That’s OK! It fixes itself at the end.",
-      "Turn only the top (U) to bring the next wrong corner to the front right. Then do the move again. Don’t turn the whole cube now."
+      "Hold the cube so a corner piece whose yellow does not point up is at the front right, on top.",
+      "Do R′ D′ R D again and again until its yellow points up. The bottom layer gets messy. That’s OK! It fixes itself at the end.",
+      "Now turn only the top layer (U) to bring the next wrong corner piece to the front right. Do R′ D′ R D again. Don’t turn the whole cube during this step."
     ],
-    tip:"In the movie, corner 1 needs 2 rounds and corner 2 needs 4 rounds. Then the bottom fixes itself.",
+    tip:"In the movie, corner 1 needs 2 rounds and corner 2 needs 4 rounds. Then the bottom layer fixes itself.",
     demo:[].concat(
-      rounds("R' D' R D", 2, "Corner 1, round"),
-      [["U","Next corner to the front right"]],
-      rounds("R' D' R D", 4, "Corner 2, round"),
-      [["U'","Turn the top back"]]
+      rounds("R' D' R D", 2, "Corner 1, round", TWIST_WHY),
+      [["U","Next corner to the front right","Turn only the top layer to bring the next wrong corner piece to the front right. The messy bottom stays where it is."]],
+      rounds("R' D' R D", 4, "Corner 2, round", TWIST_WHY),
+      [["U'","Turn the top back","Turn the top layer back. The bottom fixed itself, and the cube is solved!"]]
     ),
     focus:"all" },
   { short:"Play", stepno:"Free play", title:"Play time",
@@ -501,7 +825,9 @@ const LESSONS = [
       "Stuck? Press Reset and try again. Even the best cubers start over a lot."
     ],
     tip:"Solve it here and you get a party!",
-    demo:[], focus:"all", free:true }
+    demo:[], focus:"all", free:true },
+  { short:"My cube", stepno:"Help me", title:"Solve my cube",
+    goal:"", body:[], tip:"", demo:[], focus:"all", mycube:true }
 ];
 
 /* Cases for steps 1-5: each one starts in the situation its text describes.
@@ -518,16 +844,18 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green piece is in the top layer. Its white part points up.",
-"do": "Turn the top until green is over the green middle square. Then turn the front 2 times (F2).",
+"look": "The white and green edge piece (pink frame) is in the top layer. Its white part points up.",
+"do": "Its home is on the bottom, under the green center piece. First turn the top layer until the green part of the piece is right above the green center piece. Then turn the front 2 times (F2). The piece drops down into its home, with white facing down.",
 "demo": [
 [
 "U",
-"Top: green over green"
+"Top: green over green",
+"Turn the top layer until the green part of the piece is right above the green center piece."
 ],
 [
 "F2",
-"Turn the front 2 times"
+"Turn the front 2 times",
+"Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down."
 ]
 ]
 },
@@ -541,16 +869,18 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green piece is in the top layer. Its white part points to the side, not up.",
-"do": "Turn the top 1 time to the right (U′). Then do R′ F R. The piece slides into place.",
+"look": "The white and green edge piece (pink frame) is in the top layer. But its white part points out to the side, not up.",
+"do": "If we dropped it now, white would face the wrong way. So we tuck it in from the side. Turn the top layer 1 time to the right (U′). Then do R′ F R. R′ moves the right side out of the way, F turns the piece into its home, and R puts the right side back.",
 "demo": [
 [
 "U'",
-"Turn the top to the right"
+"Turn the top to the right",
+"Turn the top layer 1 time to the right. The piece moves to the right side, where we can tuck it in."
 ],
 [
 "R' F R",
-"Slide it in"
+"Slide it in",
+"R′ turns the right side so the piece goes down into the middle layer, at the front right. F turns the front, which rolls the piece down into its home. R turns the right side back, so the white piece that was already home on the right comes back too."
 ]
 ]
 },
@@ -564,12 +894,13 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green piece is in the middle layer. Its green part is on the front.",
-"do": "Turn the front 1 time (F). The piece drops to the bottom. Is it on the left side instead? Then use F′.",
+"look": "The white and green edge piece (pink frame) is in the middle layer. Its green part is on the front, right next to the green center piece.",
+"do": "The green part already matches the green center piece. Turn the front 1 time (F) and the piece drops down into its home. Is the piece on the left side instead? Then turn the front the other way (F′).",
 "demo": [
 [
 "F",
-"Turn the front 1 time"
+"Turn the front 1 time",
+"The green part of the piece already touches the green center piece. 1 front turn rolls the piece down into its home, with white facing down."
 ]
 ]
 },
@@ -583,16 +914,18 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green piece is in the middle layer. Its white part is on the front.",
-"do": "Do R U R′ to lift it to the top. Now white points up. Then turn the front 2 times (F2).",
+"look": "The white and green edge piece (pink frame) is in the middle layer. Its white part is on the front.",
+"do": "White points the wrong way, so first we lift the piece up to the top layer. Do R U R′. Now the piece is on top and its white part points up. That’s case 1: turn the front 2 times (F2) to drop it home.",
 "demo": [
 [
 "R U R'",
-"Lift it to the top"
+"Lift it to the top",
+"R takes the right side up, so the piece goes up into the top layer. U moves it to the front, out of the way. R′ takes the right side back down, so the white piece already home on the right goes back too. Now our piece is on top with white pointing up."
 ],
 [
 "F2",
-"Turn the front 2 times"
+"Turn the front 2 times",
+"Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down."
 ]
 ]
 },
@@ -606,20 +939,23 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green piece is on the bottom, but under the wrong color.",
-"do": "Turn that side 2 times (R2) to lift it up. Then do case 1: turn the top so green is over green, and turn the front 2 times.",
+"look": "The white and green edge piece (pink frame) is on the bottom, but under the wrong center piece. In the movie it’s under the orange center piece.",
+"do": "First lift it out: turn that side 2 times (R2). Now the piece is in the top layer with white up. Turn the top layer until its green part is over the green center piece (U). Then turn the front 2 times (F2). The white and orange piece goes home at the same time!",
 "demo": [
 [
 "R2",
-"Lift it up"
+"Lift it up",
+"Turn the right side 2 times. Our piece flips from the bottom up to the top layer. At the same time, the white and orange piece on top drops down into its own home."
 ],
 [
 "U",
-"Top: green over green"
+"Top: green over green",
+"Turn the top layer until the green part of the piece is right above the green center piece."
 ],
 [
 "F2",
-"Turn the front 2 times"
+"Turn the front 2 times",
+"Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down."
 ]
 ]
 },
@@ -633,20 +969,23 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green piece is in its home, but upside down. Its white part points to the front.",
-"do": "Turn the front 2 times (F2) to bring it up. Then do case 2: U′, then R′ F R.",
+"look": "The white and green edge piece (pink frame) is in its home, but upside down. Its white part points to the front instead of down.",
+"do": "Bring it up with F2. Now it’s in the top layer with white pointing out to the side. That’s case 2: turn the top layer to the right (U′), then do R′ F R.",
 "demo": [
 [
 "F2",
-"Bring it up"
+"Bring it up",
+"Turn the front 2 times. The piece flips up to the top layer. Now its white part points out to the front."
 ],
 [
 "U'",
-"Turn the top to the right"
+"Turn the top to the right",
+"Turn the top layer 1 time to the right. The piece moves to the right side, where we can tuck it in."
 ],
 [
 "R' F R",
-"Slide it in"
+"Slide it in",
+"R′ turns the right side so the piece goes down into the middle layer, at the front right. F turns the front, which rolls the piece down into its home. R turns the right side back, so the white piece that was already home on the right comes back too."
 ]
 ]
 }
@@ -662,16 +1001,18 @@ const CASES = {
 1
 ]
 ],
-"look": "The white, green and orange corner is in the top layer.",
-"do": "Turn the top until the corner is right above its home, between green and orange. Now white points right. Do R U R′ U′ 1 time.",
+"look": "The white, green and orange corner piece (pink frame) is in the top layer.",
+"do": "Its home is the bottom corner between the green and orange center pieces. Turn the top layer until the corner piece is right above its home. Now its white part points to the right. Do R U R′ U′ 1 time. The corner piece goes down into its home.",
 "demo": [
 [
 "U",
-"Top: over its home"
+"Top: over its home",
+"Turn the top layer until the corner piece is right above its home, between the green and orange center pieces."
 ],
 [
 "R U R' U'",
-"Round 1 of 1"
+"Round 1 of 1",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ]
 ]
 },
@@ -685,20 +1026,23 @@ const CASES = {
 1
 ]
 ],
-"look": "The corner is on top, right above its home. Its white part points up.",
-"do": "Do R U R′ U′ 3 times.",
+"look": "The white, green and orange corner piece (pink frame) is in the top layer, right above its home. Its white part points up.",
+"do": "Do R U R′ U′ 3 times. Each time, the corner piece goes down and comes back up, turned a little. After 3 times it lands in its home with white facing down.",
 "demo": [
 [
 "R U R' U'",
-"Round 1 of 3"
+"Round 1 of 3",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 2 of 3"
+"Round 2 of 3",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 3 of 3"
+"Round 3 of 3",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ]
 ]
 },
@@ -712,28 +1056,33 @@ const CASES = {
 1
 ]
 ],
-"look": "The corner is on top, right above its home. Its white part points to the front.",
-"do": "Do R U R′ U′ 5 times. Count out loud!",
+"look": "The white, green and orange corner piece (pink frame) is in the top layer, right above its home. Its white part points to the front.",
+"do": "Do R U R′ U′ 5 times. Count out loud! After 5 times it lands in its home with white facing down.",
 "demo": [
 [
 "R U R' U'",
-"Round 1 of 5"
+"Round 1 of 5",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 2 of 5"
+"Round 2 of 5",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 3 of 5"
+"Round 3 of 5",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 4 of 5"
+"Round 4 of 5",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 5 of 5"
+"Round 5 of 5",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ]
 ]
 },
@@ -747,16 +1096,18 @@ const CASES = {
 1
 ]
 ],
-"look": "The corner is in its home on the bottom, but white is not facing down.",
-"do": "Do R U R′ U′ again and again until white faces down. It takes 2 or 4 times.",
+"look": "The white, green and orange corner piece (pink frame) is in its home on the bottom, but its white part does not face down.",
+"do": "Keep it at the front right. Do R U R′ U′ again and again until white faces down. It takes 2 or 4 times.",
 "demo": [
 [
 "R U R' U'",
-"Round 1 of 2"
+"Round 1 of 2",
+"The corner piece is home but turned. R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ],
 [
 "R U R' U'",
-"Round 2 of 2"
+"Round 2 of 2",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ]
 ]
 },
@@ -770,20 +1121,23 @@ const CASES = {
 1
 ]
 ],
-"look": "The corner is on the bottom, but in the wrong place.",
-"do": "Is it at the front left? Do L′ U′ L U to lift it to the top. Turn the top until it’s above its home. Then do case 1, 2 or 3.",
+"look": "The white, green and orange corner piece (pink frame) is on the bottom, but in the wrong corner.",
+"do": "We have to lift it out first. It’s at the front left, so do L′ U′ L U. Now it’s in the top layer. Turn the top layer until the corner piece is right above its home (U′). Then do R U R′ U′ until it lands home.",
 "demo": [
 [
 "L' U' L U",
-"Lift it to the top"
+"Lift it to the top",
+"This is R U R′ U′ done with the left hand. L′ lifts the left side, taking the stuck corner piece up. U′ moves it out of the left side. L takes the left side back down. U puts the top back. Now the corner piece is in the top layer."
 ],
 [
 "U'",
-"Top: over its home"
+"Top: over its home",
+"Turn the top layer until the corner piece is right above its home."
 ],
 [
 "R U R' U'",
-"Round 1 of 1"
+"Round 1 of 1",
+"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
 ]
 ]
 }
@@ -799,20 +1153,23 @@ const CASES = {
 1
 ]
 ],
-"look": "The green and orange piece is in the top layer. It has no yellow.",
-"do": "Turn the top until green is over green. Orange is on top, and the orange side is on the right. So it goes right. Do U R U′ R′, then U′ F′ U F.",
+"look": "The green and orange edge piece (pink frame) is in the top layer. It has no yellow, so it belongs in the middle layer.",
+"do": "First turn the top layer until the green part of the piece is right above the green center piece. Now look at the top of the piece: it’s orange. The orange center piece is on the right side. So the piece goes to the right. Do U R U′ R′, then U′ F′ U F. The piece slides down into the middle layer, between green and orange.",
 "demo": [
 [
 "U'",
-"Top: green over green"
+"Top: green over green",
+"Turn the top layer until the green part of the piece is right above the green center piece."
 ],
 [
 "U R U' R'",
-"Right move, part 1"
+"Right move, part 1",
+"We can’t just push the piece down, because that would break the finished bottom layer. So first U moves the piece out of the way, R lifts the white corner piece up from below, U′ brings our piece back to the front, and R′ brings the white corner piece right next to it. Now they sit side by side on top."
 ],
 [
 "U' F' U F",
-"Right move, part 2"
+"Right move, part 2",
+"Now we put both back in together. U′ moves them away, F′ opens the front, U brings them back, and F swings them both down: the piece into the middle layer, and the white corner piece back into its home on the bottom."
 ]
 ]
 },
@@ -826,20 +1183,23 @@ const CASES = {
 1
 ]
 ],
-"look": "The green and red piece is in the top layer. It has no yellow.",
-"do": "Turn the top until green is over green. Red is on top, and the red side is on the left. So it goes left. Do U′ L′ U L, then U F U′ F′.",
+"look": "The green and red edge piece (pink frame) is in the top layer. It has no yellow, so it belongs in the middle layer.",
+"do": "First turn the top layer until the green part of the piece is right above the green center piece. Now look at the top of the piece: it’s red. The red center piece is on the left side. So the piece goes to the left. Do U′ L′ U L, then U F U′ F′. The piece slides down into the middle layer, between green and red.",
 "demo": [
 [
 "U",
-"Top: green over green"
+"Top: green over green",
+"Turn the top layer until the green part of the piece is right above the green center piece."
 ],
 [
 "U' L' U L",
-"Left move, part 1"
+"Left move, part 1",
+"The same idea on the left side. U′ moves the piece out of the way, L′ lifts the white corner piece up from below, U brings our piece back to the front, and L brings the white corner piece right next to it."
 ],
 [
 "U F U' F'",
-"Left move, part 2"
+"Left move, part 2",
+"U moves them both away, F opens the front, U′ brings them back, and F′ swings them both down: the piece into the middle layer, and the white corner piece back into its home."
 ]
 ]
 },
@@ -853,28 +1213,33 @@ const CASES = {
 1
 ]
 ],
-"look": "The green and orange piece is in the middle layer, but in the wrong place or flipped.",
-"do": "Hold the cube so the stuck piece is at the front right. Do the right move 1 time. It pops up to the top. Turn the top until green is over green. Then do the right move again.",
+"look": "The green and orange edge piece (pink frame) is already in the middle layer, but in the wrong place, or flipped with its colors the wrong way round.",
+"do": "Hold the cube so the stuck piece is at the front right. Do the right move 1 time (U R U′ R′, then U′ F′ U F). It pushes a top piece in and pops the stuck piece up to the top layer. Then turn the top layer until green is over the green center piece, and do the right move again.",
 "demo": [
 [
 "U R U' R'",
-"Pop it out, part 1"
+"Pop it out, part 1",
+"The right move, part 1. The piece’s home is taken by the wrong piece, so this move will push a top piece in and pop the stuck piece out."
 ],
 [
 "U' F' U F",
-"Pop it out, part 2"
+"Pop it out, part 2",
+"The right move, part 2. The stuck piece pops up into the top layer."
 ],
 [
 "U2",
-"Top: green over green"
+"Top: green over green",
+"Turn the top layer until the green part of the piece is right above the green center piece."
 ],
 [
 "U R U' R'",
-"Right move, part 1"
+"Right move, part 1",
+"We can’t just push the piece down, because that would break the finished bottom layer. So first U moves the piece out of the way, R lifts the white corner piece up from below, U′ brings our piece back to the front, and R′ brings the white corner piece right next to it. Now they sit side by side on top."
 ],
 [
 "U' F' U F",
-"Right move, part 2"
+"Right move, part 2",
+"Now we put both back in together. U′ moves them away, F′ opens the front, U brings them back, and F swings them both down: the piece into the middle layer, and the white corner piece back into its home on the bottom."
 ]
 ]
 }
@@ -905,12 +1270,13 @@ const CASES = {
 0
 ]
 ],
-"look": "On top, the yellow makes a line through the middle.",
-"do": "Turn the top so the line goes from left to right. Do F R U R′ U′ F′ 1 time.",
+"look": "Look only at the top. The yellow center piece and 2 yellow edge pieces make a line.",
+"do": "Turn the top layer so the line goes from left to right, like a flat road. Then do F R U R′ U′ F′ 1 time. The line becomes a plus sign.",
 "demo": [
 [
 "F R U R' U' F'",
-"The plus sign move"
+"The plus sign move",
+"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were."
 ]
 ]
 },
@@ -939,16 +1305,18 @@ const CASES = {
 0
 ]
 ],
-"look": "On top, the yellow makes an L shape.",
-"do": "Turn the top so the L points to the back and to the left. Do F R U R′ U′ F′. Now you have a line. Do the move 1 more time.",
+"look": "Look only at the top. The yellow center piece and 2 yellow edge pieces make an L shape.",
+"do": "Turn the top layer so the L points to the back and to the left, like clock hands at 9 and 12. Do F R U R′ U′ F′. Now you have a line. Do the move 1 more time to make the plus sign.",
 "demo": [
 [
 "F R U R' U' F'",
-"L turns into a line"
+"L turns into a line",
+"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The L becomes a line."
 ],
 [
 "F R U R' U' F'",
-"Line turns into a plus"
+"Line turns into a plus",
+"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The line becomes a plus sign."
 ]
 ]
 },
@@ -977,24 +1345,28 @@ const CASES = {
 0
 ]
 ],
-"look": "On top, only the middle square is yellow.",
-"do": "Do F R U R′ U′ F′. Now you have an L. Turn the top so the L points to the back and to the left. Then do the move 2 more times.",
+"look": "Look only at the top. Only the yellow center piece points up. No yellow edge piece points up.",
+"do": "Do F R U R′ U′ F′ 1 time. Now you have an L. Turn the top layer so the L points to the back and to the left. Then do the move 2 more times: first you get a line, then a plus sign.",
 "demo": [
 [
 "F R U R' U' F'",
-"Dot turns into an L"
+"Dot turns into an L",
+"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The dot becomes an L."
 ],
 [
 "U2",
-"L to the back left"
+"L to the back left",
+"Turn the top layer so the L points to the back and to the left."
 ],
 [
 "F R U R' U' F'",
-"L turns into a line"
+"L turns into a line",
+"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The L becomes a line."
 ],
 [
 "F R U R' U' F'",
-"Line turns into a plus"
+"Line turns into a plus",
+"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The line becomes a plus sign."
 ]
 ]
 }
@@ -1025,16 +1397,18 @@ const CASES = {
 0
 ]
 ],
-"look": "Turn the top until 2 edge pieces match. They are next to each other.",
-"do": "Hold them at the back and on the right. Do R U R′ U R U2 R′. Then turn the top 1 time (U).",
+"look": "Turn the top layer until 2 edge pieces match the center pieces under them. These 2 are next to each other, around a corner.",
+"do": "Hold the cube so the 2 matching pieces are at the back and on the right. Do R U R′ U R U2 R′. Then turn the top layer 1 time (U). The other 2 pieces swap places, and all 4 match.",
 "demo": [
 [
 "R U R' U R U2 R'",
-"The swap move"
+"The swap move",
+"R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. Because the 2 matching pieces are at the back and right, the circle sends the others where they belong."
 ],
 [
 "U",
-"Turn the top 1 time"
+"Turn the top 1 time",
+"Turn the top layer 1 time. Now all 4 edge pieces match their center pieces."
 ]
 ]
 },
@@ -1063,24 +1437,28 @@ const CASES = {
 0
 ]
 ],
-"look": "Only 2 edge pieces match. They are across from each other.",
-"do": "Do R U R′ U R U2 R′ 1 time. Now 2 pieces next to each other match. Turn the whole cube so they are at the back and right. Then do case 1.",
+"look": "Only 2 edge pieces match the center pieces under them, and they are across from each other, on opposite sides.",
+"do": "Do R U R′ U R U2 R′ 1 time, from any side. Now 2 pieces next to each other match. Turn the whole cube so they are at the back and on the right. Then do case 1.",
 "demo": [
 [
 "R U R' U R U2 R'",
-"Swap move, any side"
+"Swap move, any side",
+"R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. After it, 2 pieces next to each other match."
 ],
 [
 "y'",
-"Turn the whole cube"
+"Turn the whole cube",
+"Turn the whole cube so the 2 matching pieces are at the back and on the right."
 ],
 [
 "R U R' U R U2 R'",
-"The swap move again"
+"The swap move again",
+"R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. Now the circle sends the others where they belong."
 ],
 [
 "U",
-"Turn the top 1 time"
+"Turn the top 1 time",
+"Turn the top layer 1 time. Now all 4 edge pieces match their center pieces."
 ]
 ]
 },
@@ -1109,12 +1487,13 @@ const CASES = {
 0
 ]
 ],
-"look": "No piece matches yet. But if you turn the top, all 4 match.",
-"do": "Turn the top until they all match. That’s it! Go to step 6.",
+"look": "No edge piece matches yet. But when you turn the top layer, all 4 match at once.",
+"do": "Just turn the top layer until all 4 match. That’s it! Go to step 7.",
 "demo": [
 [
 "U",
-"Turn the top"
+"Turn the top",
+"Turn the top layer. All 4 edge pieces line up with their center pieces at once."
 ]
 ]
 }
@@ -1374,7 +1753,7 @@ function toast(t, ms){
   toastTimer = setTimeout(() => { els.toast.classList.add("off"); view.classList.remove("toasting"); }, ms || 3500);
 }
 
-const PATH_COLORS = ["#FFFFFF","#FFFFFF","#FFFFFF","#E8384F","#FFD23F","#FFD23F","#FF8A1F","#2F6FE0","#23B05A"];
+const PATH_COLORS = ["#FFFFFF","#FFFFFF","#FFFFFF","#E8384F","#FFD23F","#FFD23F","#FF8A1F","#2F6FE0","#23B05A","#FFFFFF"];
 function renderPath(){
   els.path.innerHTML = "";
   LESSONS.forEach((L, i) => {
@@ -1385,7 +1764,7 @@ function renderPath(){
     if (i === current) b.setAttribute("aria-current", "step");
     const bg = PATH_COLORS[i];
     const fg = (bg === "#2F6FE0" || bg === "#23B05A" || bg === "#E8384F") ? "#FFFFFF" : "#1D2748";
-    b.innerHTML = '<span class="num" style="background:' + bg + ';color:' + fg + '">' + (L.free ? "★" : i) + '</span>' +
+    b.innerHTML = '<span class="num" style="background:' + bg + ';color:' + fg + '">' + (L.free ? "★" : L.mycube ? "📷" : i + 1) + '</span>' +
       '<span class="name">' + L.short + '</span>' + (done.has(i) ? '<span class="tick" aria-label="done">✓</span>' : "");
     b.addEventListener("click", () => loadLesson(i));
     els.path.appendChild(b);
@@ -1407,7 +1786,7 @@ let cardIdx = 0, cardMode = false;
 function renderBody(L){
   els.body.innerHTML = "";
   const add = el => els.body.appendChild(el);
-  const g = document.createElement("p"); g.className = "goal"; g.textContent = L.goal; add(g);
+  const g = document.createElement("p"); g.className = "goal"; g.textContent = (!L.mycube && nowLine) || L.goal; add(g);
   const C = curCase();
   if (C) {
     const look = document.createElement("p"), b = document.createElement("b");
@@ -1435,13 +1814,14 @@ function renderBody(L){
 
 let pages = [];
 function fitText(){
+  if (typeof MY !== "undefined" && MY.active() && MY.hiding()) return;
   const kids = [...els.body.children];
   els.body.classList.remove("cards");
   els.body.style.height = "";
   els.pager.hidden = true;
   kids.forEach(k => k.classList.add("on"));
   void els.body.offsetHeight;
-  cardMode = els.body.scrollHeight > els.body.clientHeight + 2;
+  cardMode = els.body.scrollHeight > els.body.clientHeight;
   if (!cardMode) { pages = [kids.map((_, i) => i)]; return; }
   // Show the pager first, then see how much room the text really has
   els.pager.hidden = false;
@@ -1509,15 +1889,26 @@ els.body.addEventListener("pointerup", e => {
 function buildGroups(L){
   flat = []; groups = [];
   const C = curCase();
-  (C ? C.demo : L.demo).forEach(([alg, label]) => {
+  (C ? C.demo : L.demo).forEach(([alg, label, why]) => {
     const moves = toks(alg);
-    groups.push({label, start:flat.length, moves});
+    groups.push({label, start:flat.length, moves, why});
     moves.forEach(m => flat.push(m));
   });
   els.bar.innerHTML = groups.map(() => "<span><i></i></span>").join("");
   [...els.bar.children].forEach((s, i) => { s.style.flex = groups[i].moves.length; });
 }
+let textTimer = 0, nowLine = null;
+// in the lessons, explain the group of moves that is playing now
+function lessonNow(){
+  const L = LESSONS[current]; if (L.mycube || L.free) return;
+  const g = groups.find(q => pos >= q.start && pos < q.start + q.moves.length);
+  const want = pos > 0 && pos < flat.length && g && g.why ? "Now: " + g.why : null;
+  if (want === nowLine) return;
+  nowLine = want; renderBody(L); fitText();
+}
 function paintMoves(){
+  if (!LESSONS[current].mycube && !LESSONS[current].free) { clearTimeout(textTimer); textTimer = setTimeout(lessonNow, 0); }
+  if (LESSONS[current].mycube && typeof MY !== "undefined") { clearTimeout(textTimer); textTimer = setTimeout(MY.text, 0); }
   if (!groups.length) return;
   const at = Math.min(pos, flat.length - 1);
   const gi = groups.findIndex(g => at >= g.start && at < g.start + g.moves.length);
@@ -1590,7 +1981,7 @@ function selectCase(j){
   if (!L.cases || j < 0 || j >= L.cases.length) return;
   playing = false;
   if (busy) { setTimeout(() => selectCase(j), 60); return; }
-  caseIdx = j;
+  caseIdx = j; nowLine = null;
   renderCases(); renderBody(L); buildGroups(L);
   setupCube(); fitText();
   toast("Case " + (j + 1) + ": " + L.cases[j].name, 2500);
@@ -1599,8 +1990,9 @@ function selectCase(j){
 function loadLesson(i){
   playing = false;
   if (busy) { setTimeout(() => loadLesson(i), 60); return; }
+  if (typeof MY !== "undefined") MY.exit();
   current = i;
-  caseIdx = 0;
+  caseIdx = 0; nowLine = null;
   renderCases();
   const L = LESSONS[i];
   els.stepno.textContent = L.stepno;
@@ -1615,6 +2007,7 @@ function loadLesson(i){
   setupCube();
   fitText();
   toast(L.free ? "Tap Mix it up to start." : "Tap ▶ to watch.");
+  if (L.mycube) MY.enter();
 }
 
 function setupCube(){
@@ -1623,7 +2016,8 @@ function setupCube(){
   const C = curCase();
   // Build the case: first how the rest of the cube looks, then run the fix backwards.
   if (C && C.mess) toks(C.mess).forEach(m => { animateMove(m, 0); });
-  if (!L.free) flat.slice().reverse().forEach(m => { animateMove(invMove(m), 0); });
+  if (L.mycube) { if (typeof MY !== "undefined") MY.paint(); }
+  else if (!L.free) flat.slice().reverse().forEach(m => { animateMove(invMove(m), 0); });
   applyFocus(L.focus);
   setTargets(C ? C.targets : []);
   pos = 0; dirty = false; scrambled = false;
@@ -1638,6 +2032,7 @@ async function stepForward(){
   await animateMove(m, dur());
   busy = false; pos++;
   paintMoves(); updateButtons();
+  if (LESSONS[current].mycube) MY.onStep();
   if (pos === flat.length) lessonFinished();
 }
 async function stepBack(){
@@ -1663,7 +2058,7 @@ async function play(){
   playing = false; updateButtons();
 }
 function lessonFinished(){
-  const last = current === LESSONS.length - 2;
+  const last = current === 7 || !!LESSONS[current].mycube;
   toast(last ? "🎉 Solved! Now try it on your cube." : "🎉 Step done! Now try it on your cube.", 5000);
   if (!done.has(current)) { done.add(current); saveDone(); renderPath(); }
   confetti();
@@ -1726,7 +2121,7 @@ $("btnScramble").addEventListener("click", async () => {
   busy = true; updateButtons(); toast("Mixing…", 4000);
   for (const m of seq) { showBubble(m); await animateMove(m, reduceMotion ? 0 : 140); }
   busy = false; scrambled = true; updateButtons();
-  toast("All mixed up! Start with step 1.");
+  toast("All mixed up! Start with step 2.");
 });
 $("btnSolve").addEventListener("click", () => {
   if (busy) return;
@@ -1741,6 +2136,7 @@ document.addEventListener("keydown", e => {
   if (k.length === 1 && "RLUDFB".includes(k)) { e.preventDefault(); userMove(k + (e.shiftKey ? "'" : "")); return; }
   if (/^[1-9]$/.test(e.key) && LESSONS[current].cases) { e.preventDefault(); selectCase(+e.key - 1); return; }
   if (LESSONS[current].free) return;
+  if (LESSONS[current].mycube && MY.hiding()) return;
   if (e.key === " " && (e.target.tagName || "").toLowerCase() !== "button") { e.preventDefault(); play(); }
   if (e.key === "ArrowRight") { e.preventDefault(); els.next.click(); }
   if (e.key === "ArrowLeft") { e.preventDefault(); stepBack(); }
@@ -1766,6 +2162,425 @@ function confetti(){
   }
 }
 
+/* ===== My cube: photos -> check -> guide ===== */
+const MY = (() => {
+  const FACE_NAME = MC.NAME;
+  const view = document.getElementById("view");
+  const over = document.getElementById("myover");
+  const box = document.getElementById("mybox");
+  const fileIn = document.getElementById("myfile");
+  let screen = "intro", photoIdx = 0, grids = null, samples = [], start = null, plan = null;
+  let bounds = [], checkAt = -1, img = null, crop = null, sel = null, purpose = "all", lastPaint = null, stream = null, mirrored = false;
+
+  // ---------- color math
+  const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  function lab(r, g, b){
+    const R = lin(r), G = lin(g), B = lin(b);
+    let x = (R*0.4124 + G*0.3576 + B*0.1805) / 0.95047, y = R*0.2126 + G*0.7152 + B*0.0722, z = (R*0.0193 + G*0.1192 + B*0.9505) / 1.08883;
+    const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16/116;
+    x = f(x); y = f(y); z = f(z);
+    return [116*y - 16, 500*(x - y), 200*(y - z)];
+  }
+  const dist = (a, b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
+  const PROTO = {U:lab(232,212,40), D:lab(236,236,236), F:lab(30,160,70), B:lab(30,80,200), R:lab(250,120,30), L:lab(200,30,45)};
+  const nearest = (c, refs) => Object.keys(refs).reduce((best, f) => dist(c, refs[f]) < dist(c, refs[best]) ? f : best, "U");
+
+  // balanced assignment: every color gets exactly 9 squares (Hungarian method)
+  function hungarian(cost){
+    const n = cost.length, u = new Array(n+1).fill(0), v = new Array(n+1).fill(0), p = new Array(n+1).fill(0), way = new Array(n+1).fill(0);
+    for (let i = 1; i <= n; i++){
+      p[0] = i; let j0 = 0; const minv = new Array(n+1).fill(Infinity), used = new Array(n+1).fill(false);
+      do {
+        used[j0] = true; const i0 = p[j0]; let delta = Infinity, j1 = 0;
+        for (let j = 1; j <= n; j++) if (!used[j]){
+          const cur = cost[i0-1][j-1] - u[i0] - v[j];
+          if (cur < minv[j]){ minv[j] = cur; way[j] = j0; }
+          if (minv[j] < delta){ delta = minv[j]; j1 = j; }
+        }
+        for (let j = 0; j <= n; j++){ if (used[j]){ u[p[j]] += delta; v[j] -= delta; } else minv[j] -= delta; }
+        j0 = j1;
+      } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+    }
+    const ans = new Array(n); for (let j = 1; j <= n; j++) ans[p[j]-1] = j-1; return ans;
+  }
+  function classify(){
+    const refs = {}; MC.PHOTOS.forEach((ph, i) => { if (samples[i]) refs[ph.face] = samples[i][1][1]; });
+    const g = MC.PHOTOS.map((ph, i) => [0,1,2].map(r => [0,1,2].map(c => (r === 1 && c === 1) ? ph.face : null)));
+    const all = Object.keys(refs).length === 6;
+    const items = [];
+    MC.PHOTOS.forEach((ph, i) => { if (!samples[i]) return; for (let r=0;r<3;r++) for (let c=0;c<3;c++) if (!(r===1&&c===1)) items.push([i,r,c,samples[i][r][c]]); });
+    if (all){
+      const faces = Object.keys(refs), slots = []; faces.forEach(f => { for (let s=0;s<8;s++) slots.push(f); });
+      const ans = hungarian(items.map(it => slots.map(f => dist(it[3], refs[f]))));
+      items.forEach((it, idx) => { g[it[0]][it[1]][it[2]] = slots[ans[idx]]; });
+    } else {
+      const R = Object.assign({}, PROTO, refs);
+      items.forEach(it => { g[it[0]][it[1]][it[2]] = nearest(it[3], R); });
+    }
+    return g;
+  }
+
+  // ---------- small helpers
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  const swatch = f => FACE_CSS[f] || "var(--line)";
+  function show(html){ box.innerHTML = html; box.hidden = false; }
+  function overlay(on){ if (on && LESSONS[current].mycube) setTargets([]); if (!on || screen !== "cam") stopCam(); over.hidden = !on; view.classList.toggle("myon", on); over.style.paddingTop = topBand() + "px"; if (!on) over.innerHTML = ""; }
+  function lessonParts(on){ // hide lesson text, moves and buttons while taking photos or checking
+    ["body","pager","moves","controls"].forEach(id => { const el = document.getElementById(id); if (!on) el.hidden = true; });
+    if (on){ els.body.hidden = false; els.moves.hidden = false; els.controls.hidden = false; }
+  }
+  function miniCube(face, top){
+    const c = n => '<rect x="' + (12 + (n%3)*22) + '" y="' + (26 + Math.floor(n/3)*22) + '" width="20" height="20" rx="4" fill="' + (n === 4 ? swatch(face) : "#C9CFDC") + '"/>';
+    return '<svg class="mymini" viewBox="0 0 90 96" aria-hidden="true"><rect x="10" y="4" width="70" height="18" rx="5" fill="' + swatch(top) + '"/>' +
+      [0,1,2,3,4,5,6,7,8].map(c).join("") + '</svg>';
+  }
+
+  // ---------- screens
+  function intro(){
+    screen = "intro"; overlay(false); lessonParts(false);
+    show('<p class="mygoal">Stuck? Show me your cube. I’ll find your step and help you finish it.</p>' +
+      '<p>You take 6 photos, one of each side. They stay on this device and are deleted right away.</p>' +
+      '<div class="mybtns"><button class="key play" id="myStart"><span class="lbl">📷 Take photos</span></button>' +
+      '<button class="key" id="myPaint"><span class="lbl">🎨 Color it myself</span></button></div>');
+    $("myStart").onclick = () => { samples = []; purpose = "all"; askPhoto(0); };
+    $("myPaint").onclick = () => { samples = []; grids = MC.PHOTOS.map(ph => [0,1,2].map(r => [0,1,2].map(c => (r===1&&c===1) ? ph.face : null))); check(); };
+    toast("Take 6 photos of your cube.", 3000);
+  }
+  function askPhoto(i){
+    stopCam(); screen = "photo"; photoIdx = i; overlay(true); lessonParts(false);
+    const ph = MC.PHOTOS[i];
+    over.innerHTML = '<div class="mybig">' + miniCube(ph.face, ph.top) + '</div>';
+    const lead = purpose === "check" ? "Check time!" : "Photo " + (i + 1) + " of 6";
+    const what = purpose === "check" ? "Turn the cube so the side facing you on the screen faces the camera. Keep the top on top."
+      : cap(FACE_NAME[ph.face]) + " faces the camera. " + cap(FACE_NAME[ph.top]) + " is on top.";
+    show('<p class="mystep">' + lead + '</p><p class="mygoal">' + what + '</p>' +
+      '<p>Fill the photo with that side. Hold it still.</p>' +
+      '<div class="mybtns"><button class="key play" id="myShoot"><span class="lbl">📷 Take photo</span></button>' +
+      (purpose === "check" ? '<button class="key" id="mySkip"><span class="lbl">Skip</span></button>'
+                           : '<button class="key" id="mySkip"><span class="lbl">Skip this side</span></button>') + '</div>');
+    $("myShoot").onclick = openCam;
+    $("mySkip").onclick = () => { if (purpose === "check") backToPlan(); else { samples[i] = null; nextPhoto(); } };
+  }
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+  fileIn.addEventListener("change", () => {
+    const f = fileIn.files && fileIn.files[0]; if (!f) return;
+    const url = URL.createObjectURL(f), im = new Image();
+    im.onload = () => {
+      const scale = Math.min(1, 900 / Math.max(im.width, im.height));
+      const cv = document.createElement("canvas"); cv.width = Math.round(im.width * scale); cv.height = Math.round(im.height * scale);
+      cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url); // the photo file is let go right away
+      useCanvas(cv);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); toast("I couldn’t open that photo. Try again.", 3500); };
+    im.src = url;
+  });
+  function useCanvas(cv){
+    mirrored = !!cv.mirrored; img = cv; const s = Math.min(cv.width, cv.height) * 0.62;
+    crop = {x:(cv.width - s)/2, y:(cv.height - s)/2, s};
+    fit();
+  }
+
+  // ---------- live camera (works on phones, tablets and laptops)
+  const lead = () => purpose === "check" ? "Check time!" : "Photo " + (photoIdx + 1) + " of 6";
+  function stopCam(){ if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; } }
+  function pickFile(){ stopCam(); fileIn.value = ""; fileIn.click(); }
+  function openCam(){
+    const md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) { pickFile(); return; }
+    toast("Opening the camera…", 2500);
+    md.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:960}}, audio:false})
+      .then(camScreen)
+      .catch(() => {
+        show('<p class="mystep">' + lead() + '</p><p class="mygoal">I can’t open the camera.</p>' +
+          '<p>Check that the browser may use the camera. Or pick a photo instead.</p>' +
+          '<div class="mybtns"><button class="key play" id="myTry"><span class="lbl">📷 Try again</span></button>' +
+          '<button class="key" id="myPick"><span class="lbl">🖼️ Pick a photo</span></button></div>');
+        $("myTry").onclick = openCam; $("myPick").onclick = pickFile;
+      });
+  }
+  function camScreen(s){
+    stopCam(); stream = s; screen = "cam"; overlay(true);
+    const ph = MC.PHOTOS[photoIdx];
+    over.innerHTML = '<div class="mycam" id="myCam"><video id="myVid" playsinline autoplay muted></video><div class="myguide"></div></div>';
+    const v = $("myVid"); v.srcObject = s;
+    const set = s.getVideoTracks()[0] && s.getVideoTracks()[0].getSettings ? s.getVideoTracks()[0].getSettings() : {};
+    if (set.facingMode !== "environment") v.classList.add("mirror"); // laptop and selfie cameras feel natural mirrored
+    v.addEventListener("loadedmetadata", layoutCam);
+    const what = purpose === "check" ? "Turn the cube so the side facing you on the screen faces the camera. Keep the top on top."
+      : cap(FACE_NAME[ph.face]) + " faces the camera. " + cap(FACE_NAME[ph.top]) + " is on top.";
+    show('<p class="mystep">' + lead() + '</p><p class="mygoal">' + what + '</p><p>Fit that side inside the grid. Hold it still.</p>' +
+      '<div class="mybtns"><button class="key play" id="mySnap"><span class="lbl">📸 Snap</span></button>' +
+      '<button class="key" id="myPick"><span class="lbl">🖼️ Pick a photo</span></button></div>');
+    $("mySnap").onclick = snap; $("myPick").onclick = pickFile;
+  }
+  function layoutCam(){
+    const v = $("myVid"), box2 = $("myCam"); if (!v || !v.videoWidth) return;
+    const W = over.clientWidth - 20, H = over.clientHeight - topBand() - 10;
+    const k = Math.min(W / v.videoWidth, H / v.videoHeight);
+    box2.style.width = Math.round(v.videoWidth * k) + "px"; box2.style.height = Math.round(v.videoHeight * k) + "px";
+    const gs = Math.round(0.62 * Math.min(v.videoWidth, v.videoHeight) * k), gd = box2.querySelector(".myguide");
+    gd.style.width = gs + "px"; gd.style.height = gs + "px"; // same square the photo grid starts with
+  }
+  function snap(){
+    const v = $("myVid"); if (!v || !v.videoWidth) { toast("The camera is still starting. Try again.", 2500); return; }
+    const scale = Math.min(1, 900 / Math.max(v.videoWidth, v.videoHeight));
+    const cv = document.createElement("canvas"); cv.width = Math.round(v.videoWidth * scale); cv.height = Math.round(v.videoHeight * scale);
+    const g = cv.getContext("2d");
+    if (v.classList.contains("mirror")){ g.translate(cv.width, 0); g.scale(-1, 1); } // keep the photo the way the kid saw it
+    g.drawImage(v, 0, 0, cv.width, cv.height);
+    cv.mirrored = v.classList.contains("mirror");
+    stopCam();
+    useCanvas(cv);
+  }
+
+  function fit(){
+    screen = "crop"; overlay(true);
+    over.innerHTML = '<canvas class="mycrop" id="myCrop"></canvas>';
+    show('<p class="mystep">' + (purpose === "check" ? "Check time!" : "Photo " + (photoIdx + 1) + " of 6") + '</p>' +
+      '<p class="mygoal">Drag the grid onto the 9 squares.</p><p>Drag the round handle to make it bigger or smaller.</p>' +
+      '<div class="mybtns"><button class="key play" id="myUse"><span class="lbl">✓ Use this photo</span></button>' +
+      '<button class="key" id="myRetake"><span class="lbl">Retake</span></button></div>');
+    $("myUse").onclick = usePhoto;
+    $("myRetake").onclick = () => { img = null; askPhoto(photoIdx); };
+    const cv = $("myCrop"); drawCrop();
+    let mode = null, last = null;
+    const toImg = e => { const r = cv.getBoundingClientRect(), k = img.width / r.width; return [(e.clientX - r.left) * k, (e.clientY - r.top) * k]; };
+    cv.addEventListener("pointerdown", e => {
+      const [x, y] = toImg(e), hx = crop.x + crop.s, hy = crop.y + crop.s, hr = img.width * 0.06;
+      mode = Math.hypot(x - hx, y - hy) < hr ? "size" : "move"; last = [x, y]; cv.setPointerCapture(e.pointerId);
+    });
+    cv.addEventListener("pointermove", e => {
+      if (!mode) return; const [x, y] = toImg(e), dx = x - last[0], dy = y - last[1]; last = [x, y];
+      if (mode === "move"){ crop.x += dx; crop.y += dy; }
+      else crop.s = Math.max(img.width * 0.15, crop.s + (dx + dy) / 2);
+      crop.s = Math.min(crop.s, img.width, img.height);
+      crop.x = Math.max(0, Math.min(img.width - crop.s, crop.x)); crop.y = Math.max(0, Math.min(img.height - crop.s, crop.y));
+      drawCrop();
+    });
+    const end = () => { mode = null; };
+    cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  }
+  function drawCrop(){
+    const cv = $("myCrop"); if (!cv || !img) return;
+    const W = over.clientWidth - 20, H = over.clientHeight - topBand() - 10;
+    const k = Math.min(W / img.width, H / img.height);
+    cv.width = img.width; cv.height = img.height; cv.style.width = Math.round(img.width * k) + "px"; cv.style.height = Math.round(img.height * k) + "px";
+    const g = cv.getContext("2d"); g.drawImage(img, 0, 0);
+    const lw = Math.max(2, img.width / 220);
+    g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(0, 0, img.width, crop.y); g.fillRect(0, crop.y + crop.s, img.width, img.height); g.fillRect(0, crop.y, crop.x, crop.s); g.fillRect(crop.x + crop.s, crop.y, img.width, crop.s);
+    for (const col of ["rgba(0,0,0,.6)", "#fff"]){
+      g.strokeStyle = col; g.lineWidth = col === "#fff" ? lw : lw * 2.6;
+      for (let i = 0; i <= 3; i++){ const t = crop.s * i / 3;
+        g.beginPath(); g.moveTo(crop.x + t, crop.y); g.lineTo(crop.x + t, crop.y + crop.s); g.stroke();
+        g.beginPath(); g.moveTo(crop.x, crop.y + t); g.lineTo(crop.x + crop.s, crop.y + t); g.stroke(); }
+    }
+    g.fillStyle = "#FF2BD6"; g.strokeStyle = "#fff"; g.lineWidth = lw;
+    g.beginPath(); g.arc(crop.x + crop.s, crop.y + crop.s, img.width * 0.03, 0, Math.PI * 2); g.fill(); g.stroke();
+  }
+  function sample(){
+    const g = img.getContext("2d"), out = [];
+    for (let r = 0; r < 3; r++){ out.push([]); for (let c = 0; c < 3; c++){
+      const cell = crop.s / 3, inset = cell * 0.3;
+      const x0 = Math.round(crop.x + c*cell + inset), y0 = Math.round(crop.y + r*cell + inset), w = Math.max(1, Math.round(cell - 2*inset));
+      const d = g.getImageData(x0, y0, w, w).data; let R = 0, G = 0, B = 0, n = 0;
+      for (let p = 0; p < d.length; p += 4){ R += d[p]; G += d[p+1]; B += d[p+2]; n++; }
+      out[r].push(lab(R/n, G/n, B/n));
+    } }
+    return out;
+  }
+  function usePhoto(){
+    const s = sample(); img = null; // done with the photo
+    if (mirrored) for (const row of s) row.reverse();
+    if (purpose === "check") return compare(s);
+    const want = MC.PHOTOS[photoIdx].face, seen = nearest(s[1][1], PROTO);
+    samples[photoIdx] = s;
+    if (seen !== want){
+      over.innerHTML = '<div class="mybig">' + miniCube(want, MC.PHOTOS[photoIdx].top) + '</div>';
+      show('<p class="mystep">Photo ' + (photoIdx + 1) + ' of 6</p><p class="mygoal">The center piece looks ' + FACE_NAME[seen] + ', not ' + FACE_NAME[want] + '.</p>' +
+        '<p>Is this really the ' + FACE_NAME[want] + ' side?</p>' +
+        '<div class="mybtns"><button class="key" id="myRetake"><span class="lbl">Retake</span></button>' +
+        '<button class="key play" id="myKeep"><span class="lbl">Yes, keep it</span></button></div>');
+      $("myRetake").onclick = () => askPhoto(photoIdx);
+      $("myKeep").onclick = nextPhoto;
+      return;
+    }
+    nextPhoto();
+  }
+  function nextPhoto(){ if (photoIdx < 5) askPhoto(photoIdx + 1); else { grids = classify(); samples = []; check(); } }
+
+  // ---------- check screen: flat map of the 6 sides, tap to fix
+  const NET = [[4,3,0],[3,0,3],[0,3,3],[1,6,3],[2,9,3],[5,3,6]]; // [photo index, col, row] of each side in the map
+  function check(){
+    screen = "check"; overlay(true); lessonParts(false); sel = null;
+    renderNet(); renderCheck();
+  }
+  function renderNet(){
+    const cs = Math.floor(Math.min((over.clientWidth - 30) / 12.6, (over.clientHeight - topBand() - 16) / 9.6));
+    let h = '<div class="mynet" style="--cs:' + Math.max(14, cs) + 'px">';
+    NET.forEach(([i, col, row]) => { for (let r=0;r<3;r++) for (let c=0;c<3;c++){
+      const f = grids[i][r][c], center = r===1 && c===1, on = sel && sel[0]===i && sel[1]===r && sel[2]===c;
+      h += '<button class="mycell' + (center ? " ctr" : "") + (on ? " on" : "") + (f ? "" : " empty") + '" style="grid-column:' + (col+c+1) + ';grid-row:' + (row+r+1) + ';background:' + (f ? swatch(f) : "transparent") + '"' +
+        (center ? ' disabled aria-label="' + FACE_NAME[f] + ' center piece"' : ' data-i="' + i + '" data-r="' + r + '" data-c="' + c + '" aria-label="Square, ' + (f ? FACE_NAME[f] : "no color yet") + '"') + '></button>';
+    } });
+    over.innerHTML = h + '</div>';
+    over.querySelectorAll(".mycell[data-i]").forEach(b => b.onclick = () => { sel = [+b.dataset.i, +b.dataset.r, +b.dataset.c]; renderNet(); renderCheck(); });
+  }
+  function counts(){ const n = {}; grids.flat(2).forEach(f => { if (f) n[f] = (n[f] || 0) + 1; }); return n; }
+  function renderCheck(){
+    const n = counts(), missing = grids.flat(2).filter(f => !f).length;
+    const wrong = Object.keys(FACE_NAME).filter(f => (n[f] || 0) > 9);
+    let msg;
+    if (missing) msg = missing + " squares still need a color.";
+    else if (wrong.length) msg = "Too many " + wrong.map(f => FACE_NAME[f]).join(" and ") + " squares. Each color has 9.";
+    else msg = "Every color has 9 squares. 👍";
+    const pal = sel ? '<div class="mypal">' + Object.keys(FACE_NAME).map(f => '<button class="mysw" data-f="' + f + '" style="background:' + swatch(f) + '" aria-label="' + FACE_NAME[f] + '"></button>').join("") + '</div>' : "";
+    show('<p class="mygoal">Does this look like your cube?</p>' +
+      '<p>' + (sel ? "Pick the right color for that square:" : "Tap a square to fix its color.") + '</p>' + pal +
+      '<p class="mystep">' + esc(msg) + '</p>' +
+      '<div class="mybtns"><button class="key play" id="myOK"' + (missing || wrong.length ? " disabled" : "") + '><span class="lbl">✓ This is my cube</span></button>' +
+      '<button class="key" id="myAgain"><span class="lbl">Retake photos</span></button></div>');
+    box.querySelectorAll(".mysw").forEach(b => b.onclick = () => { grids[sel[0]][sel[1]][sel[2]] = b.dataset.f; sel = null; renderNet(); renderCheck(); });
+    $("myOK").onclick = accept;
+    $("myAgain").onclick = () => { samples = []; purpose = "all"; askPhoto(0); };
+  }
+  function accept(){
+    let st = MC.fromGrids(grids), note = "";
+    if (!MC.solvable(st)){
+      const fixed = MC.fixTurns(grids);
+      if (!fixed){ toast("Some squares don’t match a real cube. Check the colors again.", 5000); return; }
+      grids = fixed.grids; st = MC.fromGrids(grids);
+      note = "I turned photo " + fixed.turns.map((t, i) => t ? i + 1 : 0).filter(Boolean).join(" and ") + " the right way. ";
+    }
+    begin(st, note);
+  }
+
+  // ---------- guide
+  const STEP_NO = i => i + 1; // lesson index -> step number shown to kids
+  const DID = {1:"the white plus on the bottom", 2:"the 4 white corner pieces", 3:"the middle layer", 4:"the yellow plus on top", 5:"the top edge pieces matching their sides", 6:"the yellow corner pieces in their homes"};
+  const TODO = {1:"make a white plus sign on the bottom", 2:"put the 4 white corner pieces on the bottom", 3:"fill the middle layer", 4:"make a yellow plus sign on top", 5:"match the top edge pieces to their sides", 6:"put each yellow corner piece in its home", 7:"turn the yellow corner pieces so yellow points up"};
+  const andList = a => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+  let found = "", gStart = [];
+  function summary(at){
+    if (at === 8) return "I looked at your cube. It’s already solved! 🎉";
+    if (at <= 1) return "I looked at your cube. Let’s start with step 2: " + TODO[1] + ".";
+    const did = []; for (let i = 1; i < at; i++) did.push(DID[i]);
+    return "I looked at your cube. ✓ You finished " + (at === 2 ? "step 2: " : "steps 2 to " + at + ": ") + andList(did) +
+      ". Great work! Now step " + STEP_NO(at) + ": " + TODO[at] + ".";
+  }
+  function begin(st, note){
+    start = st; plan = MC.plan(st);
+    const L = LESSONS[current], at = MC.stage(st);
+    const groups = []; bounds = [];
+    plan.chunks.forEach(ch => { ch.groups.forEach(g => groups.push(g)); bounds.push({at: groups.reduce((t, g) => t + toks(g[0]).length, 0), title: ch.title, stage: ch.stage, about: ch.about, target: ch.target}); });
+    L.demo = groups;
+    const doneTxt = at === 8 ? "Your cube is already solved! 🎉"
+      : at <= 1 ? "Let’s start at step 2: the white cross."
+      : (at === 2 ? "Step 2 is done." : "Steps 2-" + STEP_NO(at - 1) + " are done.") + " Great work! Now step " + STEP_NO(at) + ".";
+    found = note + summary(at); L.goal = found;
+    gStart = []; groups.reduce((t, g) => { gStart.push(t); return t + toks(g[0]).length; }, 0);
+    screen = "plan"; overlay(false); box.hidden = true;
+    buildGroups(L); setupCube(); lessonParts(true);
+    els.moves.hidden = !groups.length; els.controls.hidden = !groups.length;
+    showPlanBar(); text();
+    toast(groups.length ? "Tap ▶ and copy each move on your cube." : "Nothing to do. It’s solved!", 4000);
+  }
+  function chunkAt(p){ return bounds.findIndex(b => p < b.at); }
+  // pink frame on the piece we are working on (same look as the lessons)
+  function framePiece(st, b){
+    setTargets([]);
+    if (!b || !b.target) return;
+    const want = b.target.slice().sort().join(""), by = {};
+    st.forEach(x => { if (x.p.filter(v => v).length > 1) (by[x.p.join()] = by[x.p.join()] || []).push(x.c); });
+    const key = Object.keys(by).find(k => by[k].slice().sort().join("") === want); if (!key) return;
+    const p = key.split(",").map(Number);
+    const c = cubies.find(q => Math.round(q.position.x) === p[0] && Math.round(q.position.y) === p[1] && Math.round(q.position.z) === p[2]);
+    if (!c) return;
+    c.children.filter(ch => ch.userData && ch.userData.face).forEach(stk => {
+      const r = new THREE.Mesh(RING_GEO, ringMat);
+      r.position.copy(stk.position).multiplyScalar(0.4895 / 0.487); r.rotation.copy(stk.rotation);
+      c.add(r); rings.push(r);
+    });
+  }
+  // explain what we are doing now and why, after every move
+  function text(){
+    if (screen !== "plan") return;
+    const L = LESSONS[current], groups = L.demo;
+    if (!groups.length) { L.body = []; L.tip = ""; renderBody(L); fitText(); return; }
+    if (pos >= flat.length){
+      setTargets([]);
+      L.goal = "Solved! 🎉 Every side is one color.";
+      L.body = ["You did it! Mix it up and try again. Each time you’ll need the screen a little less."];
+    } else {
+      let gi = 0; while (gi + 1 < gStart.length && gStart[gi + 1] <= pos) gi++;
+      const b = bounds[chunkAt(pos)], why = groups[gi][2] || groups[gi][1];
+      if (!busy) framePiece(stateAt(pos), b);
+      L.goal = pos === 0 ? found : "Now: " + why;
+      L.body = [
+        pos === 0 ? "First: " + why : null,
+        "What we’re building: " + b.about,
+        "Step " + STEP_NO(b.stage) + " of 8: " + LESSONS[b.stage].title + ". The goal is to " + TODO[b.stage] + "."
+      ].filter(Boolean);
+    }
+    const bb = pos < flat.length ? bounds[chunkAt(pos)] : null;
+    L.tip = (bb && bb.target ? "Watch the piece with the pink frame. " : "") + "Watch a move, then do it on your cube. Made a mistake? Tap Oops.";
+    renderBody(L); fitText();
+  }
+  function showPlanBar(){
+    show('<div class="mybtns slim"><button class="ghost" id="myCheck" aria-label="Check my cube with a photo">📷 Check</button><button class="ghost" id="myOops" aria-label="Oops, I turned wrong">😬 Oops</button></div>');
+    $("myCheck").onclick = () => askCheck();
+    $("myOops").onclick = () => { playing = false; samples = []; purpose = "all"; toast("No problem. Take 6 new photos.", 3500); askPhoto(0); };
+  }
+  function askCheck(){ if (busy) return; playing = false; purpose = "check"; checkAt = pos; askPhoto(0); }
+  // state of the app cube after p moves
+  function stateAt(p){ const s = MC.clone(start); flat.slice(0, p).forEach(m => MC.move(s, m)); return s; }
+  function compare(s){
+    const st = stateAt(checkAt), refs = {};
+    // use this photo's own center piece, plus typical colors, to read the 9 squares
+    const front = MC.center(st, "F"); Object.assign(refs, PROTO); refs[front] = s[1][1];
+    const expect = [0,1,2].map(r => [0,1,2].map(c => MC.colorAt(st, MC.PHOTOS[0].pos(r, c), MC.N.F)));
+    let same = 0; for (let r=0;r<3;r++) for (let c=0;c<3;c++) if (nearest(s[r][c], refs) === expect[r][c]) same++;
+    if (same >= 8){ toast("✓ Your cube matches. Keep going!", 3500); backToPlan(); }
+    else {
+      overlay(false); purpose = "all";
+      show('<p class="mygoal">Your cube looks different from mine.</p><p>That’s OK! Take 6 new photos and I’ll catch up.</p>' +
+        '<div class="mybtns"><button class="key play" id="myRe"><span class="lbl">📷 Take photos</span></button><button class="key" id="myBack"><span class="lbl">Keep going</span></button></div>');
+      $("myRe").onclick = () => { samples = []; askPhoto(0); };
+      $("myBack").onclick = backToPlan;
+    }
+  }
+  function backToPlan(){ screen = "plan"; purpose = "all"; overlay(false); lessonParts(true); showPlanBar(); fitText(); }
+
+  // called by the player after each move
+  function onStep(){
+    if (screen !== "plan") return;
+    const before = chunkAt(pos - 1), now = chunkAt(pos);
+    if (pos < flat.length && before !== now && before >= 0){
+      playing = false; updateButtons();
+      toast("Piece done! Tap 📷 Check to compare.", 4000);
+    }
+  }
+  // paint the app cube with the kid's colors
+  function paint(){
+    if (!start) return;
+    cubies.forEach(c => c.children.forEach(st => { const u = st.userData; if (!u || !u.face) return;
+      if (!("origFace" in u)) u.origFace = u.face;
+      u.face = MC.colorAt(start, [u.home.x, u.home.y, u.home.z], [u.n.x, u.n.y, u.n.z]) || u.origFace; }));
+  }
+  function restoreFaces(){ cubies.forEach(c => c.children.forEach(st => { const u = st.userData; if (u && "origFace" in u) u.face = u.origFace; })); }
+  function enter(){ start = null; intro(); }
+  function exit(){
+    if (!LESSONS[current].mycube) return;
+    stopCam(); start = null; screen = "intro"; overlay(false); box.hidden = true; restoreFaces();
+    const L = LESSONS[current]; L.demo = []; L.goal = ""; L.body = []; L.tip = "";
+    els.body.hidden = false;
+  }
+  function onResize(){ if (screen === "cam") layoutCam(); else if (screen === "crop") drawCrop(); else if (screen === "check" && !over.hidden) renderNet(); }
+  return {enter, exit, paint, onStep, onResize, text, active: () => !!LESSONS[current].mycube, hiding: () => screen !== "plan"};
+})();
+
+new ResizeObserver(() => { if (MY.active()) MY.onResize(); }).observe(document.getElementById("view"));
 loadLesson(0);
 })();
 </script>
