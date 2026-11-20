@@ -127,6 +127,7 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .mybtns{display:flex; gap:6px; flex-wrap:wrap}
 .mybtns .key{flex:1 1 0; min-width:120px}
 .mybox .key .lbl{display:inline}
+.mybtns #mySnap{flex-basis:100%} /* Snap gets its own row; Switch camera and Pick a photo share the next one */
 .mybtns.slim .ghost{flex:1 1 0; justify-content:center}
 .mypal{display:flex; gap:6px}
 .mysw{flex:1; height:40px; border-radius:10px; border:2px solid rgba(0,0,0,.28); cursor:pointer}
@@ -291,6 +292,11 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 }
 /* Free play has only 2 buttons, so their words always fit */
 #freeControls .key .lbl{display:inline}
+/* Lesson buttons: Play is a small icon button; Prev and Next are the big ones with words */
+#btnPlay{flex:1 1 0}
+#btnPlay .lbl{display:none !important}
+#btnBack, #btnNext{flex:1.6 1 0; font-size:1.08em}
+#btnBack .lbl, #btnNext .lbl{display:inline !important}
 
 /* Small screens: drop extra words, keep every control */
 @media (max-width: 1099px){ .brand p{display:none} }
@@ -404,8 +410,8 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
       </div>
       <div class="controls" id="controls">
         <button class="key" id="btnRestart" aria-label="Start over" title="Start over"><span class="ic" data-icon="restart"></span><span class="lbl">Start over</span></button>
-        <button class="key" id="btnBack" aria-label="Back one move" title="Back one move (left arrow)"><span class="ic" data-icon="back"></span><span class="lbl">Back</span></button>
-        <button class="key play" id="btnPlay" title="Play or pause (space)"><span class="ic" id="playIc" data-icon="play"></span><span class="lbl" id="playLbl">Play</span></button>
+        <button class="key play" id="btnPlay" aria-label="Play" title="Play or pause (space)"><span class="ic" id="playIc" data-icon="play"></span><span class="lbl" id="playLbl">Play</span></button>
+        <button class="key" id="btnBack" aria-label="Previous move" title="Previous move (left arrow)"><span class="ic" data-icon="back"></span><span class="lbl">Prev</span></button>
         <button class="key" id="btnNext" aria-label="Next move" title="Next move (right arrow)"><span class="lbl">Next</span><span class="ic" data-icon="next"></span></button>
         <button class="key" id="btnSpeed" aria-label="Change speed" title="Change speed"><span class="ic" data-icon="speed"></span><span class="spd" id="speedLbl">1×</span></button>
       </div>
@@ -1945,6 +1951,7 @@ function updateButtons(){
   const again = !playing && pos >= n && n;
   els.playIc.innerHTML = ICON[playing ? "pause" : (again ? "restart" : "play")];
   els.playLbl.textContent = playing ? "Pause" : (again ? "Again" : "Play");
+  els.play.setAttribute("aria-label", els.playLbl.textContent); // the word is hidden, so screen readers get it here
   els.play.disabled = dirty;
   els.next.disabled = playing || busy || dirty || pos >= n;
   els.back.disabled = playing || busy || dirty || pos <= 0;
@@ -2225,7 +2232,7 @@ const MY = (() => {
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
   const swatch = f => FACE_CSS[f] || "var(--line)";
   function show(html){ box.innerHTML = html; box.hidden = false; }
-  function overlay(on){ if (on && LESSONS[current].mycube) setTargets([]); if (!on || screen !== "cam") stopCam(); over.hidden = !on; view.classList.toggle("myon", on); over.style.paddingTop = topBand() + "px"; if (!on) over.innerHTML = ""; }
+  function overlay(on){ if (on && LESSONS[current].mycube) setTargets([]); if (!on) stopCam(); over.hidden = !on; view.classList.toggle("myon", on); over.style.paddingTop = topBand() + "px"; if (!on) over.innerHTML = ""; }
   function lessonParts(on){ // hide lesson text, moves and buttons while taking photos or checking
     ["body","pager","moves","controls"].forEach(id => { const el = document.getElementById(id); if (!on) el.hidden = true; });
     if (on){ els.body.hidden = false; els.moves.hidden = false; els.controls.hidden = false; }
@@ -2248,7 +2255,7 @@ const MY = (() => {
     toast("Take 6 photos of your cube.", 3000);
   }
   function askPhoto(i){
-    stopCam(); screen = "photo"; photoIdx = i; overlay(true); lessonParts(false);
+    screen = "photo"; photoIdx = i; overlay(true); lessonParts(false); // the camera stays on between photos
     const ph = MC.PHOTOS[i];
     over.innerHTML = '<div class="mybig">' + miniCube(ph.face, ph.top) + '</div>';
     const lead = purpose === "check" ? "Check time!" : "Photo " + (i + 1) + " of 6";
@@ -2284,14 +2291,28 @@ const MY = (() => {
 
   // ---------- live camera (works on phones, tablets and laptops)
   const lead = () => purpose === "check" ? "Check time!" : "Photo " + (photoIdx + 1) + " of 6";
-  function stopCam(){ if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; } }
-  function pickFile(){ stopCam(); fileIn.value = ""; fileIn.click(); }
+  // Which camera: iPads start with the front one (hold the cube up to the screen), phones with the back one.
+  // A tap on Switch camera changes it, and this device remembers the choice.
+  const isIPad = /iPad/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  let facing = isIPad ? "user" : "environment", streamFacing = null;
+  try { facing = localStorage.getItem("cube-steps-camera") || facing; } catch (e) {}
+  function stopCam(){ if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; streamFacing = null; } }
+  const camLive = () => stream && stream.getVideoTracks().some(t => t.readyState === "live");
+  function pickFile(){ stopCam(); fileIn.setAttribute("capture", facing); fileIn.value = ""; fileIn.click(); }
+  function switchCam(){
+    facing = facing === "user" ? "environment" : "user";
+    try { localStorage.setItem("cube-steps-camera", facing); } catch (e) {}
+    stopCam(); openCam();
+  }
   function openCam(){
     const md = navigator.mediaDevices;
     if (!md || !md.getUserMedia) { pickFile(); return; }
+    // The camera stays on for all 6 photos, so the iPad asks at most once per visit
+    if (camLive() && streamFacing === facing) { camScreen(stream); return; }
+    stopCam();
     toast("Opening the camera…", 2500);
-    md.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:960}}, audio:false})
-      .then(camScreen)
+    md.getUserMedia({video:{facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:960}}, audio:false})
+      .then(s => { streamFacing = facing; camScreen(s); })
       .catch(() => {
         show('<p class="mystep">' + lead() + '</p><p class="mygoal">I can’t open the camera.</p>' +
           '<p>Check that the browser may use the camera. Or pick a photo instead.</p>' +
@@ -2301,7 +2322,8 @@ const MY = (() => {
       });
   }
   function camScreen(s){
-    stopCam(); stream = s; screen = "cam"; overlay(true);
+    if (stream && stream !== s) stopCam();
+    const sf = streamFacing; stream = s; streamFacing = sf; screen = "cam"; overlay(true);
     const ph = MC.PHOTOS[photoIdx];
     over.innerHTML = '<div class="mycam" id="myCam"><video id="myVid" playsinline autoplay muted></video><div class="myguide"></div></div>';
     const v = $("myVid"); v.srcObject = s;
@@ -2312,8 +2334,9 @@ const MY = (() => {
       : cap(FACE_NAME[ph.face]) + " faces the camera. " + cap(FACE_NAME[ph.top]) + " is on top.";
     show('<p class="mystep">' + lead() + '</p><p class="mygoal">' + what + '</p><p>Fit that side inside the grid. Hold it still.</p>' +
       '<div class="mybtns"><button class="key play" id="mySnap"><span class="lbl">📸 Snap</span></button>' +
+      '<button class="key" id="mySwitch"><span class="lbl">🔄 Switch camera</span></button>' +
       '<button class="key" id="myPick"><span class="lbl">🖼️ Pick a photo</span></button></div>');
-    $("mySnap").onclick = snap; $("myPick").onclick = pickFile;
+    $("mySnap").onclick = snap; $("myPick").onclick = pickFile; $("mySwitch").onclick = switchCam;
   }
   function layoutCam(){
     const v = $("myVid"), box2 = $("myCam"); if (!v || !v.videoWidth) return;
@@ -2331,8 +2354,7 @@ const MY = (() => {
     if (v.classList.contains("mirror")){ g.translate(cv.width, 0); g.scale(-1, 1); } // keep the photo the way the kid saw it
     g.drawImage(v, 0, 0, cv.width, cv.height);
     cv.mirrored = v.classList.contains("mirror");
-    stopCam();
-    useCanvas(cv);
+    useCanvas(cv); // the camera keeps running for the next photo
   }
 
   function fit(){
@@ -2408,7 +2430,7 @@ const MY = (() => {
     }
     nextPhoto();
   }
-  function nextPhoto(){ if (photoIdx < 5) askPhoto(photoIdx + 1); else { grids = classify(); samples = []; check(); } }
+  function nextPhoto(){ if (photoIdx < 5) askPhoto(photoIdx + 1); else { stopCam(); grids = classify(); samples = []; check(); } }
 
   // ---------- check screen: flat map of the 6 sides, tap to fix
   const NET = [[4,3,0],[3,0,3],[0,3,3],[1,6,3],[2,9,3],[5,3,6]]; // [photo index, col, row] of each side in the map
