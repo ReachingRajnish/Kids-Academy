@@ -60,7 +60,7 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .brand p{margin:0; color:var(--muted); font-size:.85em}
 .path{
   flex:1 1 480px; min-width:0; display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
-  justify-content:flex-end;
+  justify-content:flex-end; justify-content:safe flex-end;
 }
 .path::-webkit-scrollbar{display:none}
 .path button{
@@ -131,6 +131,12 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .mybtns.slim .ghost{flex:1 1 0; justify-content:center}
 .mypal{display:flex; gap:6px}
 .mysw{flex:1; height:40px; border-radius:10px; border:2px solid rgba(0,0,0,.28); cursor:pointer}
+
+.whybtn{margin:0 0 .6em; min-height:36px}
+.whytext{padding:.5em .8em; border-radius:12px; background:var(--bg)}
+.toppicbox{display:flex; justify-content:center}
+.toppic{width:96px; height:auto}
+.toppic .tpl{font:800 11px "Nunito",system-ui,sans-serif; fill:var(--muted)}
 
 /* Stage */
 .stage{
@@ -264,6 +270,18 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
   box-shadow:inset 0 -4px 0 rgba(0,0,0,.2); transition:transform .15s, opacity .2s;
 }
 .chip.done{opacity:.35}
+#chips{display:block}
+.bigmove{font-family:"Baloo 2",system-ui,sans-serif; font-weight:800; font-size:clamp(17px, 2.6vmin, 23px); line-height:1.15;
+  background:var(--bg); border-radius:12px; padding:6px 10px}
+.nextmove{margin-top:4px; font-size:.85em; font-weight:700; color:var(--muted)}
+/* short screens: keep the current move, drop the "Next:" line so the text keeps its room */
+@media (max-aspect-ratio: 23/20) and (max-height: 860px), (max-height: 520px){
+  .nextmove{display:none}
+  .bigmove{font-size:16px; padding:4px 8px}
+  .mhead{display:none}
+  .bar{margin-top:5px}
+  .toppic{width:74px}
+}
 .chip.now{transform:translateY(-3px); border-color:var(--ink)}
 #count{white-space:nowrap; flex:none}
 .bar{display:flex; gap:3px; margin-top:8px; height:7px}
@@ -278,9 +296,12 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
   display:flex; align-items:center; justify-content:center; gap:6px;
 }
 .key:active{transform:translateY(2px); box-shadow:inset 0 -2px 0 var(--key-edge)}
-.key.play{flex:1.6 1 0; background:var(--sun); color:#1D2748; box-shadow:inset 0 -5px 0 var(--sun-edge); font-size:1.08em}
+.key.play{flex:1 1 0; background:var(--sun); color:#1D2748; box-shadow:inset 0 -5px 0 var(--sun-edge); font-size:1.08em}
 .key:disabled{opacity:.4; cursor:not-allowed; transform:none}
 .key .ic{display:inline-flex; width:20px; height:20px; flex:none}
+#controls .key.step{flex:1.6 1 0; font-size:1.08em}
+#controls .key .lbl.keep{display:inline}
+#controls .key.play .lbl{display:none}
 .key .ic svg{width:100%; height:100%}
 .key .spd{font-weight:800; font-variant-numeric:tabular-nums}
 @container (max-width: 560px){
@@ -289,18 +310,20 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 }
 @container (max-width: 340px){
   .key.play .lbl{display:none}
+  #btnSpeed .ic{display:none}
+}
+/* very narrow panels (small phone held sideways): icons only, so nothing is cut off */
+@container (max-width: 300px){
+  #controls .key .lbl.keep{display:none}
+  #controls .key.step{flex:1 1 0}
+  #btnSpeed .ic{display:inline-flex}
 }
 /* Free play has only 2 buttons, so their words always fit */
 #freeControls .key .lbl{display:inline}
-/* Lesson buttons: Play is a small icon button; Prev and Next are the big ones with words */
-#btnPlay{flex:1 1 0}
-#btnPlay .lbl{display:none !important}
-#btnBack, #btnNext{flex:1.6 1 0; font-size:1.08em}
-#btnBack .lbl, #btnNext .lbl{display:inline !important}
 
 /* Small screens: drop extra words, keep every control */
 @media (max-width: 1099px){ .brand p{display:none} }
-@media (max-width: 1599px){
+@media (max-width: 1999px){
   .path button:not([aria-current="step"]){padding:4px}
   .path button:not([aria-current="step"]) .name{display:none}
   .path button:not([aria-current="step"]) .tick{display:none}
@@ -410,9 +433,9 @@ button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
       </div>
       <div class="controls" id="controls">
         <button class="key" id="btnRestart" aria-label="Start over" title="Start over"><span class="ic" data-icon="restart"></span><span class="lbl">Start over</span></button>
-        <button class="key play" id="btnPlay" aria-label="Play" title="Play or pause (space)"><span class="ic" id="playIc" data-icon="play"></span><span class="lbl" id="playLbl">Play</span></button>
-        <button class="key" id="btnBack" aria-label="Previous move" title="Previous move (left arrow)"><span class="ic" data-icon="back"></span><span class="lbl">Prev</span></button>
-        <button class="key" id="btnNext" aria-label="Next move" title="Next move (right arrow)"><span class="lbl">Next</span><span class="ic" data-icon="next"></span></button>
+        <button class="key play" id="btnPlay" aria-label="Play" title="Play or pause (space)"><span class="ic" id="playIc" data-icon="play"></span><span class="lbl" id="playLbl" hidden>Play</span></button>
+        <button class="key step" id="btnBack" aria-label="Previous move" title="Previous move (left arrow)"><span class="ic" data-icon="back"></span><span class="lbl keep">Prev</span></button>
+        <button class="key step" id="btnNext" aria-label="Next move" title="Next move (right arrow)"><span class="lbl keep">Next</span><span class="ic" data-icon="next"></span></button>
         <button class="key" id="btnSpeed" aria-label="Change speed" title="Change speed"><span class="ic" data-icon="speed"></span><span class="spd" id="speedLbl">1×</span></button>
       </div>
       <div class="controls" id="freeControls" hidden>
@@ -437,19 +460,20 @@ const FACE_CSS = {U:"#FFD23F", D:"#FFFFFF", F:"#23B05A", B:"#2F6FE0", R:"#FF8A1F
 const FACE_TEXT = {U:"#1D2748", D:"#1D2748", F:"#FFFFFF", B:"#FFFFFF", R:"#1D2748", L:"#FFFFFF"};
 const GRAY = 0x8B91A3;
 // axis, layer, direction of a clockwise quarter turn seen from that face
-const MOVE_DEF = {R:["x",1,-1], L:["x",-1,1], U:["y",1,-1], D:["y",-1,1], F:["z",1,-1], B:["z",-1,1], y:["y",null,-1]};
+const MOVE_DEF = {R:["x",1,-1], L:["x",-1,1], U:["y",1,-1], D:["y",-1,1], F:["z",1,-1], B:["z",-1,1], y:["y",null,-1], z:["z",null,-1]};
 
 const SAY = {
-  "R":["up","Right side turns up"],   "R'":["down","Right side turns down"],
-  "L":["down","Left side turns down"],  "L'":["up","Left side turns up"],
-  "U":["left","Top turns to the left"], "U'":["right","Top turns to the right"],
-  "D":["right","Bottom turns to the right"], "D'":["left","Bottom turns to the left"],
-  "F":["cw","Front turns like a clock"], "F'":["ccw","Front turns the other way"],
-  "B":["left","Back turns: top row goes left"], "B'":["right","Back turns: top row goes right"],
-  "y":["left","Turn the whole cube to the left"], "y'":["right","Turn the whole cube to the right"]
+  "R":["up","Right side up"],   "R'":["down","Right side down"],
+  "L":["down","Left side down"],  "L'":["up","Left side up"],
+  "U":["left","Top layer left"], "U'":["right","Top layer right"],
+  "D":["right","Bottom layer right"], "D'":["left","Bottom layer left"],
+  "F":["cw","Front side clockwise"], "F'":["ccw","Front side anticlockwise"],
+  "B":["ccw","Back side clockwise"], "B'":["cw","Back side anticlockwise"],
+  "y":["left","Turn the whole cube left"], "y'":["right","Turn the whole cube right"]
 };
+const TWICE = {R:"Right side 2 times", L:"Left side 2 times", U:"Top layer 2 times", D:"Bottom layer 2 times", F:"Front side 2 times", B:"Back side 2 times", y:"Turn the whole cube 2 times", z:"Turn the whole cube upside down"};
 function sayFor(m){
-  if (m.endsWith("2")) { const s = SAY[m[0]]; return [s[0], s[1] + ", two times", true]; }
+  if (m.endsWith("2")) return [m[0] === "z" ? "down" : SAY[m[0]][0], TWICE[m[0]], m[0] !== "z"];
   return SAY[m];
 }
 const pretty = m => m.replace("'", "′");
@@ -475,12 +499,12 @@ const toks = s => s.trim().split(/\s+/).filter(Boolean);
 const invMove = m => m.endsWith("2") ? m : (m.endsWith("'") ? m[0] : m + "'");
 
 /* ---------- Lessons ---------- */
-const rounds = (alg, n, name, why) => Array.from({length:n}, (_, i) => [alg, name + " " + (i+1) + " of " + n, why || ""]);
+const rounds = (alg, n, name, why) => Array.from({length:n}, (_, i) => [alg, name + " (" + (i+1) + " of " + n + ")", why || ""]);
 const TWIST_WHY = "R′ D′ R D turns the front right corner piece a little. It messes up the bottom for a moment. Keep going until its yellow points up.";
 
 /* ===== MyCube: cube model + beginner-method solver (no DOM, runs in Node for tests) ===== */
 const MC = (() => {
-const MD = {R:[0,1,-1],L:[0,-1,1],U:[1,1,-1],D:[1,-1,1],F:[2,1,-1],B:[2,-1,1],y:[1,null,-1]};
+const MD = {R:[0,1,-1],L:[0,-1,1],U:[1,1,-1],D:[1,-1,1],F:[2,1,-1],B:[2,-1,1],y:[1,null,-1],z:[2,null,-1]};
 const N = {R:[1,0,0],L:[-1,0,0],U:[0,1,0],D:[0,-1,0],F:[0,0,1],B:[0,0,-1]};
 const OPP = {U:"D",D:"U",F:"B",B:"F",R:"L",L:"R"};
 function rot(v, ax, q){
@@ -526,73 +550,60 @@ function plan(start){
   const add = (alg, label, why) => { if (!alg) return; run(st, alg); cur.groups.push([alg, label, why || ""]); };
   const W = center(st,"D"), Y = center(st,"U");
   const guard = n => { if (n > 40) throw new Error("stuck"); };
+  const RM = "R U R' U'", LM = "L' U' L U";
 
   // ---- Step 2: white cross
   for (let i=0; i<4; i++){
     const todo = SIDES.map(f => center(st,f)).filter(c => { const p=find(st,[W,c]); return !(p && p[1]===-1 && pieceOK(st,p)); });
     if (!todo.length) break;
     const rank = c => { const p=find(st,[W,c]); return p[1]===1 ? 0 : p[1]===0 ? 1 : 2; };
-    todo.sort((a,b)=>rank(a)-rank(b)); const side = todo[0];
-    begin(1, "White cross: the white and " + NAME[side] + " piece", [W,side],
-      "The piece with the pink frame is the white and " + NAME[side] + " edge piece. Its home is on the bottom, under the " + NAME[side] + " center piece, with white facing down.");
+    todo.sort((a,b)=>rank(a)-rank(b)); const side = todo[0], S = NAME[side];
+    begin(1, "White cross", [W,side], "This piece (pink frame): the white and " + S + " edge piece. Its right place: the bottom side, under the " + S + " center piece, with white facing down.");
     for (let n=0;;n++){ guard(n);
       const p = find(st,[W,side]);
       if (p[1]===-1 && pieceOK(st,p)) break;
       if (p[1]===1){
-        add(tryTurns(st, YT, c => center(c,"F")===side), "Turn the whole cube: " + NAME[side] + " in front",
-          "Turn the whole cube so the " + NAME[side] + " center piece faces you. Now the piece’s home is at the front, on the bottom.");
-        add(tryTurns(st, UT, c => k(find(c,[W,side]))==="0,1,1"), "Top: " + NAME[side] + " over " + NAME[side],
-          "Turn the top layer until the " + NAME[side] + " part of the piece is right above the " + NAME[side] + " center piece. Now the piece is right above its home.");
-        if (colorAt(st,[0,1,1],N.U)===W) add("F2", "Turn the front 2 times",
-          "The white part of the piece points up. Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down.");
-        else { add("U'", "Turn the top to the right", "The white part of the piece points to the side, not up. If we dropped it now, white would face the wrong way. So first move it to the right side, then tuck it in.");
-               add("R' F R", "Slide it in", "R′ turns the right side so the piece goes down into the middle layer, at the front right. F turns the front, which rolls the piece down into its home. R turns the right side back, so the white piece that was already home on the right comes back too."); }
+        add(tryTurns(st, YT, c => center(c,"F")===side), "Turn the whole cube until the " + S + " center piece faces you", "Now the piece’s right place is at the front, on the bottom side.");
+        add(tryTurns(st, UT, c => k(find(c,[W,side]))==="0,1,1"), "Top layer: " + S + " above the " + S + " center piece", "Turn the top layer until the " + S + " side of the piece is right above the " + S + " center piece.");
+        if (colorAt(st,[0,1,1],N.U)===W) add("F2", "Front side 2 times", "The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down.");
+        else { add("U'", "Top layer right", "The white side faces the front. If you turned the front now, white would face the wrong way. So first move the piece to the right side.");
+               add("R' F R", "Right side down, front side clockwise, right side up", "Right side down takes the piece into the middle layer. Front side clockwise turns it into its right place. Right side up brings back the white piece that was already in its right place on the right."); }
       } else if (p[1]===0){
-        add(tryTurns(st, YT, c => k(find(c,[W,side]))==="1,0,1"), "Turn the whole cube: piece at the front right",
-          "The piece is in the middle layer. Turn the whole cube so the piece sits at the front right.");
-        if (colorAt(st,[1,0,1],N.F)===side && center(st,"F")===side) add("F", "Turn the front 1 time",
-          "The " + NAME[side] + " part of the piece already matches the " + NAME[side] + " center piece in front. 1 front turn (F) drops it down into its home.");
-        else add("R U R'", "Lift it to the top", "White points the wrong way, so first we lift the piece up to the top layer. R takes the right side up, so the piece goes up into the top layer. U moves it to the front, out of the way. R′ takes the right side back down, so the white piece already home on the right goes back too.");
+        add(tryTurns(st, YT, c => k(find(c,[W,side]))==="1,0,1"), "Turn the whole cube until the piece is at the front right", "The piece is in the middle layer. We fix it from the front right.");
+        if (colorAt(st,[1,0,1],N.F)===side && center(st,"F")===side) add("F", "Front side clockwise", "Its " + S + " side already matches the " + S + " center piece in front. 1 front turn moves it down into its right place, with white facing down.");
+        else add("R U R'", "Right side up, top layer left, right side down", "White faces the wrong way, so first we lift the piece to the top layer. Right side up lifts it, top layer left moves it away, and right side down brings back the white piece that was already in its right place.");
       } else {
-        add(tryTurns(st, YT, c => k(find(c,[W,side]))==="0,-1,1"), "Turn the whole cube: piece at the front",
-          "The piece is on the bottom, but under the wrong center piece or upside down. Turn the whole cube so the piece is at the front.");
-        add("F2", "Lift it to the top", "Turn the front 2 times. The front layer flips upside down, so the piece goes up into the top layer. From there we can bring it home the right way.");
+        add(tryTurns(st, YT, c => k(find(c,[W,side]))==="0,-1,1"), "Turn the whole cube until the piece is at the front", "The piece is on the bottom side, but under the wrong center piece or upside down.");
+        add("F2", "Front side 2 times (lift it up)", "2 front turns lift the piece up to the top layer. From there we can bring it to its right place.");
       }
     }
   }
-  // ---- Step 3: white corners
-  const SX = "R U R' U'";
+  // ---- Step 3: white corners (Right move)
+  const ROUND = "Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down.";
   for (let i=0; i<4; i++){
     const pairs = [["F","R"],["R","B"],["B","L"],["L","F"]].map(([a,b]) => [center(st,a), center(st,b)]);
     const todo = pairs.filter(([a,b]) => { const p=find(st,[W,a,b]); return !(p[1]===-1 && pieceOK(st,p)); });
     if (!todo.length) break;
     todo.sort((x,y) => find(st,[W,...y])[1] - find(st,[W,...x])[1]);
-    const [a,b] = todo[0]; const set = [W,a,b];
-    begin(2, "White corners: the white, " + NAME[a] + " and " + NAME[b] + " corner", set,
-      "The piece with the pink frame is the white, " + NAME[a] + " and " + NAME[b] + " corner piece. Its home is the bottom corner between the " + NAME[a] + " and " + NAME[b] + " center pieces, with white facing down.");
+    const [a,b] = todo[0]; const set = [W,a,b], A = NAME[a], B = NAME[b];
+    begin(2, "White corners", set, "This piece (pink frame): the white, " + A + " and " + B + " corner piece. Its right place: the bottom corner between the " + A + " and " + B + " center pieces, with white facing down.");
     for (let n=0;;n++){ guard(n);
       const p = find(st,set);
       if (p[1]===-1 && pieceOK(st,p)) break;
       if (p[1]===1){
-        add(tryTurns(st, YT, c => [center(c,"F"),center(c,"R")].sort().join("")===[a,b].sort().join("")), "Turn the whole cube: its home at the front right",
-          "Turn the whole cube so the corner piece’s home is at the front right, on the bottom. That’s the corner where R U R′ U′ works.");
-        add(tryTurns(st, UT, c => k(find(c,set))==="1,1,1"), "Top: over its home", "Turn the top layer until the corner piece is right above its home.");
-        for (let r=1; r<=5 && !pieceOK(st,[1,-1,1]); r++) add(SX, "R U R′ U′, round " + r,
-          "R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more. Keep going until it lands in its home with white facing down.");
+        add(tryTurns(st, YT, c => [center(c,"F"),center(c,"R")].sort().join("")===[a,b].sort().join("")), "Turn the whole cube until its right place is at the front right", "The Right move works on the bottom front right corner. So we hold the corner piece’s right place there.");
+        add(tryTurns(st, UT, c => k(find(c,set))==="1,1,1"), "Top layer: corner above its right place", "Turn the top layer until the corner piece is right above its right place.");
+        for (let r=1; r<=5 && !pieceOK(st,[1,-1,1]); r++) add(RM, "Right move (" + r + ")", ROUND);
       } else {
-        add(tryTurns(st, YT, c => k(find(c,set))==="1,-1,1"), "Turn the whole cube: corner at the front right",
-          "The corner piece is on the bottom. Turn the whole cube so it sits at the front right.");
+        add(tryTurns(st, YT, c => k(find(c,set))==="1,-1,1"), "Turn the whole cube until the corner piece is at the front right", "The corner piece is on the bottom side. We fix it from the front right.");
         const home = [center(st,"F"),center(st,"R")].sort().join("")===[a,b].sort().join("");
-        if (home) for (let r=1; r<=5 && !pieceOK(st,[1,-1,1]); r++) add(SX, "R U R′ U′, round " + r,
-          "The corner piece is in its home, but turned the wrong way. R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more. Keep going until its white part faces down.");
-        else add(SX, "Pop it up to the top", "The corner piece is in the wrong corner. R takes it up, U moves it out of the right side, R′ takes the right side back down, and U′ turns the top back. Now the corner piece is in the top layer, where we can move it.");
+        if (home) for (let r=1; r<=5 && !pieceOK(st,[1,-1,1]); r++) add(RM, "Right move (" + r + ")", "The corner piece is in its right place, but turned. " + ROUND);
+        else add(RM, "Right move (pops it up)", "The corner piece is in the wrong corner. 1 Right move lifts it up into the top layer, where we can move it.");
       }
     }
   }
-  // ---- Step 4: middle layer
-  const RI = [["U R U' R'","Right move, part 1"],["U' F' U F","Right move, part 2"]];
-  const LI = [["U' L' U L","Left move, part 1"],["U F U' F'","Left move, part 2"]];
-  for (let i=0; i<10; i++){
+  // ---- Step 4: middle layer, the video's way (push away, Right move, turn the cube, Left move)
+  for (let i=0; i<12; i++){
     const mids = [["F","R"],["R","B"],["B","L"],["L","F"]].map(([a,b]) => [center(st,a), center(st,b)]);
     const todo = mids.filter(pr => { const p=find(st,pr); return !(p[1]===0 && pieceOK(st,p)); });
     if (!todo.length) break;
@@ -600,88 +611,97 @@ function plan(start){
     if (free){
       const p = find(st,free);
       const side = pieceAt(st,p).find(s => s.n[1]===0).c, top = pieceAt(st,p).find(s => s.n[1]===1).c;
-      begin(3, "Middle layer: the " + NAME[free[0]] + " and " + NAME[free[1]] + " piece", free,
-        "The piece with the pink frame is the " + NAME[free[0]] + " and " + NAME[free[1]] + " edge piece. It has no yellow, so its home is in the middle layer, between the " + NAME[free[0]] + " and " + NAME[free[1]] + " center pieces.");
-      add(tryTurns(st, YT, c => center(c,"F")===side), "Turn the whole cube: " + NAME[side] + " in front",
-        "Turn the whole cube so the " + NAME[side] + " center piece faces you. " + cap1(NAME[side]) + " is the color on the side of the piece.");
-      add(tryTurns(st, UT, c => k(find(c,free))==="0,1,1"), "Top: " + NAME[side] + " over " + NAME[side],
-        "Turn the top layer until the " + NAME[side] + " part of the piece is right above the " + NAME[side] + " center piece.");
-      const right = top===center(st,"R"), other = NAME[top];
-      (right ? RI : LI).forEach(([a,l], j) => add(a, l, j === 0
-        ? "Look at the top of the piece: it’s " + other + ". The " + other + " center piece is on the " + (right ? "right" : "left") + " side. So the piece goes to the " + (right ? "right" : "left") + ". " + (right ? "We can’t just push the piece down, because that would break the finished bottom layer. So first U moves the piece out of the way, R lifts the white corner piece up from below, U′ brings our piece back to the front, and R′ brings the white corner piece right next to it. Now they sit side by side on top." : "The same idea on the left side. U′ moves the piece out of the way, L′ lifts the white corner piece up from below, U brings our piece back to the front, and L brings the white corner piece right next to it.")
-        : (right ? "Now we put both back in together. U′ moves them away, F′ opens the front, U brings them back, and F swings them both down: the piece into the middle layer, and the white corner piece back into its home on the bottom." : "U moves them both away, F opens the front, U′ brings them back, and F′ swings them both down: the piece into the middle layer, and the white corner piece back into its home.")));
+      const S = NAME[side], T = NAME[top];
+      begin(3, "Middle layer", free, "This piece (pink frame): the " + NAME[free[0]] + " and " + NAME[free[1]] + " edge piece. It has no yellow. Its right place: the middle layer, between the " + NAME[free[0]] + " and " + NAME[free[1]] + " center pieces.");
+      add(tryTurns(st, YT, c => center(c,"F")===side), "Turn the whole cube until the " + S + " center piece faces you", S.charAt(0).toUpperCase() + S.slice(1) + " is the color on the side of the piece.");
+      add(tryTurns(st, UT, c => k(find(c,free))==="0,1,1"), "Top layer: " + S + " above the " + S + " center piece", "Turn the top layer until the " + S + " side of the piece is right above the " + S + " center piece.");
+      const right = top===center(st,"R"), dir = right ? "right" : "left";
+      const look = "Look at the top of the piece: " + T + ". The " + T + " center piece is on the " + dir + ", so the piece goes to the " + dir + ". ";
+      if (right){
+        add("U", "Top layer left (push it away)", look + "Pushing the piece away keeps it safe in the top layer while we open its spot.");
+        add(RM, "Right move", "The Right move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer.");
+        add("y", "Turn the whole cube left", "Now the empty spot is on your left.");
+        add(LM, "Left move", "The Left move brings the piece and the white corner piece down together into their right places.");
+      } else {
+        add("U'", "Top layer right (push it away)", look + "Pushing the piece away keeps it safe in the top layer while we open its spot.");
+        add(LM, "Left move", "The Left move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer.");
+        add("y'", "Turn the whole cube right", "Now the empty spot is on your right.");
+        add(RM, "Right move", "The Right move brings the piece and the white corner piece down together into their right places.");
+      }
     } else {
       const pr = todo[0];
-      begin(3, "Middle layer: pop out the stuck piece", pr,
-        "Every edge piece in the top layer has yellow, so none of them belongs in the middle. That means a middle edge piece is stuck in the wrong place. We pop it up to the top first.");
-      add(tryTurns(st, YT, c => k(find(c,pr))==="1,0,1"), "Turn the whole cube: stuck piece at the front right",
-        "Turn the whole cube so the stuck edge piece is at the front right.");
-      add(RI[0][0], "Pop it out, part 1", "The right move, part 1. The piece’s home is taken by the wrong piece, so this move will push a top piece in and pop the stuck piece out.");
-      add(RI[1][0], "Pop it out, part 2", "The right move, part 2. The stuck piece pops up into the top layer. Next we put it into its right home.");
+      begin(3, "Middle layer", pr, "A middle edge piece is stuck in the wrong place. Every edge piece in the top layer has yellow, so first we pop the stuck one out.");
+      add(tryTurns(st, YT, c => k(find(c,pr))==="1,0,1"), "Turn the whole cube until the stuck piece is at the front right", "We pop the stuck piece out from the front right.");
+      add("U", "Top layer left (push it away)", "We do the same moves as for a piece that goes to the right.");
+      add(RM, "Right move (pops it up)", "The Right move lifts the stuck piece up into the top layer.");
+      add("y", "Turn the whole cube left", "Now the empty spot is on your left.");
+      add(LM, "Left move", "A top piece fills the empty spot for now.");
+      add("y'", "Turn the whole cube right (back)", "Turn the cube back. The stuck piece is now in the top layer, ready to go to its right place.");
     }
   }
-  // ---- Step 5: yellow cross
-  const A = "F R U R' U' F'";
+  // ---- Step 5: yellow cross (Plus move)
+  const A2 = "F R U R' U' F'";
   const UE = {UF:[0,1,1], UR:[1,1,0], UB:[0,1,-1], UL:[-1,1,0]};
   const ups = c => Object.keys(UE).filter(e => colorAt(c,UE[e],N.U)===Y);
+  const PLUSW = "Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were.";
   if (ups(st).length < 4){
-    begin(4, "Yellow cross", null, "Now we work on the top. Look at the yellow center piece and the 4 edge pieces around it. We want yellow to point up on all 4 edge pieces. That makes a yellow plus sign.");
+    begin(4, "Yellow cross", null, "Make a yellow plus on the top side. Look only at the yellow center piece and the 4 edge pieces around it.");
     for (let n=0;; n++){ guard(n*8);
       const u = ups(st); if (u.length===4) break;
       if (u.length===2){
         const line = (u.includes("UF")&&u.includes("UB")) || (u.includes("UL")&&u.includes("UR"));
-        if (line) add(tryTurns(st, UT, c => { const v=ups(c); return v.includes("UL")&&v.includes("UR"); }), "Top: line goes left to right",
-          "On top, the yellow center piece and 2 yellow edge pieces make a line. Turn the top layer so the line goes from left to right. The plus sign move works from there.");
-        else add(tryTurns(st, UT, c => { const v=ups(c); return v.includes("UB")&&v.includes("UL"); }), "Top: L to the back left",
-          "On top, the yellow center piece and 2 yellow edge pieces make an L shape. Turn the top layer so the L points to the back and to the left.");
+        if (line) add(tryTurns(st, UT, c => { const v=ups(c); return v.includes("UL")&&v.includes("UR"); }), "Top layer: line goes from left to right", "On the top side, the yellow line must go from left to right. The Plus move works from there.");
+        else add(tryTurns(st, UT, c => { const v=ups(c); return v.includes("UB")&&v.includes("UL"); }), "Top layer: yellow at the back and on the left", "On the top side, the L shape must have its yellow edge pieces at the back and on the left.");
       }
-      add(A, "The plus sign move", "F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The yellow shape grows: dot, then L, then line, then plus sign.");
+      add(A2, "Plus move", PLUSW);
     }
   }
-  // ---- Step 6: yellow edges
+  // ---- Step 6: yellow edges (Door move)
   const SUNE = "R U R' U R U2 R'";
   const SIDE_OF = {UF:"F", UR:"R", UB:"B", UL:"L"};
   const match = c => Object.keys(UE).filter(e => colorAt(c,UE[e],N[SIDE_OF[e]])===center(c,SIDE_OF[e]));
   const best = () => { let bt="", bm=-1; UT.forEach(t => { const c=clone(st); if (t) run(c,t); const m=match(c).length; if (m>bm){bm=m; bt=t;} }); return bt; };
+  const SWAP = "The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were.";
   if (Object.keys(UE).some(e => !pieceOK(st,UE[e]))){
-    begin(5, "Yellow edges", null, "Each top edge piece has yellow on top and a second color on its side. We want that side color to match the center piece right under it.");
+    begin(5, "Yellow edges", null, "Each top edge piece has a second color on its side. Make that color match the center piece right under it.");
     for (let n=0;; n++){ guard(n*8);
-      add(best(), "Turn the top until 2 match", "Turn the top layer until at least 2 edge pieces match the center pieces under them.");
+      add(best(), "Top layer: turn until 2 edge pieces match", "Turn the top layer until at least 2 edge pieces match the center pieces under them.");
       const m = match(st); if (m.length===4) break;
       const opp = (m.includes("UF")&&m.includes("UB")) || (m.includes("UL")&&m.includes("UR"));
-      if (!opp) add(tryTurns(st, YT, c => { const v=match(c); return v.includes("UB")&&v.includes("UR"); }), "Turn the whole cube: matching ones at the back and right",
-        "Turn the whole cube so the 2 matching edge pieces are at the back and on the right. Then the swap move fixes the other 2.");
-      add(SUNE, opp ? "Swap move, any side" : "The swap move", opp
-        ? "The 2 matching edge pieces are across from each other. R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. After it, 2 pieces next to each other match."
-        : "R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. Because the 2 matching pieces are at the back and right, the circle sends the others where they belong.");
+      if (opp){
+        add(tryTurns(st, YT, c => { const v=match(c); return v.includes("UF")&&v.includes("UB"); }), "Turn the whole cube until the 2 matching pieces are at the front and back", "Hold the 2 matching pieces at the front and at the back.");
+        add(SUNE, "Door move", SWAP + " After it, 2 pieces next to each other match.");
+      } else {
+        add(tryTurns(st, YT, c => { const v=match(c); return v.includes("UB")&&v.includes("UR"); }), "Turn the whole cube until the 2 matching pieces are at the back and right", "Hold the 2 matching pieces at the back and on the right.");
+        add(SUNE, "Door move", SWAP + " Because the 2 matching pieces are at the back and right, the circle sends the others to their right places.");
+      }
     }
   }
-  // ---- Step 7: corner places
+  // ---- Step 7: corner places (Corner move, the good corner held at the front left)
   const UC = [[1,1,1],[-1,1,1],[1,1,-1],[-1,1,-1]];
   const placed = (c,p) => pieceAt(c,p).map(s=>s.c).sort().join("") === pieceAt(c,p).map(s=>colorAt(c,s.n,s.n)).sort().join("");
-  const NIK = "U R U' L' U R' U' L";
+  const CORNER = "R U' L' U R' U' L U";
   if (UC.some(p => !placed(st,p))){
-    begin(6, "Corner places", null, "Each yellow corner piece has 3 colors. Its home is the corner where the 3 center pieces with those colors meet. For now it can still be turned the wrong way.");
+    begin(6, "Corner places", null, "Put each yellow corner piece in its right place. Its yellow side can still face the wrong way for now.");
     for (let n=0;; n++){ guard(n*8);
       const ok = UC.filter(p => placed(st,p)); if (ok.length===4) break;
-      if (ok.length===1) add(tryTurns(st, YT, c => placed(c,[1,1,1])), "Turn the whole cube: the home corner at the front right",
-        "1 corner piece is already home. Turn the whole cube so it sits at the front right. It stays put during the next move.");
-      add(NIK, "The corner swap move", ok.length===1
-        ? "U R U′ L′ U R′ U′ L moves the other 3 corner pieces around in a circle. The front right one stays home. Everything else comes back exactly as it was."
-        : "No corner piece is home yet. The corner swap move moves 3 corner pieces, so after it at least 1 will be home.");
+      if (ok.length===1) add(tryTurns(st, YT, c => placed(c,[-1,1,1])), "Turn the whole cube until that corner piece is at the front left", "1 corner piece is already in its right place. Hold it at the front left. It stays put during the Corner move.");
+      add(CORNER, "Corner move", ok.length===1
+        ? "The Corner move moves the other 3 corner pieces around in a circle. The front left corner piece stays in its right place. Everything else comes back exactly as it was."
+        : "No corner piece is in its right place yet. The Corner move moves 3 corner pieces, so after it at least 1 will be in its right place.");
     }
   }
-  // ---- Step 8: corner twist
+  // ---- Step 8: corner twist, the video's way (upside down, Right move, turn only the bottom layer)
   if (!UC.every(p => pieceOK(st,p))){
-    begin(7, "Corner twist", null, "Last step! Every corner piece is home. Now we turn each one so its yellow part points up.");
+    begin(7, "Corner twist", null, "Turn each yellow corner piece so its yellow side faces down. Then your cube is solved!");
+    add("z2", "Turn the whole cube upside down", "Keep the same side facing you. Now white is on top and yellow is on the bottom side.");
+    const Yb = center(st,"D"), BC = [[1,-1,1],[-1,-1,1],[1,-1,-1],[-1,-1,-1]], DT = ["", "D", "D'", "D2"];
     for (let n=0; n<4; n++){
-      if (UC.every(p => colorAt(st,p,N.U)===Y)) break;
-      add(tryTurns(st, UT, c => colorAt(c,[1,1,1],N.U)!==Y), "Top: next wrong corner to the front right",
-        "Turn only the top layer to bring a corner piece whose yellow does not point up to the front right.");
-      for (let r=1; r<=6 && colorAt(st,[1,1,1],N.U)!==Y; r++) add("R' D' R D", "R′ D′ R D, round " + r,
-        "R′ D′ R D turns the front right corner piece a little. It messes up the bottom for a moment. Keep going until its yellow points up. The bottom fixes itself at the end.");
+      if (BC.every(p => colorAt(st,p,N.D)===Yb)) break;
+      add(tryTurns(st, DT, c => colorAt(c,[1,-1,1],N.D)!==Yb), "Bottom layer: next wrong corner to the bottom front right", "Turn only the bottom layer to bring a corner piece whose yellow side does not face down to the bottom front right. Never turn the whole cube now.");
+      for (let r=1; r<=6 && colorAt(st,[1,-1,1],N.D)!==Yb; r++) add(RM, "Right move (" + r + ")", "The Right move turns the bottom front right corner piece a little. It messes up the top for a moment. Keep going until its yellow side faces down.");
     }
-    add(tryTurns(st, UT, c => UC.every(p => pieceOK(c,p))), "Turn the top: all done", "Turn the top layer so every piece lines up with its side. Solved!");
+    add(tryTurns(st, DT, c => c.every(s => s.c === colorAt(c, s.n, s.n))), "Bottom layer: every side matches", "Turn the bottom layer until every side matches. Solved!");
   }
   const done = st.every(s => s.c === colorAt(st, s.n, s.n));
   return {chunks: chunks.filter(c => c.groups.length), solved: done, end: st};
@@ -758,40 +778,39 @@ return {solved, clone, run, move, plan, stage, fromGrids, toGrids, piecesOK, sol
 
 const LESSONS = [
   { short:"Meet", stepno:"Step 1 of 8", title:"Meet your cube",
-    goal:"Meet the 3 kinds of pieces. Then learn the turn letters.",
+    goal:"Meet the 3 kinds of pieces. Then learn how to turn the sides.",
     body:[
-      "The center piece sits in the middle of each side. It has 1 color and never moves. It tells you the color of that whole side.",
-      "An edge piece sits between 2 center pieces. It has 2 colors. A corner piece sits in a corner. It has 3 colors.",
-      "Every piece has a home: the place where it belongs. The cube is solved when every piece is home.",
-      "Hold the cube with the yellow center piece on top and the white center piece on the bottom. The green center piece faces you. Start every step like this.",
+      "The center piece is the square in the middle of each side. It never moves. Its color tells you the color of that whole side.",
+      "An edge piece sits between 2 corners. It has 2 colors. A corner piece sits in a corner. It has 3 colors.",
+      "Hold the cube with the yellow center piece on top and the white center piece on the bottom side. The green center piece faces you. Start every step like this.",
       "KEYS"
     ],
-    tip:"R means: turn the right side. R′ (say “R prime”) means: turn it the other way. R2 means: turn it 2 times. The arrow on the screen shows which way.",
-    demo:[["R R'","Right side, and back again","R turns the right layer up. R′ turns it back down. Only the right layer moves. The center pieces never move."],
-          ["U U'","Top, and back again","U turns the top layer to the left. U′ turns it back to the right. Only the top layer moves."],
-          ["F F'","Front, and back again","F turns the front layer like a clock. F′ turns it back. Only the front layer moves."],
-          ["L L'","Left side, and back again","L turns the left layer down. L′ turns it back up. Only the left layer moves."],
-          ["D D'","Bottom, and back again","D turns the bottom layer to the right. D′ turns it back. Only the bottom layer moves."]],
+    tip:"We say turns in words, like “Right side up” or “Top layer left”. The letters are a short way to write them. R′ (say “R prime”) means: turn it the other way.",
+    demo:[["R R'","Right side up, then right side down","Only the right side moves. The center pieces never move."],
+          ["U U'","Top layer left, then top layer right","Only the top layer moves."],
+          ["F F'","Front side clockwise, then back anticlockwise","Clockwise means the way a clock’s hands go. Anticlockwise is the other way."],
+          ["L L'","Left side down, then left side up","Only the left side moves."],
+          ["D D'","Bottom layer right, then bottom layer left","Only the bottom layer moves."]],
     focus:"all" },
   { short:"White cross", stepno:"Step 2 of 8", title:"White cross",
-    goal:"Make a white plus sign on the bottom. Each white edge piece must also match the side next to it.",
+    goal:"Make a white plus on the bottom side. Each white edge piece should have its other color matching the center piece next to it.",
     body:[], demo:[],
-    tip:"The piece with the pink frame is the one to watch. Tap the numbers. Pick the one that looks like your cube.",
+    tip:"Look for the piece with the pink frame. Tap the numbers. Pick the case that looks like your cube.",
     focus:"all" },
   { short:"White corners", stepno:"Step 3 of 8", title:"White corners",
-    goal:"Put the 4 white corner pieces on the bottom. Then the whole bottom layer is done.",
+    goal:"Put the 4 white corner pieces on the bottom side, each in its right place. You need the Right move.",
     body:[], demo:[],
-    tip:"Say it while you turn: right up, top left, right down, top right.",
+    tip:"Say it out loud while you turn: right side up, top layer left, right side down, top layer right.",
     focus:"all" },
   { short:"Middle layer", stepno:"Step 4 of 8", title:"Middle layer",
-    goal:"Put the 4 middle edge pieces in place. Then the bottom 2 layers are done.",
+    goal:"Fill the middle layer. Each middle edge piece goes between its 2 matching center pieces. You only need the Right move and the Left move.",
     body:[], demo:[],
-    tip:"Does every edge piece in the top layer have yellow on it? Then none of them belongs in the middle. Use case 3 to pop one out.",
+    tip:"Does every edge piece in the top layer have yellow on it? Then use case 3 to pop a stuck piece out.",
     focus:"all" },
   { short:"Yellow cross", stepno:"Step 5 of 8", title:"Yellow cross",
-    goal:"Make a yellow plus sign on top. Only the yellow center piece and the 4 top edge pieces matter now.",
+    goal:"Make a yellow plus on the top side. Look only at the yellow center piece and the 4 edge pieces around it.",
     body:[], demo:[],
-    tip:"Already have a yellow plus sign? Go to step 6.",
+    tip:"Already have a yellow plus? Go to step 6.",
     focus:"all" },
   { short:"Yellow edges", stepno:"Step 6 of 8", title:"Yellow edges",
     goal:"Each top edge piece has a second color on its side. Make that color match the center piece right under it.",
@@ -799,36 +818,42 @@ const LESSONS = [
     tip:"Match means: the side color of the edge piece is the same as the center piece right under it.",
     focus:"all" },
   { short:"Corner places", stepno:"Step 7 of 8", title:"Corner places",
-    goal:"Put each yellow corner piece in its home. For now it can still be turned the wrong way.",
+    goal:"Put each yellow corner piece in its right place. Its yellow side can still face the wrong way for now.",
     body:[
-      "A corner piece is home when its 3 colors are the same as the 3 center pieces around it. Its yellow part can point any way for now.",
-      "Find a corner piece that is home. Hold the cube so it sits at the front right, on top.",
-      "Do U R U′ L′ U R′ U′ L. The other 3 corner pieces move around in a circle. The front right one stays home. Do it again until all 4 corner pieces are home."
+      "A corner piece is in its right place when its 3 colors match the 3 center pieces around it.",
+      "Find a corner piece that is in its right place. Hold the cube so it is in the top layer, at the front left.",
+      "Do the Corner move: right side up, top layer right, left side up, top layer left, right side down, top layer right, left side down, top layer left.",
+      "The other 3 corner pieces move around in a circle. The front left corner piece stays where it is. Do it again until all 4 corner pieces are in their right places."
     ],
-    tip:"No corner piece is home yet? Do the move 1 time from any side. Then look again.",
-    demo:[["U R U' L' U R' U' L","The corner swap move","U R U′ L′ U R′ U′ L moves 3 corner pieces around in a circle. The front right corner piece stays put. Everything else comes back exactly as it was."]],
+    tip:"No corner piece is in its right place yet? Do the Corner move 1 time from any side. Then look again.",
+    demo:[["R U' L' U R' U' L U","Corner move","The Corner move moves 3 corner pieces around in a circle. The front left corner piece stays in its right place. Everything else comes back exactly as it was."]],
     focus:"all" },
   { short:"Corner twist", stepno:"Step 8 of 8", title:"Corner twist",
-    goal:"Turn each yellow corner piece so yellow points up. Then your cube is solved!",
+    goal:"Turn each yellow corner piece so its yellow side faces down. Then your cube is solved!",
     body:[
-      "Hold the cube so a corner piece whose yellow does not point up is at the front right, on top.",
-      "Do R′ D′ R D again and again until its yellow points up. The bottom layer gets messy. That’s OK! It fixes itself at the end.",
-      "Now turn only the top layer (U) to bring the next wrong corner piece to the front right. Do R′ D′ R D again. Don’t turn the whole cube during this step."
+      "Turn the whole cube upside down. Keep green facing you. Now white is on top and yellow is on the bottom side.",
+      "Turn the bottom layer until a corner piece whose yellow side does not face down is at the bottom front right.",
+      "Do the Right move again and again until its yellow side faces down. The top gets messy. Don’t panic! It fixes itself at the end.",
+      "Never turn the whole cube now. Only turn the bottom layer to bring the next wrong corner piece to the bottom front right. Then do the Right move again.",
+      "When all yellow sides face down, turn the bottom layer until every side matches."
     ],
-    tip:"In the movie, corner 1 needs 2 rounds and corner 2 needs 4 rounds. Then the bottom layer fixes itself.",
+    tip:"In the movie, the first corner piece needs 4 Right moves and the second needs 2.",
+    mess:"z2",
     demo:[].concat(
-      rounds("R' D' R D", 2, "Corner 1, round", TWIST_WHY),
-      [["U","Next corner to the front right","Turn only the top layer to bring the next wrong corner piece to the front right. The messy bottom stays where it is."]],
-      rounds("R' D' R D", 4, "Corner 2, round", TWIST_WHY),
-      [["U'","Turn the top back","Turn the top layer back. The bottom fixed itself, and the cube is solved!"]]
+      [["z2","Turn the whole cube upside down","Keep green facing you. Now white is on top and yellow is on the bottom side."]],
+      [["D","Bottom layer right (next wrong corner to the bottom front right)","Turn only the bottom layer to bring a corner piece whose yellow side does not face down to the bottom front right."]],
+      rounds("R U R' U'", 4, "Right move", "The Right move turns the bottom front right corner piece a little. It messes up the top for a moment. Keep going until its yellow side faces down."),
+      [["D","Bottom layer right (next wrong corner to the bottom front right)","Turn only the bottom layer. Never turn the whole cube now."]],
+      rounds("R U R' U'", 2, "Right move", "The Right move turns the bottom front right corner piece a little. It messes up the top for a moment. Keep going until its yellow side faces down."),
+      [["D2","Bottom layer 2 times (every side matches)","All yellow sides face down. Turn the bottom layer until every side matches. Solved!"]]
     ),
     focus:"all" },
   { short:"Play", stepno:"Free play", title:"Play time",
     goal:"Mix up the cube. Then solve it, step by step.",
     body:[
-      "Press Mix it up. Then use the turn buttons to solve it.",
-      "On a computer you can also press R L U D F B. Hold Shift to turn the other way.",
-      "Stuck? Press Reset and try again. Even the best cubers start over a lot."
+      "Tap Mix it up. Then use the turn buttons to solve it.",
+      "On a computer you can also press the keys R, L, U, D, F and B. Hold Shift to turn the other way.",
+      "Stuck? Tap Reset and try again. Even the best cubers start over many times."
     ],
     tip:"Solve it here and you get a party!",
     demo:[], focus:"all", free:true },
@@ -841,7 +866,7 @@ const LESSONS = [
 const CASES = {
 "1": [
 {
-"name": "On top, white up",
+"name": "Top layer, white facing up",
 "mess": "R U R' U2 L' U' L F' U2 F U' B U B' R U' R' U2 L U L'",
 "targets": [
 [
@@ -850,23 +875,24 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green edge piece (pink frame) is in the top layer. Its white part points up.",
-"do": "Its home is on the bottom, under the green center piece. First turn the top layer until the green part of the piece is right above the green center piece. Then turn the front 2 times (F2). The piece drops down into its home, with white facing down.",
+"look": "The white and green edge piece is in the top layer. Its white side faces up. Its green side faces the right.",
+"do": "Turn the top layer left 1 time. Now the green side is right above the green center piece. Turn the front side 2 times. The white side turns down, next to the white center piece. Now the piece is in its right place.",
 "demo": [
 [
 "U",
-"Top: green over green",
-"Turn the top layer until the green part of the piece is right above the green center piece."
+"Top layer left (green above the green center piece)",
+"Turn the top layer until the green side of the piece is right above the green center piece."
 ],
 [
 "F2",
-"Turn the front 2 times",
-"Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down."
+"Front side 2 times",
+"The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down."
 ]
-]
+],
+"why": "Turn the top layer until the green side of the piece is right above the green center piece. The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down."
 },
 {
-"name": "On top, white to the side",
+"name": "Top layer, white facing the front",
 "mess": "R U R' U2 L' U' L F' U2 F U' B U B' R U' R' U2 L U L'",
 "targets": [
 [
@@ -875,23 +901,24 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green edge piece (pink frame) is in the top layer. But its white part points out to the side, not up.",
-"do": "If we dropped it now, white would face the wrong way. So we tuck it in from the side. Turn the top layer 1 time to the right (U′). Then do R′ F R. R′ moves the right side out of the way, F turns the piece into its home, and R puts the right side back.",
+"look": "The white and green edge piece is in the top layer, at the front. Its white side faces the front. Its green side faces up.",
+"do": "If you turn the front side now, white would end up facing the wrong way. So first turn the top layer right 1 time. The piece moves to the right side. Then: right side down, front side clockwise, right side up. The piece goes into its right place, with white facing down.",
 "demo": [
 [
 "U'",
-"Turn the top to the right",
-"Turn the top layer 1 time to the right. The piece moves to the right side, where we can tuck it in."
+"Top layer right",
+"The white side faces the front. If you turned the front now, white would face the wrong way. So first move the piece to the right side."
 ],
 [
 "R' F R",
-"Slide it in",
-"R′ turns the right side so the piece goes down into the middle layer, at the front right. F turns the front, which rolls the piece down into its home. R turns the right side back, so the white piece that was already home on the right comes back too."
+"Right side down, front side clockwise, right side up",
+"Right side down takes the piece into the middle layer. Front side clockwise turns it into its right place. Right side up brings back the white piece that was already in its right place on the right."
 ]
-]
+],
+"why": "The white side faces the front. If you turned the front now, white would face the wrong way. So first move the piece to the right side. Right side down takes the piece into the middle layer. Front side clockwise turns it into its right place. Right side up brings back the white piece that was already in its right place on the right."
 },
 {
-"name": "In the middle, green in front",
+"name": "Middle layer, green facing the front",
 "mess": "R U R' U2 L' U' L F' U2 F U' B U B' R U' R' U2 L U L'",
 "targets": [
 [
@@ -900,18 +927,19 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green edge piece (pink frame) is in the middle layer. Its green part is on the front, right next to the green center piece.",
-"do": "The green part already matches the green center piece. Turn the front 1 time (F) and the piece drops down into its home. Is the piece on the left side instead? Then turn the front the other way (F′).",
+"look": "The white and green edge piece is in the middle layer. Its green side faces the front. Its white side faces the right.",
+"do": "Turn the front side clockwise 1 time. The white side turns down, next to the white center piece. Now the piece is in its right place. Is the piece on the left instead? Then turn the front side anticlockwise.",
 "demo": [
 [
 "F",
-"Turn the front 1 time",
-"The green part of the piece already touches the green center piece. 1 front turn rolls the piece down into its home, with white facing down."
+"Front side clockwise",
+"Its green side already matches the green center piece in front. 1 front turn moves it down into its right place, with white facing down."
 ]
-]
+],
+"why": "Its green side already matches the green center piece in front. 1 front turn moves it down into its right place, with white facing down."
 },
 {
-"name": "In the middle, white in front",
+"name": "Middle layer, white facing the front",
 "mess": "R U R' U2 L' U' L F' U2 F U' B U B' R U' R' U2 L U L'",
 "targets": [
 [
@@ -920,23 +948,24 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green edge piece (pink frame) is in the middle layer. Its white part is on the front.",
-"do": "White points the wrong way, so first we lift the piece up to the top layer. Do R U R′. Now the piece is on top and its white part points up. That’s case 1: turn the front 2 times (F2) to drop it home.",
+"look": "The white and green edge piece is in the middle layer, at the front right. Its white side faces the front. Its green side faces the right.",
+"do": "White faces the wrong way, so first lift the piece to the top layer: right side up, top layer left, right side down. Now the piece is at the top front, with white facing up and green above the green center piece. Turn the front side 2 times. The white side turns down, next to the white center piece.",
 "demo": [
 [
 "R U R'",
-"Lift it to the top",
-"R takes the right side up, so the piece goes up into the top layer. U moves it to the front, out of the way. R′ takes the right side back down, so the white piece already home on the right goes back too. Now our piece is on top with white pointing up."
+"Right side up, top layer left, right side down",
+"White faces the wrong way, so first we lift the piece to the top layer. Right side up lifts it, top layer left moves it to the front, and right side down brings back the white piece that was already in its right place."
 ],
 [
 "F2",
-"Turn the front 2 times",
-"Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down."
+"Front side 2 times",
+"The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down."
 ]
-]
+],
+"why": "White faces the wrong way, so first we lift the piece to the top layer. Right side up lifts it, top layer left moves it to the front, and right side down brings back the white piece that was already in its right place. The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down."
 },
 {
-"name": "On the bottom, wrong place",
+"name": "Bottom side, wrong place",
 "mess": "R U R' U2 L' U' L F' U2 F U' B U B' R U' R' U2 L U L'",
 "targets": [
 [
@@ -945,28 +974,29 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green edge piece (pink frame) is on the bottom, but under the wrong center piece. In the movie it’s under the orange center piece.",
-"do": "First lift it out: turn that side 2 times (R2). Now the piece is in the top layer with white up. Turn the top layer until its green part is over the green center piece (U). Then turn the front 2 times (F2). The white and orange piece goes home at the same time!",
+"look": "The white and green edge piece is on the bottom side, but under the wrong center piece. In the movie, it is under the orange center piece.",
+"do": "Turn the right side 2 times. The piece comes up to the top layer, with white facing up. At the same time, the white and orange edge piece goes down into its right place. Turn the top layer left until green is above the green center piece. Turn the front side 2 times.",
 "demo": [
 [
 "R2",
-"Lift it up",
-"Turn the right side 2 times. Our piece flips from the bottom up to the top layer. At the same time, the white and orange piece on top drops down into its own home."
+"Right side 2 times",
+"Our piece comes up to the top layer. At the same time, the white and orange edge piece goes down into its right place."
 ],
 [
 "U",
-"Top: green over green",
-"Turn the top layer until the green part of the piece is right above the green center piece."
+"Top layer left (green above the green center piece)",
+"Turn the top layer until the green side of the piece is right above the green center piece."
 ],
 [
 "F2",
-"Turn the front 2 times",
-"Turn the front 2 times. The front layer flips upside down, so the piece goes from the top layer down into its home, with white facing down."
+"Front side 2 times",
+"The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down."
 ]
-]
+],
+"why": "Our piece comes up to the top layer. At the same time, the white and orange edge piece goes down into its right place. Turn the top layer until the green side of the piece is right above the green center piece. The white side of the piece faces up. 2 front turns flip it down into its right place, with white facing down."
 },
 {
-"name": "On the bottom, upside down",
+"name": "Bottom side, upside down",
 "mess": "R U R' U2 L' U' L F' U2 F U' B U B' R U' R' U2 L U L'",
 "targets": [
 [
@@ -975,30 +1005,31 @@ const CASES = {
 1
 ]
 ],
-"look": "The white and green edge piece (pink frame) is in its home, but upside down. Its white part points to the front instead of down.",
-"do": "Bring it up with F2. Now it’s in the top layer with white pointing out to the side. That’s case 2: turn the top layer to the right (U′), then do R′ F R.",
+"look": "The white and green edge piece is in its right place, but upside down. Its white side faces the front instead of down.",
+"do": "Turn the front side 2 times. The piece comes up to the top layer, with white facing the front. Now do case 2: top layer right, then right side down, front side clockwise, right side up.",
 "demo": [
 [
 "F2",
-"Bring it up",
-"Turn the front 2 times. The piece flips up to the top layer. Now its white part points out to the front."
+"Front side 2 times (lift it up)",
+"2 front turns lift the piece up to the top layer. Now its white side faces the front."
 ],
 [
 "U'",
-"Turn the top to the right",
-"Turn the top layer 1 time to the right. The piece moves to the right side, where we can tuck it in."
+"Top layer right",
+"Move the piece to the right side first, so we can tuck it in."
 ],
 [
 "R' F R",
-"Slide it in",
-"R′ turns the right side so the piece goes down into the middle layer, at the front right. F turns the front, which rolls the piece down into its home. R turns the right side back, so the white piece that was already home on the right comes back too."
+"Right side down, front side clockwise, right side up",
+"Right side down takes the piece into the middle layer. Front side clockwise turns it into its right place. Right side up brings back the white piece that was already in its right place on the right."
 ]
-]
+],
+"why": "2 front turns lift the piece up to the top layer. Now its white side faces the front. Move the piece to the right side first, so we can tuck it in. Right side down takes the piece into the middle layer. Front side clockwise turns it into its right place. Right side up brings back the white piece that was already in its right place on the right."
 }
 ],
 "2": [
 {
-"name": "On top, white to the right",
+"name": "Top layer, white facing the right",
 "mess": "U R U' R' U' F' U F U2 U' L' U L U F U' F' U' U R U' R' U' F' U F U R U R' U R U2 R' U2 U' L' U L U F U' F' U' U R U' R' U' F' U F",
 "targets": [
 [
@@ -1007,23 +1038,24 @@ const CASES = {
 1
 ]
 ],
-"look": "The white, green and orange corner piece (pink frame) is in the top layer.",
-"do": "Its home is the bottom corner between the green and orange center pieces. Turn the top layer until the corner piece is right above its home. Now its white part points to the right. Do R U R′ U′ 1 time. The corner piece goes down into its home.",
+"look": "The white, green and orange corner piece is in the top layer, at the back right. Its white side faces the back.",
+"do": "Its right place is the bottom corner between the green and orange center pieces. Turn the top layer left 1 time. Now the corner piece is right above its right place, at the front right, and its white side faces the right. Do the Right move 1 time. The corner piece goes down into its right place, with white facing down.",
 "demo": [
 [
 "U",
-"Top: over its home",
-"Turn the top layer until the corner piece is right above its home, between the green and orange center pieces."
+"Top layer left (corner above its right place)",
+"Turn the top layer until the corner piece is right above its right place."
 ],
 [
 "R U R' U'",
-"Round 1 of 1",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (1 of 1)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ]
-]
+],
+"why": "Turn the top layer until the corner piece is right above its right place. Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 },
 {
-"name": "On top, white up",
+"name": "Top layer, white facing up",
 "mess": "U R U' R' U' F' U F U2 U' L' U L U F U' F' U' U R U' R' U' F' U F U R U R' U R U2 R' U2 U' L' U L U F U' F' U' U R U' R' U' F' U F",
 "targets": [
 [
@@ -1032,28 +1064,29 @@ const CASES = {
 1
 ]
 ],
-"look": "The white, green and orange corner piece (pink frame) is in the top layer, right above its home. Its white part points up.",
-"do": "Do R U R′ U′ 3 times. Each time, the corner piece goes down and comes back up, turned a little. After 3 times it lands in its home with white facing down.",
+"look": "The white, green and orange corner piece is in the top layer, right above its right place. Its white side faces up.",
+"do": "Do the Right move 3 times. Each time, the corner piece goes down or comes back up, turned a little. After 3 times, it is in its right place, with white facing down.",
 "demo": [
 [
 "R U R' U'",
-"Round 1 of 3",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (1 of 3)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 2 of 3",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (2 of 3)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 3 of 3",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (3 of 3)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ]
-]
+],
+"why": "Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 },
 {
-"name": "On top, white in front",
+"name": "Top layer, white facing the front",
 "mess": "U R U' R' U' F' U F U2 U' L' U L U F U' F' U' U R U' R' U' F' U F U R U R' U R U2 R' U2 U' L' U L U F U' F' U' U R U' R' U' F' U F",
 "targets": [
 [
@@ -1062,38 +1095,39 @@ const CASES = {
 1
 ]
 ],
-"look": "The white, green and orange corner piece (pink frame) is in the top layer, right above its home. Its white part points to the front.",
-"do": "Do R U R′ U′ 5 times. Count out loud! After 5 times it lands in its home with white facing down.",
+"look": "The white, green and orange corner piece is in the top layer, right above its right place. Its white side faces the front.",
+"do": "Do the Right move 5 times. Count out loud! After 5 times, it is in its right place, with white facing down.",
 "demo": [
 [
 "R U R' U'",
-"Round 1 of 5",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (1 of 5)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 2 of 5",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (2 of 5)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 3 of 5",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (3 of 5)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 4 of 5",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (4 of 5)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 5 of 5",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (5 of 5)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ]
-]
+],
+"why": "Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 },
 {
-"name": "In its home, but turned",
+"name": "In its right place, but turned",
 "mess": "U R U' R' U' F' U F U2 U' L' U L U F U' F' U' U R U' R' U' F' U F U R U R' U R U2 R' U2 U' L' U L U F U' F' U' U R U' R' U' F' U F",
 "targets": [
 [
@@ -1102,23 +1136,24 @@ const CASES = {
 1
 ]
 ],
-"look": "The white, green and orange corner piece (pink frame) is in its home on the bottom, but its white part does not face down.",
-"do": "Keep it at the front right. Do R U R′ U′ again and again until white faces down. It takes 2 or 4 times.",
+"look": "The white, green and orange corner piece is in its right place, on the bottom side at the front right. But its white side faces the right, not down.",
+"do": "Do the Right move 2 times. The corner piece comes up, turns, and goes back down with white facing down. Does white face the front instead? Then it takes 4 times.",
 "demo": [
 [
 "R U R' U'",
-"Round 1 of 2",
-"The corner piece is home but turned. R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (1 of 2)",
+"The corner piece is in its right place, but turned. Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ],
 [
 "R U R' U'",
-"Round 2 of 2",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (2 of 2)",
+"The corner piece is in its right place, but turned. Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ]
-]
+],
+"why": "The corner piece is in its right place, but turned. Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 },
 {
-"name": "In the wrong corner",
+"name": "Bottom side, wrong corner",
 "mess": "U R U' R' U' F' U F U2 U' L' U L U F U' F' U' U R U' R' U' F' U F U R U R' U R U2 R' U2 U' L' U L U F U' F' U' U R U' R' U' F' U F",
 "targets": [
 [
@@ -1127,31 +1162,32 @@ const CASES = {
 1
 ]
 ],
-"look": "The white, green and orange corner piece (pink frame) is on the bottom, but in the wrong corner.",
-"do": "We have to lift it out first. It’s at the front left, so do L′ U′ L U. Now it’s in the top layer. Turn the top layer until the corner piece is right above its home (U′). Then do R U R′ U′ until it lands home.",
+"look": "The white, green and orange corner piece is on the bottom side, at the front left. That is the wrong corner.",
+"do": "First lift it up with the Left move. Now the corner piece is in the top layer, at the front left. Turn the top layer right 1 time. Now it is right above its right place, with white facing the right. Do the Right move 1 time. It goes down into its right place, with white facing down.",
 "demo": [
 [
 "L' U' L U",
-"Lift it to the top",
-"This is R U R′ U′ done with the left hand. L′ lifts the left side, taking the stuck corner piece up. U′ moves it out of the left side. L takes the left side back down. U puts the top back. Now the corner piece is in the top layer."
+"Left move (lift it up)",
+"The Left move lifts the corner piece out of the wrong corner, up into the top layer."
 ],
 [
 "U'",
-"Top: over its home",
-"Turn the top layer until the corner piece is right above its home."
+"Top layer right (corner above its right place)",
+"Turn the top layer until the corner piece is right above its right place."
 ],
 [
 "R U R' U'",
-"Round 1 of 1",
-"R takes the right side up, carrying the corner piece away. U brings it back to the front right. R′ takes the right side down, carrying the corner piece down into its home. U′ puts the top back. Each round the corner piece comes back turned a little more."
+"Right move (1 of 1)",
+"Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 ]
-]
+],
+"why": "The Left move lifts the corner piece out of the wrong corner, up into the top layer. Turn the top layer until the corner piece is right above its right place. Right side up takes the corner piece away. Top layer left brings it back to the front right. Right side down takes it down. Top layer right puts the top back. Each Right move turns the corner piece a little more, until white faces down."
 }
 ],
 "3": [
 {
 "name": "Goes to the right",
-"mess": "R U R' U R U2 R' U R U' L' U R' U' L U2 F R U R' U' F' U' R U2 R' U' R U' R'",
+"mess": "R U R' U R U2 R' U R U' L' U R' U' L U2 F R U R' U' F' U' R U2 R' U' R U' R' y",
 "targets": [
 [
 1,
@@ -1159,29 +1195,46 @@ const CASES = {
 1
 ]
 ],
-"look": "The green and orange edge piece (pink frame) is in the top layer. It has no yellow, so it belongs in the middle layer.",
-"do": "First turn the top layer until the green part of the piece is right above the green center piece. Now look at the top of the piece: it’s orange. The orange center piece is on the right side. So the piece goes to the right. Do U R U′ R′, then U′ F′ U F. The piece slides down into the middle layer, between green and orange.",
+"look": "The green and orange edge piece is in the top layer, on the left. It has no yellow, so it belongs in the middle layer. Its green side faces the left. Its orange side faces up.",
+"do": [
+"1. Turn the top layer right. Now the green side is right above the green center piece. Its top is orange, and the orange center piece is on the right, so the piece goes to the right.",
+"2. Push it away: turn the top layer left.",
+"3. Do the Right move. This makes room on the right.",
+"4. Turn the whole cube left. Now the orange center piece faces you, and the empty spot is on your left.",
+"5. Do the Left move. The piece drops into the middle layer, between the orange and green center pieces."
+],
 "demo": [
 [
 "U'",
-"Top: green over green",
-"Turn the top layer until the green part of the piece is right above the green center piece."
+"Top layer right (green above the green center piece)",
+"Turn the top layer until the green side of the piece is right above the green center piece. Its top is orange, and the orange center piece is on the right, so the piece goes to the right."
 ],
 [
-"U R U' R'",
-"Right move, part 1",
-"We can’t just push the piece down, because that would break the finished bottom layer. So first U moves the piece out of the way, R lifts the white corner piece up from below, U′ brings our piece back to the front, and R′ brings the white corner piece right next to it. Now they sit side by side on top."
+"U",
+"Top layer left (push it away)",
+"Pushing the piece away keeps it safe in the top layer while we open its spot."
 ],
 [
-"U' F' U F",
-"Right move, part 2",
-"Now we put both back in together. U′ moves them away, F′ opens the front, U brings them back, and F swings them both down: the piece into the middle layer, and the white corner piece back into its home on the bottom."
+"R U R' U'",
+"Right move",
+"The Right move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer."
+],
+[
+"y",
+"Turn the whole cube left",
+"Now the empty spot is on your left."
+],
+[
+"L' U' L U",
+"Left move",
+"The Left move brings the piece and the white corner piece down together into their right places."
 ]
-]
+],
+"why": "Turn the top layer until the green side of the piece is right above the green center piece. Its top is orange, and the orange center piece is on the right, so the piece goes to the right. Pushing the piece away keeps it safe in the top layer while we open its spot. The Right move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer. Now the empty spot is on your left. The Left move brings the piece and the white corner piece down together into their right places."
 },
 {
 "name": "Goes to the left",
-"mess": "R U R' U R U2 R' U R U' L' U R' U' L U2 F R U R' U' F' U' R U2 R' U' R U' R'",
+"mess": "R U R' U R U2 R' U R U' L' U R' U' L U2 F R U R' U' F' U' R U2 R' U' R U' R' y'",
 "targets": [
 [
 -1,
@@ -1189,29 +1242,46 @@ const CASES = {
 1
 ]
 ],
-"look": "The green and red edge piece (pink frame) is in the top layer. It has no yellow, so it belongs in the middle layer.",
-"do": "First turn the top layer until the green part of the piece is right above the green center piece. Now look at the top of the piece: it’s red. The red center piece is on the left side. So the piece goes to the left. Do U′ L′ U L, then U F U′ F′. The piece slides down into the middle layer, between green and red.",
+"look": "The green and red edge piece is in the top layer, on the right. It has no yellow, so it belongs in the middle layer. Its green side faces the right. Its red side faces up.",
+"do": [
+"1. Turn the top layer left. Now the green side is right above the green center piece. Its top is red, and the red center piece is on the left, so the piece goes to the left.",
+"2. Push it away: turn the top layer right.",
+"3. Do the Left move. This makes room on the left.",
+"4. Turn the whole cube right. Now the red center piece faces you, and the empty spot is on your right.",
+"5. Do the Right move. The piece drops into the middle layer, between the red and green center pieces."
+],
 "demo": [
 [
 "U",
-"Top: green over green",
-"Turn the top layer until the green part of the piece is right above the green center piece."
+"Top layer left (green above the green center piece)",
+"Turn the top layer until the green side of the piece is right above the green center piece. Its top is red, and the red center piece is on the left, so the piece goes to the left."
 ],
 [
-"U' L' U L",
-"Left move, part 1",
-"The same idea on the left side. U′ moves the piece out of the way, L′ lifts the white corner piece up from below, U brings our piece back to the front, and L brings the white corner piece right next to it."
+"U'",
+"Top layer right (push it away)",
+"Pushing the piece away keeps it safe in the top layer while we open its spot."
 ],
 [
-"U F U' F'",
-"Left move, part 2",
-"U moves them both away, F opens the front, U′ brings them back, and F′ swings them both down: the piece into the middle layer, and the white corner piece back into its home."
+"L' U' L U",
+"Left move",
+"The Left move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer."
+],
+[
+"y'",
+"Turn the whole cube right",
+"Now the empty spot is on your right."
+],
+[
+"R U R' U'",
+"Right move",
+"The Right move brings the piece and the white corner piece down together into their right places."
 ]
-]
+],
+"why": "Turn the top layer until the green side of the piece is right above the green center piece. Its top is red, and the red center piece is on the left, so the piece goes to the left. Pushing the piece away keeps it safe in the top layer while we open its spot. The Left move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer. Now the empty spot is on your right. The Right move brings the piece and the white corner piece down together into their right places."
 },
 {
 "name": "Stuck in the middle",
-"mess": "R U R' U R U2 R' U R U' L' U R' U' L U2 F R U R' U' F' U' R U2 R' U' R U' R'",
+"mess": "R U R' U R U2 R' U R U' L' U R' U' L U2 F R U R' U' F' U' R U2 R' U' R U' R' y",
 "targets": [
 [
 1,
@@ -1219,35 +1289,67 @@ const CASES = {
 1
 ]
 ],
-"look": "The green and orange edge piece (pink frame) is already in the middle layer, but in the wrong place, or flipped with its colors the wrong way round.",
-"do": "Hold the cube so the stuck piece is at the front right. Do the right move 1 time (U R U′ R′, then U′ F′ U F). It pushes a top piece in and pops the stuck piece up to the top layer. Then turn the top layer until green is over the green center piece, and do the right move again.",
+"look": "The green and orange edge piece is in the middle layer at the front right. Its place is right, but it is flipped: its orange side faces the front and its green side faces the right.",
+"do": [
+"1. Do the “goes right” moves with any top piece: top layer left, then the Right move. The stuck piece pops up into the top layer.",
+"2. Turn the whole cube left, and do the Left move. A top piece fills the empty spot for now.",
+"3. Turn the whole cube back, so green faces you again. The green and orange piece is now in the top layer, on the right.",
+"4. Turn the top layer left. Green is right above the green center piece.",
+"5. Now do case 1, from step 2 on."
+],
 "demo": [
 [
-"U R U' R'",
-"Pop it out, part 1",
-"The right move, part 1. The piece’s home is taken by the wrong piece, so this move will push a top piece in and pop the stuck piece out."
+"U",
+"Top layer left (push it away)",
+"We do the same moves as for a piece that goes to the right, with any top piece."
 ],
 [
-"U' F' U F",
-"Pop it out, part 2",
-"The right move, part 2. The stuck piece pops up into the top layer."
+"R U R' U'",
+"Right move (pops it up)",
+"The Right move lifts the stuck piece up into the top layer."
 ],
 [
-"U2",
-"Top: green over green",
-"Turn the top layer until the green part of the piece is right above the green center piece."
+"y",
+"Turn the whole cube left",
+"Now the empty spot is on your left."
 ],
 [
-"U R U' R'",
-"Right move, part 1",
-"We can’t just push the piece down, because that would break the finished bottom layer. So first U moves the piece out of the way, R lifts the white corner piece up from below, U′ brings our piece back to the front, and R′ brings the white corner piece right next to it. Now they sit side by side on top."
+"L' U' L U",
+"Left move",
+"A top piece fills the empty spot for now."
 ],
 [
-"U' F' U F",
-"Right move, part 2",
-"Now we put both back in together. U′ moves them away, F′ opens the front, U brings them back, and F swings them both down: the piece into the middle layer, and the white corner piece back into its home on the bottom."
+"y'",
+"Turn the whole cube right (back)",
+"Turn the cube back, so green faces you again. The stuck piece is now in the top layer, on the right."
+],
+[
+"U",
+"Top layer left (green above the green center piece)",
+"Turn the top layer until the green side of the piece is right above the green center piece."
+],
+[
+"U",
+"Top layer left (push it away)",
+"Its top is orange, and the orange center piece is on the right, so it goes to the right. Pushing the piece away keeps it safe in the top layer while we open its spot."
+],
+[
+"R U R' U'",
+"Right move",
+"The Right move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer."
+],
+[
+"y",
+"Turn the whole cube left",
+"Now the empty spot is on your left."
+],
+[
+"L' U' L U",
+"Left move",
+"The Left move brings the piece and the white corner piece down together into their right places."
 ]
-]
+],
+"why": "We do the same moves as for a piece that goes to the right, with any top piece. The Right move lifts the stuck piece up into the top layer. Now the empty spot is on your left. A top piece fills the empty spot for now. Turn the cube back, so green faces you again. The stuck piece is now in the top layer, on the right. Turn the top layer until the green side of the piece is right above the green center piece. Its top is orange, and the orange center piece is on the right, so it goes to the right. Pushing the piece away keeps it safe in the top layer while we open its spot. The Right move lifts the white corner piece up into the top layer. That opens an empty spot in the middle layer. The Left move brings the piece and the white corner piece down together into their right places."
 }
 ],
 "4": [
@@ -1276,15 +1378,17 @@ const CASES = {
 0
 ]
 ],
-"look": "Look only at the top. The yellow center piece and 2 yellow edge pieces make a line.",
-"do": "Turn the top layer so the line goes from left to right, like a flat road. Then do F R U R′ U′ F′ 1 time. The line becomes a plus sign.",
+"look": "On the top side, the yellow center piece and 2 yellow edge pieces make a line.",
+"do": "Turn the top layer so the line goes from left to right, like the picture. Do the Plus move: front side clockwise, Right move, front side anticlockwise. The line becomes a plus.",
 "demo": [
 [
 "F R U R' U' F'",
-"The plus sign move",
-"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were."
+"Plus move (line becomes a plus)",
+"Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were."
 ]
-]
+],
+"why": "Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were.",
+"pic": "LINE"
 },
 {
 "name": "An L shape",
@@ -1311,20 +1415,22 @@ const CASES = {
 0
 ]
 ],
-"look": "Look only at the top. The yellow center piece and 2 yellow edge pieces make an L shape.",
-"do": "Turn the top layer so the L points to the back and to the left, like clock hands at 9 and 12. Do F R U R′ U′ F′. Now you have a line. Do the move 1 more time to make the plus sign.",
+"look": "On the top side, the yellow center piece and 2 yellow edge pieces make an L shape.",
+"do": "Turn the top layer so the yellow edge pieces are at the back and on the left, like the picture. Do the Plus move. Now you have a line. Do the Plus move 1 more time to make the plus.",
 "demo": [
 [
 "F R U R' U' F'",
-"L turns into a line",
-"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The L becomes a line."
+"Plus move (L becomes a line)",
+"Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were."
 ],
 [
 "F R U R' U' F'",
-"Line turns into a plus",
-"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The line becomes a plus sign."
+"Plus move (line becomes a plus)",
+"Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were."
 ]
-]
+],
+"why": "Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were.",
+"pic": "L"
 },
 {
 "name": "Just a dot",
@@ -1351,30 +1457,32 @@ const CASES = {
 0
 ]
 ],
-"look": "Look only at the top. Only the yellow center piece points up. No yellow edge piece points up.",
-"do": "Do F R U R′ U′ F′ 1 time. Now you have an L. Turn the top layer so the L points to the back and to the left. Then do the move 2 more times: first you get a line, then a plus sign.",
+"look": "On the top side, only the yellow center piece is yellow. No yellow edge piece faces up.",
+"do": "Do the Plus move. Now you have an L, with the yellow edge pieces at the front and on the right. Turn the top layer 2 times, so they are at the back and on the left, like the picture. Then do the Plus move 2 more times: first a line, then a plus.",
 "demo": [
 [
 "F R U R' U' F'",
-"Dot turns into an L",
-"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The dot becomes an L."
+"Plus move (dot becomes an L)",
+"Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were."
 ],
 [
 "U2",
-"L to the back left",
-"Turn the top layer so the L points to the back and to the left."
+"Top layer 2 times (yellow at the back and on the left)",
+"Now the L has its yellow edge pieces at the back and on the left."
 ],
 [
 "F R U R' U' F'",
-"L turns into a line",
-"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The L becomes a line."
+"Plus move (L becomes a line)",
+"Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were."
 ],
 [
 "F R U R' U' F'",
-"Line turns into a plus",
-"F R U R′ U′ F′ always flips 2 top edge pieces so their yellow points up. F turns the front, R U R′ U′ shuffles the pieces, and F′ turns the front back. The bottom 2 layers come back exactly as they were. The line becomes a plus sign."
+"Plus move (line becomes a plus)",
+"Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were."
 ]
-]
+],
+"why": "Front side clockwise, then the Right move, then front side anticlockwise. It always flips 2 top edge pieces so yellow faces up. The bottom 2 layers come back exactly as they were. Now the L has its yellow edge pieces at the back and on the left.",
+"pic": "L"
 }
 ],
 "5": [
@@ -1404,22 +1512,23 @@ const CASES = {
 ]
 ],
 "look": "Turn the top layer until 2 edge pieces match the center pieces under them. These 2 are next to each other, around a corner.",
-"do": "Hold the cube so the 2 matching pieces are at the back and on the right. Do R U R′ U R U2 R′. Then turn the top layer 1 time (U). The other 2 pieces swap places, and all 4 match.",
+"do": "Hold the cube so the 2 matching pieces are at the back and on the right. Do the Door move. Then turn the top layer left 1 time. Now all 4 edge pieces match.",
 "demo": [
 [
 "R U R' U R U2 R'",
-"The swap move",
-"R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. Because the 2 matching pieces are at the back and right, the circle sends the others where they belong."
+"Door move",
+"The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were. Because the 2 matching pieces are at the back and right, the circle sends the others to their right places."
 ],
 [
 "U",
-"Turn the top 1 time",
-"Turn the top layer 1 time. Now all 4 edge pieces match their center pieces."
+"Top layer left (all 4 match)",
+"Turn the top layer. Now all 4 edge pieces match the center pieces under them."
 ]
-]
+],
+"why": "The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were. Because the 2 matching pieces are at the back and right, the circle sends the others to their right places. Turn the top layer. Now all 4 edge pieces match the center pieces under them."
 },
 {
-"name": "2 across",
+"name": "2 across from each other",
 "mess": "U R U' L' U R' U' L U U R U' L' U R' U' L U' R' D' R D R' D' R D U R' D' R D R' D' R D R' D' R D R' D' R D U' U2 R' D' R D R' D' R D U R' D' R D R' D' R D R' D' R D R' D' R D U' U2 U R U' L' U R' U' L y'",
 "targets": [
 [
@@ -1443,33 +1552,34 @@ const CASES = {
 0
 ]
 ],
-"look": "Only 2 edge pieces match the center pieces under them, and they are across from each other, on opposite sides.",
-"do": "Do R U R′ U R U2 R′ 1 time, from any side. Now 2 pieces next to each other match. Turn the whole cube so they are at the back and on the right. Then do case 1.",
+"look": "Only 2 edge pieces match the center pieces under them. They are across from each other.",
+"do": "Hold the cube so the 2 matching pieces are at the front and at the back. Do the Door move. Now 2 pieces next to each other match. Turn the whole cube right, so they are at the back and on the right. Do the Door move again. Then turn the top layer left 1 time.",
 "demo": [
 [
 "R U R' U R U2 R'",
-"Swap move, any side",
-"R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. After it, 2 pieces next to each other match."
+"Door move",
+"The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were. After it, 2 pieces next to each other match."
 ],
 [
 "y'",
-"Turn the whole cube",
-"Turn the whole cube so the 2 matching pieces are at the back and on the right."
+"Turn the whole cube right (matching pieces to the back and right)",
+"Now the 2 matching pieces are at the back and on the right."
 ],
 [
 "R U R' U R U2 R'",
-"The swap move again",
-"R U R′ U R U2 R′ moves 3 top edge pieces around in a circle. The one in front stays put. The bottom 2 layers come back exactly as they were. Now the circle sends the others where they belong."
+"Door move",
+"The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were. Now the circle sends the others to their right places."
 ],
 [
 "U",
-"Turn the top 1 time",
-"Turn the top layer 1 time. Now all 4 edge pieces match their center pieces."
+"Top layer left (all 4 match)",
+"Turn the top layer. Now all 4 edge pieces match the center pieces under them."
 ]
-]
+],
+"why": "The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were. After it, 2 pieces next to each other match. Now the 2 matching pieces are at the back and on the right. The Door move moves 3 top edge pieces around in a circle. The front one stays put. The bottom 2 layers come back exactly as they were. Now the circle sends the others to their right places. Turn the top layer. Now all 4 edge pieces match the center pieces under them."
 },
 {
-"name": "All 4 match",
+"name": "All 4 match after a turn",
 "mess": "U R U' L' U R' U' L U U R U' L' U R' U' L U' R' D' R D R' D' R D U R' D' R D R' D' R D R' D' R D R' D' R D U' U2 R' D' R D R' D' R D U R' D' R D R' D' R D R' D' R D R' D' R D U' U2 U R U' L' U R' U' L",
 "targets": [
 [
@@ -1494,14 +1604,15 @@ const CASES = {
 ]
 ],
 "look": "No edge piece matches yet. But when you turn the top layer, all 4 match at once.",
-"do": "Just turn the top layer until all 4 match. That’s it! Go to step 7.",
+"do": "Turn the top layer left until all 4 match. That’s it! Go to step 7.",
 "demo": [
 [
 "U",
-"Turn the top",
+"Top layer left (all 4 match)",
 "Turn the top layer. All 4 edge pieces line up with their center pieces at once."
 ]
-]
+],
+"why": "Turn the top layer. All 4 edge pieces line up with their center pieces at once."
 }
 ]
 };
@@ -1781,7 +1892,7 @@ function renderPath(){
 
 function chipStyle(el, m){
   const f = m[0];
-  if (f === "y") { el.style.background = "var(--ink)"; el.style.color = "var(--bg)"; return; }
+  if (f === "y" || f === "z") { el.style.background = "var(--ink)"; el.style.color = "var(--bg)"; return; }
   el.style.background = FACE_CSS[f];
   el.style.color = FACE_TEXT[f];
   if (f === "D") el.style.borderColor = "var(--line)";
@@ -1789,6 +1900,13 @@ function chipStyle(el, m){
 
 /* Lesson text: shown all at once when it fits, as swipeable cards when it doesn't */
 let cardIdx = 0, cardMode = false;
+let whyOpen = false, whyText = "";
+function topPic(kind){ // a small top view: back at the top, you at the bottom
+  const on = kind === "LINE" ? [3,4,5] : [1,3,4];
+  let h = '<svg viewBox="0 0 120 138" class="toppic" role="img" aria-label="Top of the cube seen from above, back at the top"><text x="60" y="11" text-anchor="middle" class="tpl">Back</text>';
+  for (let i = 0; i < 9; i++) h += '<rect x="' + (15 + (i%3)*31) + '" y="' + (18 + Math.floor(i/3)*31) + '" width="28" height="28" rx="5" fill="' + (on.includes(i) ? "#FFD23F" : "#C9CFDC") + '"/>';
+  return h + '<text x="60" y="134" text-anchor="middle" class="tpl">You</text></svg>';
+}
 function renderBody(L){
   els.body.innerHTML = "";
   const add = el => els.body.appendChild(el);
@@ -1798,7 +1916,8 @@ function renderBody(L){
     const look = document.createElement("p"), b = document.createElement("b");
     b.textContent = "Case " + (caseIdx + 1) + ": " + C.name + ". ";
     look.appendChild(b); look.appendChild(document.createTextNode(C.look)); add(look);
-    const doIt = document.createElement("p"); doIt.textContent = C.do; add(doIt);
+    (Array.isArray(C.do) ? C.do : [C.do]).forEach(t => { const doIt = document.createElement("p"); doIt.textContent = t; add(doIt); });
+    if (C.pic) { const pc = document.createElement("div"); pc.className = "toppicbox"; pc.innerHTML = topPic(C.pic); add(pc); }
   }
   (C ? [] : L.body).forEach(p => {
     if (p === "KEYS") {
@@ -1814,7 +1933,6 @@ function renderBody(L){
     }
     const el = document.createElement("p"); el.textContent = p; add(el);
   });
-  const tip = document.createElement("p"); tip.className = "tip"; tip.textContent = "💡 " + L.tip; add(tip);
   cardIdx = 0;
 }
 
@@ -1835,7 +1953,7 @@ function fitText(){
   const room = els.body.clientHeight;
   // A paragraph taller than the whole box is split into sentences, so no page overflows
   const splitTall = re => [...els.body.children].forEach(k => {
-    if (k.tagName !== "P" || k.offsetHeight <= room) return;
+    if (k.tagName !== "P" || k.offsetHeight + (parseFloat(getComputedStyle(k).marginBottom) || 0) <= room) return;
     const pieces = [];
     k.childNodes.forEach(n => {
       if (n.nodeType === 1) pieces.push({bold:true, text:n.textContent.trim()});
@@ -1908,9 +2026,15 @@ let textTimer = 0, nowLine = null;
 function lessonNow(){
   const L = LESSONS[current]; if (L.mycube || L.free) return;
   const g = groups.find(q => pos >= q.start && pos < q.start + q.moves.length);
-  const want = pos > 0 && pos < flat.length && g && g.why ? "Now: " + g.why : null;
+  const want = pos > 0 && pos < flat.length && g ? "Now: " + g.label + "." : null;
   if (want === nowLine) return;
-  nowLine = want; renderBody(L); fitText();
+  nowLine = want; whyText = (want && g.why) || ""; whyOpen = false; renderBody(L); fitText();
+}
+// the small label over the move line shows only the short name of the group
+function shortLabel(t){
+  if (t.length <= 28) return t;
+  for (const cut of [" (", ":", " until "]) { const i = t.indexOf(cut); if (i > 0) return t.slice(0, i); }
+  return t;
 }
 function paintMoves(){
   if (!LESSONS[current].mycube && !LESSONS[current].free) { clearTimeout(textTimer); textTimer = setTimeout(lessonNow, 0); }
@@ -1919,17 +2043,14 @@ function paintMoves(){
   const at = Math.min(pos, flat.length - 1);
   const gi = groups.findIndex(g => at >= g.start && at < g.start + g.moves.length);
   const g = groups[gi];
-  els.glabel.textContent = g.label;
-  els.count.textContent = "Move " + Math.min(pos + 1, flat.length) + " of " + flat.length;
+  els.glabel.textContent = shortLabel(g.label);
+  els.count.textContent = "";
+  const words = m => sayFor(m)[1];
+  const big = pos >= flat.length ? "All " + flat.length + " moves done!" : "Move " + (pos + 1) + " of " + flat.length + ": " + words(flat[pos]);
+  const next = pos + 1 < flat.length ? "Next: " + words(flat[pos + 1]) : (pos < flat.length ? "This is the last move." : "");
   els.chips.innerHTML = "";
-  g.moves.forEach((m, j) => {
-    const c = document.createElement("span");
-    const k = g.start + j;
-    c.className = "chip" + (k < pos ? " done" : "") + (k === pos && !dirty ? " now" : "");
-    c.textContent = pretty(m);
-    chipStyle(c, m);
-    els.chips.appendChild(c);
-  });
+  const bm = document.createElement("div"); bm.className = "bigmove"; bm.textContent = big; els.chips.appendChild(bm);
+  if (next) { const nm = document.createElement("div"); nm.className = "nextmove"; nm.textContent = next; els.chips.appendChild(nm); }
   [...els.bar.children].forEach((s, i) => {
     const G = groups[i];
     const f = Math.max(0, Math.min(1, (pos - G.start) / G.moves.length));
@@ -1951,7 +2072,7 @@ function updateButtons(){
   const again = !playing && pos >= n && n;
   els.playIc.innerHTML = ICON[playing ? "pause" : (again ? "restart" : "play")];
   els.playLbl.textContent = playing ? "Pause" : (again ? "Again" : "Play");
-  els.play.setAttribute("aria-label", els.playLbl.textContent); // the word is hidden, so screen readers get it here
+  els.play.setAttribute("aria-label", els.playLbl.textContent);
   els.play.disabled = dirty;
   els.next.disabled = playing || busy || dirty || pos >= n;
   els.back.disabled = playing || busy || dirty || pos <= 0;
@@ -1988,7 +2109,7 @@ function selectCase(j){
   if (!L.cases || j < 0 || j >= L.cases.length) return;
   playing = false;
   if (busy) { setTimeout(() => selectCase(j), 60); return; }
-  caseIdx = j; nowLine = null;
+  caseIdx = j; nowLine = null; whyOpen = false; whyText = "";
   renderCases(); renderBody(L); buildGroups(L);
   setupCube(); fitText();
   toast("Case " + (j + 1) + ": " + L.cases[j].name, 2500);
@@ -1999,7 +2120,7 @@ function loadLesson(i){
   if (busy) { setTimeout(() => loadLesson(i), 60); return; }
   if (typeof MY !== "undefined") MY.exit();
   current = i;
-  caseIdx = 0; nowLine = null;
+  caseIdx = 0; nowLine = null; whyOpen = false; whyText = "";
   renderCases();
   const L = LESSONS[i];
   els.stepno.textContent = L.stepno;
@@ -2022,7 +2143,8 @@ function setupCube(){
   resetCube();
   const C = curCase();
   // Build the case: first how the rest of the cube looks, then run the fix backwards.
-  if (C && C.mess) toks(C.mess).forEach(m => { animateMove(m, 0); });
+  const mess = C ? C.mess : L.mess;
+  if (mess) toks(mess).forEach(m => { animateMove(m, 0); });
   if (L.mycube) { if (typeof MY !== "undefined") MY.paint(); }
   else if (!L.free) flat.slice().reverse().forEach(m => { animateMove(invMove(m), 0); });
   applyFocus(L.focus);
@@ -2246,8 +2368,8 @@ const MY = (() => {
   // ---------- screens
   function intro(){
     screen = "intro"; overlay(false); lessonParts(false);
-    show('<p class="mygoal">Stuck? Show me your cube. I’ll find your step and help you finish it.</p>' +
-      '<p>You take 6 photos, one of each side. They stay on this device and are deleted right away.</p>' +
+    show('<p class="mygoal">Stuck? Show me your cube. I’ll find which step you are on, and help you solve the rest.</p>' +
+      '<p>You will take 6 photos, 1 of each side. The photos stay on this device and are deleted right away.</p>' +
       '<div class="mybtns"><button class="key play" id="myStart"><span class="lbl">📷 Take photos</span></button>' +
       '<button class="key" id="myPaint"><span class="lbl">🎨 Color it myself</span></button></div>');
     $("myStart").onclick = () => { samples = []; purpose = "all"; askPhoto(0); };
@@ -2260,9 +2382,9 @@ const MY = (() => {
     over.innerHTML = '<div class="mybig">' + miniCube(ph.face, ph.top) + '</div>';
     const lead = purpose === "check" ? "Check time!" : "Photo " + (i + 1) + " of 6";
     const what = purpose === "check" ? "Turn the cube so the side facing you on the screen faces the camera. Keep the top on top."
-      : cap(FACE_NAME[ph.face]) + " faces the camera. " + cap(FACE_NAME[ph.top]) + " is on top.";
+      : cap(FACE_NAME[ph.face]) + " center piece faces the camera.<br>" + cap(FACE_NAME[ph.top]) + " center piece on top.";
     show('<p class="mystep">' + lead + '</p><p class="mygoal">' + what + '</p>' +
-      '<p>Fill the photo with that side. Hold it still.</p>' +
+      '<p>Fill the photo with that side. Hold the cube still.</p>' +
       '<div class="mybtns"><button class="key play" id="myShoot"><span class="lbl">📷 Take photo</span></button>' +
       (purpose === "check" ? '<button class="key" id="mySkip"><span class="lbl">Skip</span></button>'
                            : '<button class="key" id="mySkip"><span class="lbl">Skip this side</span></button>') + '</div>');
@@ -2315,7 +2437,7 @@ const MY = (() => {
       .then(s => { streamFacing = facing; camScreen(s); })
       .catch(() => {
         show('<p class="mystep">' + lead() + '</p><p class="mygoal">I can’t open the camera.</p>' +
-          '<p>Check that the browser may use the camera. Or pick a photo instead.</p>' +
+          '<p>Let this page use the camera in your browser. Or tap Pick a photo.</p>' +
           '<div class="mybtns"><button class="key play" id="myTry"><span class="lbl">📷 Try again</span></button>' +
           '<button class="key" id="myPick"><span class="lbl">🖼️ Pick a photo</span></button></div>');
         $("myTry").onclick = openCam; $("myPick").onclick = pickFile;
@@ -2331,8 +2453,8 @@ const MY = (() => {
     if (set.facingMode !== "environment") v.classList.add("mirror"); // laptop and selfie cameras feel natural mirrored
     v.addEventListener("loadedmetadata", layoutCam);
     const what = purpose === "check" ? "Turn the cube so the side facing you on the screen faces the camera. Keep the top on top."
-      : cap(FACE_NAME[ph.face]) + " faces the camera. " + cap(FACE_NAME[ph.top]) + " is on top.";
-    show('<p class="mystep">' + lead() + '</p><p class="mygoal">' + what + '</p><p>Fit that side inside the grid. Hold it still.</p>' +
+      : cap(FACE_NAME[ph.face]) + " center piece faces the camera.<br>" + cap(FACE_NAME[ph.top]) + " center piece on top.";
+    show('<p class="mystep">' + lead() + '</p><p class="mygoal">' + what + '</p><p>Fit the 9 squares of that side inside the white grid. Hold the cube still.</p>' +
       '<div class="mybtns"><button class="key play" id="mySnap"><span class="lbl">📸 Snap</span></button>' +
       '<button class="key" id="mySwitch"><span class="lbl">🔄 Switch camera</span></button>' +
       '<button class="key" id="myPick"><span class="lbl">🖼️ Pick a photo</span></button></div>');
@@ -2361,7 +2483,7 @@ const MY = (() => {
     screen = "crop"; overlay(true);
     over.innerHTML = '<canvas class="mycrop" id="myCrop"></canvas>';
     show('<p class="mystep">' + (purpose === "check" ? "Check time!" : "Photo " + (photoIdx + 1) + " of 6") + '</p>' +
-      '<p class="mygoal">Drag the grid onto the 9 squares.</p><p>Drag the round handle to make it bigger or smaller.</p>' +
+      '<p class="mygoal">Drag the white grid so it sits on the 9 squares of the side.</p><p>Drag the pink circle to make the grid bigger or smaller.</p>' +
       '<div class="mybtns"><button class="key play" id="myUse"><span class="lbl">✓ Use this photo</span></button>' +
       '<button class="key" id="myRetake"><span class="lbl">Retake</span></button></div>');
     $("myUse").onclick = usePhoto;
@@ -2420,8 +2542,8 @@ const MY = (() => {
     samples[photoIdx] = s;
     if (seen !== want){
       over.innerHTML = '<div class="mybig">' + miniCube(want, MC.PHOTOS[photoIdx].top) + '</div>';
-      show('<p class="mystep">Photo ' + (photoIdx + 1) + ' of 6</p><p class="mygoal">The center piece looks ' + FACE_NAME[seen] + ', not ' + FACE_NAME[want] + '.</p>' +
-        '<p>Is this really the ' + FACE_NAME[want] + ' side?</p>' +
+      show('<p class="mystep">Photo ' + (photoIdx + 1) + ' of 6</p><p class="mygoal">The center piece in this photo looks ' + FACE_NAME[seen] + ', but I asked for ' + FACE_NAME[want] + '.</p>' +
+        '<p>Is this really the side with the ' + FACE_NAME[want] + ' center piece?</p>' +
         '<div class="mybtns"><button class="key" id="myRetake"><span class="lbl">Retake</span></button>' +
         '<button class="key play" id="myKeep"><span class="lbl">Yes, keep it</span></button></div>');
       $("myRetake").onclick = () => askPhoto(photoIdx);
@@ -2455,11 +2577,11 @@ const MY = (() => {
     const wrong = Object.keys(FACE_NAME).filter(f => (n[f] || 0) > 9);
     let msg;
     if (missing) msg = missing + " squares still need a color.";
-    else if (wrong.length) msg = "Too many " + wrong.map(f => FACE_NAME[f]).join(" and ") + " squares. Each color has 9.";
+    else if (wrong.length) msg = "There are too many " + wrong.map(f => FACE_NAME[f]).join(" and ") + " squares. Each color must have exactly 9.";
     else msg = "Every color has 9 squares. 👍";
     const pal = sel ? '<div class="mypal">' + Object.keys(FACE_NAME).map(f => '<button class="mysw" data-f="' + f + '" style="background:' + swatch(f) + '" aria-label="' + FACE_NAME[f] + '"></button>').join("") + '</div>' : "";
     show('<p class="mygoal">Does this look like your cube?</p>' +
-      '<p>' + (sel ? "Pick the right color for that square:" : "Tap a square to fix its color.") + '</p>' + pal +
+      '<p>' + (sel ? "Pick the right color for that square:" : "Tap a square if its color is wrong.") + '</p>' + pal +
       '<p class="mystep">' + esc(msg) + '</p>' +
       '<div class="mybtns"><button class="key play" id="myOK"' + (missing || wrong.length ? " disabled" : "") + '><span class="lbl">✓ This is my cube</span></button>' +
       '<button class="key" id="myAgain"><span class="lbl">Retake photos</span></button></div>');
@@ -2471,17 +2593,17 @@ const MY = (() => {
     let st = MC.fromGrids(grids), note = "";
     if (!MC.solvable(st)){
       const fixed = MC.fixTurns(grids);
-      if (!fixed){ toast("Some squares don’t match a real cube. Check the colors again.", 5000); return; }
+      if (!fixed){ toast("Some colors don’t fit together on a real cube. Look at the squares again and fix the wrong ones.", 5000); return; }
       grids = fixed.grids; st = MC.fromGrids(grids);
-      note = "I turned photo " + fixed.turns.map((t, i) => t ? i + 1 : 0).filter(Boolean).join(" and ") + " the right way. ";
+      note = "Photo " + fixed.turns.map((t, i) => t ? i + 1 : 0).filter(Boolean).join(" and ") + " was turned sideways, so I turned it the right way. ";
     }
     begin(st, note);
   }
 
   // ---------- guide
   const STEP_NO = i => i + 1; // lesson index -> step number shown to kids
-  const DID = {1:"the white plus on the bottom", 2:"the 4 white corner pieces", 3:"the middle layer", 4:"the yellow plus on top", 5:"the top edge pieces matching their sides", 6:"the yellow corner pieces in their homes"};
-  const TODO = {1:"make a white plus sign on the bottom", 2:"put the 4 white corner pieces on the bottom", 3:"fill the middle layer", 4:"make a yellow plus sign on top", 5:"match the top edge pieces to their sides", 6:"put each yellow corner piece in its home", 7:"turn the yellow corner pieces so yellow points up"};
+  const DID = {1:"the white plus on the bottom side", 2:"the 4 white corner pieces", 3:"the middle layer", 4:"the yellow plus on the top side", 5:"the top edge pieces matching their sides", 6:"the yellow corner pieces in their right places"};
+  const TODO = {1:"make a white plus on the bottom side", 2:"put the 4 white corner pieces on the bottom side", 3:"fill the middle layer", 4:"make a yellow plus on the top side", 5:"match the top edge pieces to their sides", 6:"put each yellow corner piece in its right place", 7:"turn the cube upside down, then turn each yellow corner piece so yellow faces down"};
   const andList = a => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
   let found = "", gStart = [];
   function summary(at){
@@ -2506,7 +2628,7 @@ const MY = (() => {
     buildGroups(L); setupCube(); lessonParts(true);
     els.moves.hidden = !groups.length; els.controls.hidden = !groups.length;
     showPlanBar(); text();
-    toast(groups.length ? "Tap ▶ and copy each move on your cube." : "Nothing to do. It’s solved!", 4000);
+    toast(groups.length ? "Tap ▶ to watch a move. Then do the same move on your cube." : "Nothing to do. It’s solved!", 4000);
   }
   function chunkAt(p){ return bounds.findIndex(b => p < b.at); }
   // pink frame on the piece we are working on (same look as the lessons)
@@ -2531,22 +2653,23 @@ const MY = (() => {
     const L = LESSONS[current], groups = L.demo;
     if (!groups.length) { L.body = []; L.tip = ""; renderBody(L); fitText(); return; }
     if (pos >= flat.length){
-      setTargets([]);
+      setTargets([]); whyText = "";
       L.goal = "Solved! 🎉 Every side is one color.";
       L.body = ["You did it! Mix it up and try again. Each time you’ll need the screen a little less."];
     } else {
       let gi = 0; while (gi + 1 < gStart.length && gStart[gi + 1] <= pos) gi++;
       const b = bounds[chunkAt(pos)], why = groups[gi][2] || groups[gi][1];
       if (!busy) framePiece(stateAt(pos), b);
-      L.goal = pos === 0 ? found : "Now: " + why;
+      L.goal = pos === 0 ? found : "Now: " + groups[gi][1] + ".";
+      if (whyText !== why) { whyText = why; whyOpen = false; }
       L.body = [
-        pos === 0 ? "First: " + why : null,
-        "What we’re building: " + b.about,
+        pos === 0 ? "First: " + groups[gi][1] + "." : null,
+        b.about,
         "Step " + STEP_NO(b.stage) + " of 8: " + LESSONS[b.stage].title + ". The goal is to " + TODO[b.stage] + "."
       ].filter(Boolean);
     }
     const bb = pos < flat.length ? bounds[chunkAt(pos)] : null;
-    L.tip = (bb && bb.target ? "Watch the piece with the pink frame. " : "") + "Watch a move, then do it on your cube. Made a mistake? Tap Oops.";
+    L.tip = (bb && bb.target ? "Watch the piece with the pink frame. " : "") + "After each move on the screen, do the same move on your cube. Made a mistake? Tap Oops.";
     renderBody(L); fitText();
   }
   function showPlanBar(){
@@ -2580,7 +2703,7 @@ const MY = (() => {
     const before = chunkAt(pos - 1), now = chunkAt(pos);
     if (pos < flat.length && before !== now && before >= 0){
       playing = false; updateButtons();
-      toast("Piece done! Tap 📷 Check to compare.", 4000);
+      toast("That piece is in its right place! Tap 📷 Check to see if your cube matches mine.", 4000);
     }
   }
   // paint the app cube with the kid's colors
